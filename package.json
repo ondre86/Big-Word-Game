@@ -7,12 +7,10 @@
     "node": ">=20.11.1"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server",
-    "dev": "nodemon server"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Ondre Johnson",
   "license": "ISC",
   "dependencies": {
     "express": "^4.19.2",
@@ -20,8 +18,5 @@
     "helmet": "^7.1.0",
     "syllabificate": "^2.0.3",
     "vue": "^3.4.34"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.4"
   }
 }
