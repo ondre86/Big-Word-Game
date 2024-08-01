@@ -1,5 +1,5 @@
 const { toRaw } = Vue
-const serverURL = 'http://big-word-game-production.up.railway.app:8383'
+const serverURL = '/'
 function $(elem){
     return document.querySelectorAll(elem)
 }
