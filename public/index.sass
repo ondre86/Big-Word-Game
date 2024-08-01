@@ -1,0 +1,326 @@
+$bg: #f5f5f5
+$yellow: #fddc02
+$yellowDark: #C8B014
+$green: #169B00
+$red: #CA0505
+$purple: #8875FF
+$dm-purple: #471686
+$dm-purpleDark: #1F0C48
+$dm-bg: #212121
+
+@font-face 
+    font-family: 'freckle'
+    src: url("/fonts/FreckleFace-Regular.woff2")
+    font-weight: 600
+    font-style: normal
+
+@font-face 
+    font-family: 'nanum'
+    src: url("/fonts/NanumPenScript-Regular.woff2")
+    font-weight: 600
+    font-style: normal
+
+%f1
+    font-family: 'freckle'
+
+%f2
+    font-family: 'nanum'
+
+%f1-l
+    font-size: 3rem
+%f1-m
+    font-size: 2.5rem
+%doubleFont
+    font-size: 2rem
+%f2-m
+    font-size: 1.5rem
+%f2-s
+    font-size: 1rem
+
+%btn
+    padding: .5rem 1rem
+    background-color: $yellow
+%focus
+    &:focus
+        outline: 9px solid $purple
+        color: black
+%active
+    &:active
+        background-color: $purple
+%hover
+    &:hover
+        background-color: $yellowDark
+
+%border
+    border: 3px solid black
+    border-top-left-radius: 17px 100px
+    border-top-right-radius: 13px 90px
+    border-bottom-left-radius: 110px 19px
+    border-bottom-right-radius: 120px 24px
+
+%flex-h
+    display: flex
+
+%flex-v
+    display: flex
+    flex-direction: column
+
+%center
+    justify-content: center
+    align-items: center
+
+%hidden
+    opacity: 0
+
+%fullParent
+    height: 100%
+    width: 100%
+%gap1
+    gap: 1rem
+%gap2
+    gap: 2rem
+
+html, body
+    margin: 0
+    padding: 0 
+    background-color: $bg
+
+html
+    height: 100%
+    min-height: 100%
+    -ms-overflow-style: none
+    scrollbar-width: none
+    &::-webkit-scrollbar
+        display: none
+    
+body
+    position: relative
+    box-sizing: border-box
+    height: 100%
+    max-height: 100%
+    overflow-x: hidden
+    -ms-overflow-style: none
+    scrollbar-width: none
+
+    &::-webkit-scrollbar
+        display: none
+    @extend %flex-v
+
+a   
+    text-decoration: none
+    color: black
+    
+.overflow
+    overflow-y: scroll
+#app
+    @extend %flex-v, %hidden
+    justify-content: flex-start
+    align-items: center
+    height: 0%
+.app-wrap
+    max-width: 500px
+    min-width: 320px
+    height: auto
+    @extend %flex-v, %center
+    justify-content: space-between
+    margin: 2rem 0 0 0
+
+.meat
+    @extend %flex-v, %center
+    // margin: 2rem 0
+    gap: 2rem
+
+.logo-holster
+    @extend %flex-h, %center
+    height: 100%
+    width: 100vw
+
+
+.logo
+    width: 50%
+    height: auto
+    padding-top: 10px
+    margin: auto auto
+
+.font1
+    @extend %f1, %f1-m
+.font2
+    @extend %f2, %f2-m
+.center
+    @extend %center
+.flex
+    @extend %flex-h
+.vert
+    @extend %flex-v, %center
+.tc
+    text-align: center
+.gap1
+    @extend %flex-h, %gap1
+.gap2
+    @extend %flex-h, %gap2
+.main
+    @extend %flex-v, %center, %gap2
+
+.btn
+    @extend %btn, %border, %f1, %f2-m, %focus, %active, %hover
+    color: black
+    text-decoration: none
+
+    transition: all .3s
+
+    &:active
+        outline: 0px solid #000
+
+.intro  
+    justify-self: center
+    margin: 5vh 0
+    .btn      
+        font-size: 5rem
+
+.timer-wrap
+    @extend %flex-h, %center
+    height: fit-content
+    gap: .5rem
+    min-width: 120px
+    justify-content: space-between
+    // align-items: flex-start
+
+
+.timer
+    @extend %f1, %f1-l
+
+.txt-card
+    @extend %f2, %f2-m, %flex-h, %center
+    justify-content: space-between
+    width: 100%
+.bottom-txt
+    align-items: initial
+    
+.form
+    @extend %flex-h, %gap2 
+    width: fit-content
+
+input
+    @extend %border, %focus, %f1, %f1-l
+    width: 100%
+    padding: 1rem
+
+.letter-meta
+    @extend %flex-v
+.letter-wrap
+    @extend %flex-h, %f2-m, %gap1
+    justify-content: flex-end
+.tvc
+    align-self: center
+
+.wl-wrap
+    @extend %flex-v
+    margin: 2rem 0 0
+    width: 100%
+    max-width: 100%
+    position: relative
+
+    &::before
+        content: ""
+        position: absolute
+        top: 0
+        left: 0
+        width: 12%
+        height: 100%
+        background-image: linear-gradient(270deg, rgba(0, 0, 0, 0), $bg)
+        background-color: rgba(0, 0, 0, 0)
+        z-index: 100
+
+    &::after
+        content: ""
+        position: absolute
+        top: 0
+        right: 0
+        width: 12%
+        height: 100%
+        background-image: linear-gradient(270deg,  $bg, rgba(0, 0, 0, 0))
+        background-color: rgba(0, 0, 0, 0)
+        z-index: 100
+
+
+.wl
+    padding: 1rem 1.25rem
+    @extend %flex-h
+    list-style-type: none
+    gap: 1rem
+    position: relative
+    justify-content: center
+
+    overflow-x: scroll 
+    -ms-overflow-style: none
+    scrollbar-width: none
+    &::-webkit-scrollbar
+        display: none
+
+
+
+.card
+    max-width: 300px
+    background-color: $yellow
+    @extend %f2, %f2-m, %flex-v, %border, %btn
+    transition: all .3s
+
+.tut-card
+    @extend %flex-v, %gap2
+    padding: 2rem
+    margin: 2rem 0
+
+    .btn
+        transition: all .3s
+
+.word-card
+    margin: 2rem 0
+    transition: box-shadow .5s
+    &:hover
+        box-shadow: 0px 5px 5px 2px #8f8f8f
+        
+.lost-card
+    @extend %gap2
+    overflow: hidden
+    padding: 0.5rem 2rem
+
+@media (max-width:500px)
+    .app-wrap
+        max-width: 90%
+    #post
+        display: none
+
+@media (prefers-color-scheme:dark)
+    html, body
+        background-color: $dm-bg
+        color: white
+
+    a
+        color: white
+        
+    .btn, .card
+        background-color: $dm-purple
+        color: white
+        border-color: white
+
+    .btn
+        &:focus
+            color: white
+            background-color: $dm-purpleDark
+        &:active
+            color: white
+            background-color: $dm-purpleDark
+        &:hover
+            color: white
+            background-color: $dm-purpleDark
+
+
+    input
+        border-color: $dm-purpleDark
+
+    .wl-wrap
+        &::before
+            background-image: linear-gradient(270deg, rgba(0, 0, 0, 0), $dm-bg)
+
+        &::after
+            background-image: linear-gradient(270deg,  $dm-bg, rgba(0, 0, 0, 0))

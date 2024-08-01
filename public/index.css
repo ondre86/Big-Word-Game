@@ -1,0 +1,319 @@
+@font-face {
+  font-family: "freckle";
+  src: url("/fonts/FreckleFace-Regular.woff2");
+  font-weight: 600;
+  font-style: normal;
+}
+@font-face {
+  font-family: "nanum";
+  src: url("/fonts/NanumPenScript-Regular.woff2");
+  font-weight: 600;
+  font-style: normal;
+}
+input, .timer, .btn, .font1 {
+  font-family: "freckle";
+}
+
+.card, .txt-card, .font2 {
+  font-family: "nanum";
+}
+
+input, .timer {
+  font-size: 3rem;
+}
+
+.font1 {
+  font-size: 2.5rem;
+}
+
+.card, .letter-wrap, .txt-card, .btn, .font2 {
+  font-size: 1.5rem;
+}
+
+.card, .btn {
+  padding: 0.5rem 1rem;
+  background-color: #fddc02;
+}
+
+input:focus, .btn:focus {
+  outline: 9px solid #8875FF;
+  color: black;
+}
+
+.btn:active {
+  background-color: #8875FF;
+}
+
+.btn:hover {
+  background-color: #C8B014;
+}
+
+.card, input, .btn {
+  border: 3px solid black;
+  border-top-left-radius: 17px 100px;
+  border-top-right-radius: 13px 90px;
+  border-bottom-left-radius: 110px 19px;
+  border-bottom-right-radius: 120px 24px;
+}
+
+.wl, .letter-wrap, .form, .txt-card, .timer-wrap, .gap2, .gap1, .flex, .logo-holster {
+  display: flex;
+}
+
+.tut-card, .card, .wl-wrap, .letter-meta, .main, .vert, .meat, .app-wrap, #app, body {
+  display: flex;
+  flex-direction: column;
+}
+
+.txt-card, .timer-wrap, .main, .vert, .center, .logo-holster, .meat, .app-wrap {
+  justify-content: center;
+  align-items: center;
+}
+
+#app {
+  opacity: 0;
+}
+
+.letter-wrap, .gap1 {
+  gap: 1rem;
+}
+
+.lost-card, .tut-card, .form, .main, .gap2 {
+  gap: 2rem;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: #f5f5f5;
+}
+
+html {
+  height: 100%;
+  min-height: 100%;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+html::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  position: relative;
+  box-sizing: border-box;
+  height: 100%;
+  max-height: 100%;
+  overflow-x: hidden;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+body::-webkit-scrollbar {
+  display: none;
+}
+
+a {
+  text-decoration: none;
+  color: black;
+}
+
+.overflow {
+  overflow-y: scroll;
+}
+
+#app {
+  justify-content: flex-start;
+  align-items: center;
+  height: 0%;
+}
+
+.app-wrap {
+  max-width: 500px;
+  min-width: 320px;
+  height: auto;
+  justify-content: space-between;
+  margin: 2rem 0 0 0;
+}
+
+.meat {
+  gap: 2rem;
+}
+
+.logo-holster {
+  height: 100%;
+  width: 100vw;
+}
+
+.logo {
+  width: 50%;
+  height: auto;
+  padding-top: 10px;
+  margin: auto auto;
+}
+
+.tc {
+  text-align: center;
+}
+
+.btn {
+  color: black;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+.btn:active {
+  outline: 0px solid #000;
+}
+
+.intro {
+  justify-self: center;
+  margin: 5vh 0;
+}
+.intro .btn {
+  font-size: 5rem;
+}
+
+.timer-wrap {
+  height: fit-content;
+  gap: 0.5rem;
+  min-width: 120px;
+  justify-content: space-between;
+}
+
+.txt-card {
+  justify-content: space-between;
+  width: 100%;
+}
+
+.bottom-txt {
+  align-items: initial;
+}
+
+.form {
+  width: fit-content;
+}
+
+input {
+  width: 100%;
+  padding: 1rem;
+}
+
+.letter-wrap {
+  justify-content: flex-end;
+}
+
+.tvc {
+  align-self: center;
+}
+
+.wl-wrap {
+  margin: 2rem 0 0;
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+}
+.wl-wrap::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 12%;
+  height: 100%;
+  background-image: linear-gradient(270deg, rgba(0, 0, 0, 0), #f5f5f5);
+  background-color: rgba(0, 0, 0, 0);
+  z-index: 100;
+}
+.wl-wrap::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 12%;
+  height: 100%;
+  background-image: linear-gradient(270deg, #f5f5f5, rgba(0, 0, 0, 0));
+  background-color: rgba(0, 0, 0, 0);
+  z-index: 100;
+}
+
+.wl {
+  padding: 1rem 1.25rem;
+  list-style-type: none;
+  gap: 1rem;
+  position: relative;
+  justify-content: center;
+  overflow-x: scroll;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.wl::-webkit-scrollbar {
+  display: none;
+}
+
+.card {
+  max-width: 300px;
+  background-color: #fddc02;
+  transition: all 0.3s;
+}
+
+.tut-card {
+  padding: 2rem;
+  margin: 2rem 0;
+}
+.tut-card .btn {
+  transition: all 0.3s;
+}
+
+.word-card {
+  margin: 2rem 0;
+  transition: box-shadow 0.5s;
+}
+.word-card:hover {
+  box-shadow: 0px 5px 5px 2px #8f8f8f;
+}
+
+.lost-card {
+  overflow: hidden;
+  padding: 0.5rem 2rem;
+}
+
+@media (max-width: 500px) {
+  .app-wrap {
+    max-width: 90%;
+  }
+  #post {
+    display: none;
+  }
+}
+@media (prefers-color-scheme: dark) {
+  html, body {
+    background-color: #212121;
+    color: white;
+  }
+  a {
+    color: white;
+  }
+  .btn, .card {
+    background-color: #471686;
+    color: white;
+    border-color: white;
+  }
+  .btn:focus {
+    color: white;
+    background-color: #1F0C48;
+  }
+  .btn:active {
+    color: white;
+    background-color: #1F0C48;
+  }
+  .btn:hover {
+    color: white;
+    background-color: #1F0C48;
+  }
+  input {
+    border-color: #1F0C48;
+  }
+  .wl-wrap::before {
+    background-image: linear-gradient(270deg, rgba(0, 0, 0, 0), #212121);
+  }
+  .wl-wrap::after {
+    background-image: linear-gradient(270deg, #212121, rgba(0, 0, 0, 0));
+  }
+}/*# sourceMappingURL=index.css.map */
