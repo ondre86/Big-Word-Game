@@ -379,7 +379,6 @@ const app = Vue.createApp({
             this.$refs.input.focus()
         },
         scroll(){
-            console.log("scroll pls")
             setTimeout(() => {
                 this.vWordsScrolled.push(this.$refs.wl.children[this.$refs.wl.children.length-1].scrollWidth)
                 gsap.to(this.$refs.wl, {
@@ -435,7 +434,7 @@ const app = Vue.createApp({
     
             }, "<")
             .to("#app", {
-                height: "90%",
+                height: "auto",
                 duration: .25,
                 opacity: 1,
                 ease: "power4.inOut"
@@ -444,7 +443,7 @@ const app = Vue.createApp({
             .set("#app", {
                 display: "flex"
             })
-            .fromTo(this.$refs.startBtn, {
+            .fromTo([this.$refs.startBtn, ".credit"], {
                 opacity: 0,
                 y: "0%"
             }, {
