@@ -10,10 +10,10 @@ let data
 server.use(express.static('public')).use(express.json())
 server.use(helmet())
 // Only one API call every 3 seconds
-server.use(rateLimit({
-    windowMs: 1 * 3 * 1000, // 3 seconds
-    max: 3,
-}))
+// server.use(rateLimit({
+//     windowMs: 1 * 3 * 1000, // 3 seconds
+//     max: 3,
+// }))
 server.disable('x-powered-by')
 
 
