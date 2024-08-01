@@ -375,12 +375,6 @@ const app = Vue.createApp({
                 this.alphaX++
                 this.currentLetter = this.alpha[this.alphaX]
             }
-            // TEST HAS BEEN USED
-            if (this.alphaX == 4){
-                this.alphaX = 0
-                this.currentLetter = this.alpha[this.alphaX]
-                this.rounds++
-            }
             this.tpScore, this.customScore = false
             this.$refs.input.focus()
         },
