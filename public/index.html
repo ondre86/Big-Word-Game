@@ -58,7 +58,7 @@
                 <button class="btn" ref="tutBtn2" @click.prevent="tutorialToggle()">Forgot the Rules?</button>
             </div>
             <div v-show="tutorialOn == false" class="meat">
-                <div class="txt-card" v-show="started == true">
+                <div class="txt-card" v-show="started == true" style="align-items: flex-start;">
                     <div class="vert" style="align-items: flex-start;">
                         <span>score: 
                             <span class="font1">{{ score }}</span>
