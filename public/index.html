@@ -82,7 +82,7 @@
                 </div>
                 <div class="main" v-show="started == true">
                     <form class="form">
-                        <input autocomplete="off" v-model="input" @enter.prevent="callServerDictionary(); resetTimer($event)" type="text" ref="input">
+                        <input spellcheck="false" autocapitalize="off" autocomplete="off" v-model="input" @enter.prevent="callServerDictionary(); resetTimer($event)" type="text" ref="input">
                         <button id="post" class="btn" @click.prevent="callServerDictionary(); resetTimer($event)" ref="post">enter</button>
                     </form>
                     <div class="txt-card bottom-txt">
