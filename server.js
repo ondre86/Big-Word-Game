@@ -1,6 +1,6 @@
 const express = require('express')
 const helmet = require('helmet')
-const rateLimit = require('express-rate-limit')
+const forceDomain = require('forcedomain')
 const syl = require('syllabificate')
 const server = express()
 const port = 8383
@@ -10,20 +10,7 @@ let data
 
 server.use(express.static('public')).use(express.json())
 server.use(helmet())
-// Only one API call every 3 seconds
-// server.use(rateLimit({
-//     windowMs: 1 * 3 * 1000, // 3 seconds
-//     max: 3,
-// }))
 server.disable('x-powered-by')
-
-
-server.use((req, res, next) => {
-    if (req.hostname.includes('www.') == false) {
-      return res.redirect(301, `${req.protocol}://www.${req.hostname}${req.originalUrl}`);
-    }
-    next()
-})
 
 server.post('/', async (req, res)=>{
     if(!req.body){
@@ -45,7 +32,6 @@ server.use((req, res, next) => {
     res.status(404).sendFile('404.html', {root: 'public'})
 })
   
-// custom error handler
 server.use((err, req, res, next) => {
     console.error(err.stack)
     res.status(500).send('Something broke!')
