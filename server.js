@@ -1,12 +1,10 @@
 const express = require('express')
 const helmet = require('helmet')
-const forceDomain = require('forcedomain')
 const syl = require('syllabificate')
 const server = express()
 const port = 8383
 const key = "f985ea64-0887-4672-bb91-9f61fd82fb75"
 let data
-
 
 server.use(express.static('public')).use(express.json())
 server.use(helmet())
