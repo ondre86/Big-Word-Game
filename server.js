@@ -7,14 +7,6 @@ const port = 8383
 const key = "f985ea64-0887-4672-bb91-9f61fd82fb75"
 let data
 
-server.all(/.*/, function(req, res, next) {
-    var host = req.header("host");
-    if (host.match(/^www\..*/i)) {
-      next()
-    } else {
-      res.redirect(301, `${req.protocol}://www.${host}${req.url}`)
-    }
-  })
 
 server.use(express.static('public')).use(express.json())
 server.use(helmet())
@@ -25,6 +17,13 @@ server.use(helmet())
 // }))
 server.disable('x-powered-by')
 
+
+server.use((req, res, next) => {
+    if (req.hostname.includes('www.') == false) {
+      return res.redirect(301, `${req.protocol}://www.${req.hostname}${req.originalUrl}`);
+    }
+    next()
+})
 
 server.post('/', async (req, res)=>{
     if(!req.body){
