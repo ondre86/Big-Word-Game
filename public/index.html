@@ -59,7 +59,12 @@
             </div>
             <div v-show="tutorialOn == false" class="meat">
                 <div class="txt-card" v-show="started == true">
-                    <div class="vert"><span>score: <span class="font1">{{ score }}</span> <span v-show="newHighScore == true" class="font2" style="margin-left: 1rem;">new high score!</span></span></div>
+                    <div class="vert">
+                        <span>score: 
+                            <span class="font1">{{ score }}</span>
+                        </span>
+                        <span v-show="newHighScore == true" class="font2" style="margin-left: 1rem;">new high score!</span>
+                    </div>
                     <span>strikes: <span class="font1">{{ strikes }}</span></span>
                 </div>
                 <div class="game-over txt-card vert gap1" v-show="started == false && lost == true">
