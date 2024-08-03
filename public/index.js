@@ -540,7 +540,12 @@ const app = Vue.createApp({
         // }
         // else 
         if (this.t == 0 && this.started == true){
-            this.$refs.input.focus()
+            scroll = gsap.timeline()
+            .to(window, {
+                scrollTo: this.$refs.meat.offsetTop,
+                duration: .5
+            })
+            .call(this.$refs.input.focus())
         }
 
         if (this.$refs.wl.children.length > 3){
