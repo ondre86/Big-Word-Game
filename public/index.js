@@ -109,6 +109,10 @@ const app = Vue.createApp({
 
         },
         startTimer(){
+            gsap.to(window, {
+                scrollTo: this.$refs.meat.offsetTop,
+                duration: .5
+            })
             if (this.strikes == 3){
                 this.started = false
                 this.resetStats()
