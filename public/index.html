@@ -39,16 +39,24 @@
     <div id="app" style="height: 0%; display: none;" hidden>
         <div class="app-wrap">
             <div v-show="tutorialOn == true" class="card tut-card">
-                <span>The Big Word Game is simple.
+                <div>
+                    <span style="justify-content: center;" class="font1 flex">How to Play</span>
+                    <br>
+                    <span>Type a word into the box and press "enter". You gain a point for each syllable detected in the word.</span>
                     <br><br>
-                    You have ten seconds to enter a three-syllable word in alphabetical order to gain points. 
+                    <span class="font1 tvc">Rules</span>
+                    <ul style="align-items: flex-start; padding: 0 0 0 1rem; margin: 1rem 0 2rem; gap: 1rem"  class="vert">
+                        <li>Play in alphabetical order</li>
+                        <li>Play within ten seconds &#40;10 sec.&#41;</li>
+                        <li>At least three syllables long &#40;3&#41;</li>
+                        <li>Not offensive</li>
+                        <li>No reused words</li>
+                    </ul>
+                    Break a rule, get a strike.
                     <br><br>
-                    You get a point for each syllable detected in the word.
-                    <br><br>
-                    If your submission is not a word, not the correct starting letter, too short, or offensive, you receive a strike.
-                    <br><br>
-                    Three strikes and you're out!
-                </span>
+                    <span style="text-decoration: underline;">Three strikes and you're out!</span>
+                    <br><br>&#40;not 100% accurate, so have fun!&#41;
+                </div>
                 <button class="btn" ref="tutBtn1" @click.prevent="tutorialToggle(); startTimer()">start</button>
             </div>
             <div v-show="!started && tutorialOn == false && (lost == null || lost == false)" class="card tut-card" style="align-self: center;">
@@ -82,8 +90,8 @@
                 </div>
                 <div class="main" v-show="started == true">
                     <form class="form" spellcheck="false" autocapitalize="off" autocomplete="off">
-                        <input v-model="input" @enter.prevent="callServerDictionary(); resetTimer($event)" type="text" ref="input">
-                        <button id="post" class="btn" @click.prevent="callServerDictionary(); resetTimer($event)" ref="post">enter</button>
+                        <input v-model="input" @enter.prevent="callServerDictionary()" type="text" ref="input">
+                        <button id="post" class="btn" @click.prevent="callServerDictionary()" ref="post">enter</button>
                     </form>
                     <div class="txt-card bottom-txt">
                         <div class="timer-wrap"><span class="font2 font">timer: </span><span class="timer">{{ t }}</span></div>

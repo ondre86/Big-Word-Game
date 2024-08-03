@@ -51,6 +51,7 @@ const app = Vue.createApp({
         },
         timer(){
             this.t++
+            console.log(this.t)
             
             if (this.t < 10){
                 this.$refs.post.disabled = false
@@ -63,8 +64,8 @@ const app = Vue.createApp({
             if (this.t == 11 && this.strikes != 3){
                 this.$refs.post.disabled = false
                 this.$refs.input.disabled = false
-                this.t = 0
                 this.callServerDictionary()
+                this.t = 0
             }
             else if(this.t == 11 && this.strikes == 3){
                 this.stopTimerAndGame()
@@ -132,10 +133,11 @@ const app = Vue.createApp({
             }
         },
         async callServerDictionary(event){
-            if (this.input == "" || this.input == null){ 
+            if ((this.input == "" || this.input == null) && this.t < 10){}
+            else if ((this.input == "" || this.input == null) && this.t == 11){ 
                 this.strike() 
                 this.foundClosest = false
-                this.wordCard.word = "Empty"
+                this.wordCard.word = "Ran Out of Time"
             }
             else {
                 fetch(serverURL, {
@@ -156,7 +158,7 @@ const app = Vue.createApp({
                     }
                 )
 
-                .catch(error => alert("Too many attempts. Please wait a few seconds."))
+                .catch(error => alert("Sorry, there was a problem."))
             }
         },
         
@@ -461,12 +463,13 @@ const app = Vue.createApp({
 
             })
 
-            if (this.tutorialOn == true){
-                setTimeout(() => {
-                    this.$refs.tutBtn1.focus()
-                }, 4000)
-            }
-            else if (this.lost == true || this.started == null){
+            // if (this.tutorialOn == true){
+            //     setTimeout(() => {
+            //         this.$refs.tutBtn1.focus()
+            //     }, 4000)
+            // }
+            // else 
+            if (this.lost == true || this.started == null){
                 setTimeout(() => {
                     this.$refs.startBtn.focus()
                 }, 2500)
@@ -479,12 +482,13 @@ const app = Vue.createApp({
         })
     },
     updated: function log(){
-        if (this.tutorialOn == true){
-            setTimeout(() => {
-                this.$refs.tutBtn1.focus()
-            },4000);
-        }
-        else if (this.lost == true || this.started == null){
+        // if (this.tutorialOn == true){
+        //     setTimeout(() => {
+        //         this.$refs.tutBtn1.focus()
+        //     },4000);
+        // }
+        // else 
+        if (this.lost == true || this.started == null){
             this.$refs.startBtn.focus()
         }
         else if (this.t == 0 && this.started == true){
