@@ -64,7 +64,7 @@
                 <span class="tvc font1">last score: {{ cookieScore }}</span>
                 <span class="tvc font1">high score: {{ cookieHighScore }}</span>
                 <button class="btn" ref="tutBtn2" @click.prevent="tutorialToggle()">Forgot the Rules?</button>
-                <button class="btn" ref="startBtn" @click="startTimer" >Start</button>
+                <button class="btn" @click="startTimer" ref="startBtn">Start</button>
             </div>
             <div v-show="tutorialOn == false" class="meat">
                 <div class="txt-card" v-show="started == true" style="align-items: flex-start;">
@@ -123,7 +123,9 @@
                     <li v-for="def in wordCard.defs">{{ def }}</li>
                 </ul>
             </div>
-
+            <div v-show="!started && tutorialOn == false && lost == true" class="intro flex center">
+                <button class="btn" @click="startTimer" ref="startBtn">start</button>
+            </div>
             <a style="display: fixed; bottom: 0; margin-bottom: 1rem;" v-if="!started" href="https://ondre.org"><div class="card btn credit"><span class="font2">created by ondre</span></div></a>
 
         </div>
