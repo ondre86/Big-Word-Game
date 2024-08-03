@@ -469,11 +469,11 @@ const app = Vue.createApp({
             //     }, 4000)
             // }
             // else 
-            if (this.lost == true || this.started == null){
-                setTimeout(() => {
-                    this.$refs.startBtn.focus()
-                }, 2500)
-            }
+            // if (this.lost == true || this.started == null){
+            //     setTimeout(() => {
+            //         this.$refs.startBtn.focus()
+            //     }, 2500)
+            // }
         })
 
         // RESET FOCUS COLOR
@@ -488,10 +488,11 @@ const app = Vue.createApp({
         //     },4000);
         // }
         // else 
-        if (this.lost == true || this.started == null){
-            this.$refs.startBtn.focus()
-        }
-        else if (this.t == 0 && this.started == true){
+        // if (this.lost == true || this.started == null){
+        //     this.$refs.startBtn.focus()
+        // }
+        // else 
+        if (this.t == 0 && this.started == true){
             this.$refs.input.focus()
         }
 
