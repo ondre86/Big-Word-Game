@@ -9,6 +9,8 @@ const app = Vue.createApp({
     data() {
         return {
             started: null,
+            paused: false,
+            pausePress: false,
             startBtn: null,
             tutBtn: null,
             lost: null,
@@ -45,31 +47,66 @@ const app = Vue.createApp({
         }
     },
     methods: {
+        isInViewport() {
+            const rect = this.$refs.input.getBoundingClientRect();
+            if (
+                rect.top >= -30 &&
+                rect.left >= 0 &&
+                rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+            ){
+                if (this.pausePress == true){}
+                else{this.paused = false}
+                return true
+            }
+            else {
+                this.paused = true
+                return false
+            }
+        },
         setData(item){
             this.data = item
             this.wordCard.syllablesOther = item.tps
         },
-        timer(){
-            this.t++
-            console.log(this.t)
-            
-            if (this.t < 10){
+        pause(){
+            this.pausePress = true
+            if (this.paused == true){
+                this.paused = false
                 this.$refs.post.disabled = false
                 this.$refs.input.disabled = false
+                this.$refs.input.focus()
             }
-            if (this.t == 10){
+            else{
+                this.paused = true
                 this.$refs.post.disabled = true
                 this.$refs.input.disabled = true
             }
-            if (this.t == 11 && this.strikes != 3){
-                this.$refs.post.disabled = false
-                this.$refs.input.disabled = false
-                this.callServerDictionary()
-                this.t = 0
+        },
+        timer(){
+            if (this.isInViewport() == true && this.paused == false){
+                this.t++
+            
+                if (this.t < 10){
+                    this.$refs.post.disabled = false
+                    this.$refs.input.disabled = false
+                }
+                if (this.t == 10){
+                    this.$refs.post.disabled = true
+                    this.$refs.input.disabled = true
+                }
+                if (this.t == 11 && this.strikes != 3){
+                    this.$refs.post.disabled = false
+                    this.$refs.input.disabled = false
+                    this.callServerDictionary()
+                    this.t = 0
+                }
+                else if(this.t == 11 && this.strikes == 3){
+                    this.stopTimerAndGame()
+                }
             }
-            else if(this.t == 11 && this.strikes == 3){
-                this.stopTimerAndGame()
+            else {
             }
+
         },
         startTimer(){
             if (this.strikes == 3){
@@ -83,6 +120,8 @@ const app = Vue.createApp({
             }
         },
         resetTimer(){
+            this.paused = false
+            this.pausePress = false
             this.t = 0
             if (this.started == true){
                 this.$refs.post.disabled = false
@@ -98,6 +137,7 @@ const app = Vue.createApp({
             this.started = false
         },
         resetStats(){
+            this.paused = false
             this.lost = null
             this.alphaX = 0
             this.currentLetter = 'a'
@@ -164,6 +204,12 @@ const app = Vue.createApp({
         
         enterWord(){
             this.resetTimer()
+            gsap.to(window, {
+                scrollTo: this.$refs.meat.offsetTop,
+                duration: .5
+            }
+
+            )
             try{
                 if (toRaw(this.data.data[0].hwi) == undefined || this.data.data[0] == undefined){
                     this.strike()
@@ -177,7 +223,7 @@ const app = Vue.createApp({
                     if (!this.isCurrentLetter()){
                         this.strike()
                         this.foundClosest = false
-                        this.wordCard.word = "Wrong Letter"
+                        this.wordCard.word = "Wrong Starting Letter"
                     }
                     else if (this.isOffensive()){
                         this.strike()

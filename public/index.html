@@ -36,26 +36,37 @@
             </picture>
         </a>
     </div>
+    <noscript style="display: flex; justify-content: center;"><div class="card">Please enable JavaScript to play</div></noscript>
     <div id="app" style="height: 0%; display: none;" hidden>
         <div class="app-wrap">
             <div v-show="tutorialOn == true" class="card tut-card">
-                <div>
-                    <span style="justify-content: center;" class="font1 flex">How to Play</span>
-                    <br>
-                    <span>Type a word into the box and press "enter". You gain a point for each syllable detected in the word.</span>
-                    <br><br>
-                    <span style="justify-content: center;" class="font1 flex">Rules</span>
-                    <ul style="align-items: flex-start; padding: 0 0 0 1rem; margin: 1rem 0 2rem; gap: 1rem"  class="vert">
-                        <li>Words must be played in alphabetical order &#40;going from A to Z, and back to A&#41;</li>
-                        <li>Word must be at least three syllables long &#40;3&#41;</li>
-                        <li>Play within ten seconds &#40;10 sec.&#41;</li>
-                        <li>No offensive words</li>
-                        <li>No reused words</li>
-                    </ul>
-                    Break a rule, get a strike.
-                    <br><br>
-                    <span style="text-decoration: underline;">Three strikes and you're out!</span>
-                    <br><br>&#40;not 100% accurate, so have fun!&#41;
+                <div class="flex gap2" style="flex-direction: column;">
+                    <div>
+                        <span style="justify-content: center;" class="font1 flex">How to Play</span>
+                        <div class="vert" style="margin-top: 1rem;">
+                            <span class="tvc">Type and enter a word that starts with the correct letter and is at least three syllables. <br><br> You gain a point for each syllable detected in the word.<br><br></span>
+                            <div class="vert gap1">
+                                <span class="tvc" style="font-size: 2rem; margin-bottom: .5rem; text-decoration: underline;">examples:<br></span>
+                                <div class="vert gap1">
+                                    <span class="tvc vert"><span style="font-size: 2.25rem;">an * gry </span>2 syllables -> 0 points &nbsp;❌<br></span>
+                                    <span class="tvc vert"><span style="font-size: 2.25rem;">as * tro * naut</span>3 syllables -> 3 points &nbsp;✅<br></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <span style="justify-content: center;" class="font1 flex">Rules</span>
+                        <ul style="align-items: flex-start; padding: 0 0 0 1rem; margin: 1rem 0 2rem; gap: 1rem"  class="vert">
+                            <li>Word must contain at least three &#40;3&#41; syllables</li>
+                            <li>Words must be played in the correct order<br>&#40;order is alphabetical: A to Z, and back to A&#41;</li>
+                            <li>Play within 10 seconds</li>
+                            <li>No offensive words</li>
+                            <li>No reused words</li>
+                        </ul>
+                        <span>Break a rule; get a strike.<br><br></span>
+                        <span style="text-decoration: underline;">Three strikes and you're out!</span>
+                    </div>
+                    <span><br>&#40;not 100% accurate, so have fun!&#41;</span>
                 </div>
                 <button class="btn" ref="tutBtn1" @click.prevent="tutorialToggle(); startTimer()">start</button>
             </div>
@@ -66,7 +77,7 @@
                 <button class="btn" ref="tutBtn2" @click.prevent="tutorialToggle()">Forgot the Rules?</button>
                 <button class="btn" @click="startTimer" ref="startBtn">Start</button>
             </div>
-            <div v-show="tutorialOn == false" class="meat">
+            <div v-show="tutorialOn == false" class="meat" ref="meat">
                 <div class="txt-card" v-show="started == true" style="align-items: flex-start;">
                     <div class="vert" style="align-items: flex-start;">
                         <span>score: 
@@ -91,11 +102,20 @@
                 </div>
                 <div class="main" v-show="started == true">
                     <form class="form" spellcheck="false" autocapitalize="off" autocomplete="off">
-                        <input v-model="input" @enter.prevent="callServerDictionary()" type="text" ref="input">
-                        <button id="post" class="btn" @click.prevent="callServerDictionary()" ref="post">enter</button>
+                        <input v-model="input" @enter.prevent="callServerDictionary()" type="search" ref="input">
+                        <button style="display: none;" id="post" class="btn" @click.prevent="callServerDictionary()" ref="post">enter</button>
                     </form>
                     <div class="txt-card bottom-txt">
-                        <div class="timer-wrap"><span class="font2 font">timer: </span><span class="timer">{{ t }}</span></div>
+                        <div class="flex gap1" style="flex-direction: column; padding-bottom: 1rem;">
+                            <div class="timer-wrap">
+                                <span class="font2 font">timer: </span><span class="timer">{{ t }}</span>
+                            </div>
+                            <button style="height: fit-content;" class="card btn" ref="pauseBtn" @click.prevent="pause()">
+                                <span v-if="paused" class="tvc">resume</span>
+                                <span v-else class="tvc">pause</span>
+                            </button>
+                        </div>
+
                         <div class="letter-meta">
                             <div class="letter-wrap">
                                 <span class="font2 tvc">current letter: </span>
@@ -111,7 +131,7 @@
             </div>
             <div class="wl-wrap" v-show="vWordsList != null">
                 <span class="font1 tvc">Words Used:</span>
-                <ul class="wl" ref="wl">
+                <ul tabindex="-1" class="wl" ref="wl">
                     <li class="card" v-for="w in vWordsList">{{ w }}</li>
                 </ul>
             </div>
