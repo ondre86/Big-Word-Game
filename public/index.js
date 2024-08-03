@@ -207,7 +207,7 @@ const app = Vue.createApp({
                 }
             } catch(error){
                 this.strike()
-                this.wordCard.word = "Really Not a Word"
+                this.wordCard.word = "Not a Word"
             }
         },
 
