@@ -8,27 +8,21 @@
     <meta name="description" content="A game designed to test players' knowledge of big words">
     <meta name="keywords" content="big,word,game,syllables,english,spelling,dictionary,learning,play">
     <meta name="author" content="Ondre Johnson">
-
     <title>The Big Word Game</title>
-
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
     <link rel="manifest" href="site.webmanifest">
     <link rel="preload" href="fonts/FreckleFace-Regular.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/NanumPenScript-Regular.woff2" as="font" type="font/woff2" crossorigin>
-
     <link href="index.css" rel="stylesheet"></script>
-
     <script defer src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/Flip.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/TextPlugin.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/CustomEase.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollToPlugin.min.js"></script>
-    
     <script defer src="index.js"></script>
-
 </head>
 <body>
     <div class="logo-holster" style="height: 100%; display: flex; justify-content: center; align-items: center;">
@@ -57,14 +51,14 @@
                             </div>
                         </div>
                     </div>
-                    <div>
+                    <div class="vert">
                         <span style="justify-content: center;" class="font1 flex">Rules</span>
                         <ul style="align-items: flex-start; padding: 0 0 0 1rem; margin: 1rem 0 2rem; gap: 1rem"  class="vert">
-                            <li>Word must contain at least three &#40;3&#41; syllables</li>
-                            <li>Words must be played in the correct order<br>&#40;A to Z, and back to A&#41;</li>
-                            <li>Play within 10 seconds</li>
-                            <li>No offensive words</li>
-                            <li>No reused words</li>
+                            <li style="width: 100%;">Word must contain at least three &#40;3&#41; syllables</li>
+                            <li style="width: 100%;">Words must be played in the correct order<br>&#40;A to Z, and back to A&#41;</li>
+                            <li style="width: 100%;">Play within 10 seconds</li>
+                            <li style="width: 100%;">No offensive words</li>
+                            <li style="width: 100%;">No reused words</li>
                         </ul>
                         <span>Break a rule; get a strike.<br><br></span>
                         <span style="text-decoration: underline;">Three strikes and you're out!</span>
