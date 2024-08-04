@@ -132,7 +132,7 @@ a {
   height: auto;
   min-height: 90%;
   justify-content: space-between;
-  margin: 2rem 0 0 0;
+  padding: 2rem 0 0 0;
 }
 
 .meat {
@@ -198,6 +198,7 @@ a {
 input {
   width: 100%;
   padding: 1rem;
+  transition: all 0.3s;
 }
 
 .letter-wrap {
@@ -285,6 +286,9 @@ input {
   }
   #post {
     display: none;
+  }
+  .btn:hover {
+    background-color: #fddc02;
   }
 }
 @media (prefers-color-scheme: dark) {

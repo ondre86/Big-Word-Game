@@ -35,7 +35,7 @@
     </div>
     <noscript style="display: flex; justify-content: center;"><div class="card">Please enable JavaScript to play</div></noscript>
     <div id="app" style="height: 0%; display: none;" hidden>
-        <div class="app-wrap">
+        <div class="app-wrap" ref="appWrap">
             <div v-show="tutorialOn == true" class="card tut-card">
                 <div class="flex gap2" style="flex-direction: column;">
                     <div>
@@ -63,7 +63,7 @@
                         <span>Break a rule; get a strike.<br><br></span>
                         <span style="text-decoration: underline;">Three strikes and you're out!</span>
                     </div>
-                    <span><br>&#40;not 100% accurate, so have fun!&#41;</span>
+                    <span class="tvc"><br>not 100% accurate, so have fun! :&#41;</span>
                 </div>
                 <button class="btn" ref="tutBtn1" @click.prevent="tutorialToggle(); startTimer()">start</button>
             </div>
@@ -94,7 +94,7 @@
                         <span v-show="(finalWord != '')" class="font1 tvc">"{{ finalWord }}"
                         </span>
                         <span class="font1 tvc">{{ wordCard.word }}</span>
-                        <span v-show="foundClosest == true && wordCard.type == null" style="margin-bottom: 1rem;">Did you mean: "{{ closest }}"?</span>
+                        <span class="tvc" v-show="foundClosest == true && wordCard.type == null" style="margin-bottom: 1rem;">Did you mean: "{{ closest }}"?</span>
                     </div>
                 </div>
                 <div class="main" v-show="started == true">
@@ -108,7 +108,7 @@
                                 <span class="font2 font">timer: </span><span class="timer">{{ t }}</span>
                             </div>
                             <button style="height: fit-content;" class="card btn" ref="pauseBtn" @click.prevent="pause()">
-                                <span v-if="paused" class="tvc">resume</span>
+                                <span v-if="paused && pausePress" class="tvc">resume</span>
                                 <span v-else class="tvc">pause</span>
                             </button>
                         </div>

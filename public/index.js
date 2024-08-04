@@ -72,13 +72,11 @@ const app = Vue.createApp({
             this.pausePress = true
             if (this.paused == true){
                 this.paused = false
-                this.$refs.post.disabled = false
                 this.$refs.input.disabled = false
                 this.$refs.input.focus()
             }
             else{
                 this.paused = true
-                this.$refs.post.disabled = true
                 this.$refs.input.disabled = true
             }
         },
@@ -87,15 +85,12 @@ const app = Vue.createApp({
                 this.t++
             
                 if (this.t < 10){
-                    this.$refs.post.disabled = false
                     this.$refs.input.disabled = false
                 }
                 if (this.t == 10){
-                    this.$refs.post.disabled = true
                     this.$refs.input.disabled = true
                 }
                 if (this.t == 11 && this.strikes != 3){
-                    this.$refs.post.disabled = false
                     this.$refs.input.disabled = false
                     this.callServerDictionary()
                     this.t = 0
@@ -109,7 +104,6 @@ const app = Vue.createApp({
 
         },
         startTimer(){
-            
             if (this.strikes == 3){
                 this.started = false
                 this.resetStats()
@@ -125,7 +119,6 @@ const app = Vue.createApp({
             this.pausePress = false
             this.t = 0
             if (this.started == true){
-                this.$refs.post.disabled = false
                 this.$refs.input.disabled = false
                 this.$refs.input.focus()
             }
@@ -181,6 +174,7 @@ const app = Vue.createApp({
                 this.wordCard.word = "Ran Out of Time"
             }
             else {
+                this.paused = true
                 fetch(serverURL, {
                     method: 'POST',
                     headers: {
@@ -196,21 +190,23 @@ const app = Vue.createApp({
                     this.setData(success)
                     this.enterWord()
                     this.input = ''
+                    this.paused = false
+                    this.$refs.input.focus()
+                    this.$refs.input.click()
                     }
                 )
-
-                .catch(error => alert("Sorry, there was a problem."))
+                .catch(error => {
+                    alert("Sorry, there was a problem.")
+                })
             }
         },
         
         enterWord(){
             this.resetTimer()
             gsap.to(window, {
-                scrollTo: this.$refs.meat.offsetTop,
+                scrollTo: this.$refs.appWrap.offsetTop,
                 duration: .5
-            }
-
-            )
+            })
             try{
                 if (toRaw(this.data.data[0].hwi) == undefined || this.data.data[0] == undefined){
                     this.strike()
@@ -509,18 +505,6 @@ const app = Vue.createApp({
                 $("body")[0].classList.add("overflow")
 
             })
-
-            // if (this.tutorialOn == true){
-            //     setTimeout(() => {
-            //         this.$refs.tutBtn1.focus()
-            //     }, 4000)
-            // }
-            // else 
-            // if (this.lost == true || this.started == null){
-            //     setTimeout(() => {
-            //         this.$refs.startBtn.focus()
-            //     }, 2500)
-            // }
         })
 
         // RESET FOCUS COLOR
@@ -529,25 +513,6 @@ const app = Vue.createApp({
         })
     },
     updated: function log(){
-        // if (this.tutorialOn == true){
-        //     setTimeout(() => {
-        //         this.$refs.tutBtn1.focus()
-        //     },4000);
-        // }
-        // else 
-        // if (this.lost == true || this.started == null){
-        //     this.$refs.startBtn.focus()
-        // }
-        // else 
-        if (this.t == 0 && this.started == true){
-            scroll = gsap.timeline()
-            .to(window, {
-                scrollTo: this.$refs.meat.offsetTop,
-                duration: .5
-            })
-            .call(this.$refs.input.focus())
-        }
-
         if (this.$refs.wl.children.length > 3){
             this.$refs.wl.style.justifyContent = "initial"
         }
@@ -555,10 +520,36 @@ const app = Vue.createApp({
         if (this.started){
             $("html")[0].style.height = "auto"
             $("html")[0].style.overflow = "scroll"
+            gsap.to([".logo", ".logo-holster"], {
+                height: 0,
+                duration: 1
+            })
+            if (this.t == 0){
+                scroll = gsap.timeline()
+                .to(window, {
+                    scrollTo: this.$refs.appWrap.offsetTop,
+                    duration: .5,
+                })
+                setTimeout(() => {
+                    this.$refs.input.focus()
+                }, 500);
+            }
         }
         else{
+            if (this.lost == true){
+                gsap.to(".logo", {
+                    height: "100px",
+                    duration: 1
+                })
+                gsap.to(".logo-holster", {
+                    height: "110px",
+                    duration: 1
+                }, "<")
+            }
             $("html")[0].style.height = "100%"
         }
+
+
     }
 
 }).mount('#app')

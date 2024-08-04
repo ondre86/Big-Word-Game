@@ -124,7 +124,7 @@ a
     min-height: 90%
     @extend %flex-v, %center
     justify-content: space-between
-    margin: 2rem 0 0 0
+    padding: 2rem 0 0 0
 
 .meat
     @extend %flex-v, %center
@@ -208,6 +208,7 @@ input
     @extend %border, %focus, %f1, %f1-l
     width: 100%
     padding: 1rem
+    transition: all .3s
 
 .letter-meta
     @extend %flex-v
@@ -294,6 +295,9 @@ input
         max-width: 90%
     #post
         display: none
+    .btn
+        &:hover
+            background-color: $yellow
 
 @media (prefers-color-scheme:dark)
     html, body
