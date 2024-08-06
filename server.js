@@ -3,7 +3,6 @@ const helmet = require('helmet')
 const syl = require('syllabificate')
 const server = express()
 const port = 8383
-const key = "f985ea64-0887-4672-bb91-9f61fd82fb75"
 let data
 
 server.use(express.static('public')).use(express.json())
@@ -41,7 +40,7 @@ server.listen(port, () => {
 
 async function dictionaryCall(input){
     try{
-        let dictURL = `https://www.dictionaryapi.com/api/v3/references/collegiate/json/${input}?key=${key}`
+        let dictURL = `https://www.dictionaryapi.com/api/v3/references/collegiate/json/${input}?key=${process.env.API_KEY}`
         const response = await fetch(dictURL)
         if (!response.ok){
             throw new Error("Could not fetch resource")
