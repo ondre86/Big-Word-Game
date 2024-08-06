@@ -170,11 +170,11 @@
                     <li v-for="w in vWordsList"><button @click.prevent="replaceWordCard" @enter.prevent="replaceWordCard" @space.prevent="replaceWordCard" class="btn font2">{{ w }}</button></li>
                 </ul>
             </div>
-            <div class="card word-card" v-show="started == true && wordCard.word != null && tutorialOn == false">
-                <span class="font1 tvc">{{ wordCard.word }}</span>
-                <span v-show="foundClosest == true && wordCard.type == null" style="margin: 1rem 0;">Did you mean: "{{ closest }}"?</span>
+            <div id="wc" class="card word-card gap1" v-show="started == true && wordCard.word != null && tutorialOn == false">
+                <span id="wc1" class="font1 tvc">{{ wordCard.word }}</span>
+                <span id="wc2" v-show="foundClosest == true && wordCard.type == null" >Did you mean: "{{ closest }}"?</span>
                 <span v-show="wordCard.type != null" class="tvc">{{ wordCard.type }}</span>
-                <ul v-show="wordCard.defs != null">
+                <ul id="defs" v-show="wordCard.defs != null" style="margin: 0; padding-right: 11.5px;">
                     <li v-for="def in wordCard.defs">{{ def }}</li>
                 </ul>
             </div>
@@ -184,7 +184,7 @@
                 </span>
                 <span class="font1 tvc">{{ wordCard.word }}</span>
                 <span v-show="wordCard.type != null" class="tvc">{{ wordCard.type }}</span>
-                <ul v-show="wordCard.defs != null" style="margin-top: 0;">
+                <ul v-show="wordCard.defs != null" style="margin: 0; padding-right: 11.5px;">
                     <li v-for="def in wordCard.defs">{{ def }}</li>
                 </ul>
                 <span class="tvc" v-show="foundClosest == true && wordCard.type == null" style="margin-bottom: 1rem;">Did you mean: "{{ closest }}"?</span>

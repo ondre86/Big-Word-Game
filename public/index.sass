@@ -106,6 +106,8 @@ body
         display: none
     @extend %flex-v
 
+    transition: all .5s
+
 a   
     text-decoration: none
     color: black
@@ -117,6 +119,8 @@ a
     justify-content: flex-start
     align-items: center
     height: 0%
+    transition: all .5s
+
 .app-wrap
     max-width: 500px
     min-width: 320px
@@ -125,6 +129,8 @@ a
     @extend %flex-v, %center
     justify-content: flex-start
     padding: 2rem 0
+    transition: all .5s
+
 
 .meat
     @extend %flex-v, %center
@@ -291,6 +297,7 @@ input
         transition: all .3s
 
 .word-card
+    padding: 1rem 1rem 1.5rem
     margin: 2rem 0
     transition: box-shadow .5s
     &:hover
@@ -299,7 +306,8 @@ input
 .lost-card
     @extend %gap1
     overflow: hidden
-    padding: 0.5rem 2rem
+    padding: 1rem 1rem 1.5rem
+
 
 kbd
     @extend %border

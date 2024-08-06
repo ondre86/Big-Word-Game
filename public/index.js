@@ -241,6 +241,12 @@ const app = Vue.createApp({
                         this.closest = toRaw(this.data.data[0])
                     }
                 }
+                else if (toRaw(this.data.data[0].meta.id).includes("-") || toRaw(this.data.data[0].meta.id).includes(' ')){
+                    this.wordCard.word = "Try Again"
+                    this.wordCard.type = "word found in dictionary but contains spaces or dashes"
+                    this.wordCard.defs = null
+                    this.foundClosest = false
+                }
                 else{
                     if (!this.isCurrentLetter()){
                         this.strike()
@@ -573,6 +579,10 @@ const app = Vue.createApp({
         // RESET FOCUS COLOR ON TYPE
         this.$refs.input.addEventListener("keydown", ()=>{
             this.$refs.input.style.outlineColor = "#8875FF"
+        })
+        // PREVENT SPACES IN INPUT (ALL NOT ALPHABET CHARACTERS ARE STRIPPED ON ENTRY)
+        this.$refs.input.addEventListener("keydown", (e)=>{
+            if (e.keyCode === 32){e.preventDefault();}
         })
     },
     updated: function log(){
