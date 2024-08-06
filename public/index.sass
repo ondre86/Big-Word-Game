@@ -297,16 +297,19 @@ input
         transition: all .3s
 
 .word-card
-    padding: 1rem 1rem 1.5rem
     margin: 2rem 0
+    padding: 1rem 1rem 1.5rem 1rem
     transition: box-shadow .5s
+
     &:hover
         box-shadow: 0px 3px 6px 2px #8f8f8f
         
 .lost-card
-    @extend %gap1
     overflow: hidden
-    padding: 1rem 1rem 1.5rem
+    padding: 1rem 1rem 1.5rem 1rem
+
+    @extend %gap1
+
 
 
 kbd

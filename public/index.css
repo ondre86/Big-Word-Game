@@ -285,8 +285,8 @@ input {
 }
 
 .word-card {
-  padding: 1rem 1rem 1.5rem;
   margin: 2rem 0;
+  padding: 1rem 1rem 1.5rem 1rem;
   transition: box-shadow 0.5s;
 }
 .word-card:hover {
@@ -295,7 +295,7 @@ input {
 
 .lost-card {
   overflow: hidden;
-  padding: 1rem 1rem 1.5rem;
+  padding: 1rem 1rem 1.5rem 1rem;
 }
 
 @media (max-width: 500px) {
