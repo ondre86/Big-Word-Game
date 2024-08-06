@@ -11,6 +11,7 @@ const app = Vue.createApp({
             started: null,
             paused: false,
             pausePress: false,
+            pauseScroll: false,
             startBtn: null,
             tutBtn: null,
             lost: null,
@@ -25,13 +26,14 @@ const app = Vue.createApp({
                 defs: null,
                 syllablesOther: null,
                 syllablesCustom: null,
-                sortOrder: null,
             },
             foundClosest: false,
             closest: null, 
             alpha: "abcdefghijklmnopqrstuvwxyz".split(""),
             alphaX: 0,
-            currentLetter: 'a',
+            currentLetter: '',
+            isRandomOrder: false,
+            randomCounter: 0,
             rounds: 1,
             score: 0,
             cookieScore: 0,
@@ -41,6 +43,7 @@ const app = Vue.createApp({
             wordPlayed: false,
             vWordsList: null,
             vWordsScrolled: [],
+            vWordsOBJList: [],
             customScore:tpScore = null,
             input: null,       
             time: null   
@@ -54,12 +57,19 @@ const app = Vue.createApp({
                 rect.left >= 0 &&
                 rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
                 rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-            ){
-                if (this.pausePress == true){}
-                else{this.paused = false}
-                return true
-            }
+            )
+                {
+                    this.pauseScroll = false
+
+                    if (this.pausePress == true){
+                    }
+                    else{
+                        this.paused = false
+                    }
+                    return true
+                }
             else {
+                this.pauseScroll = true
                 this.paused = true
                 return false
             }
@@ -69,15 +79,28 @@ const app = Vue.createApp({
             this.wordCard.syllablesOther = item.tps
         },
         pause(){
-            this.pausePress = true
-            if (this.paused == true){
-                this.paused = false
-                this.$refs.input.disabled = false
-                this.$refs.input.focus()
+            if (this.pausePress == false){
+                this.pausePress = true
+
+                if (this.paused == true){
+                    this.$refs.input.disabled = true
+                }
+                else{
+                    this.paused = true
+                    this.$refs.input.disabled = true
+                }
             }
-            else{
-                this.paused = true
-                this.$refs.input.disabled = true
+            else {
+                this.pausePress = false
+                
+                if (this.pauseScroll == true){
+                    this.$refs.input.disabled = false
+                }
+                else{
+                    this.paused = false
+                    this.$refs.input.disabled = false
+                    this.$refs.input.focus()
+                }
             }
         },
         timer(){
@@ -101,7 +124,6 @@ const app = Vue.createApp({
             }
             else {
             }
-
         },
         startTimer(){
             if (this.strikes == 3){
@@ -133,11 +155,12 @@ const app = Vue.createApp({
         resetStats(){
             this.paused = false
             this.lost = null
-            this.alphaX = 0
-            this.currentLetter = 'a'
+            this.currentLetter = ''
+            this.randomCounter = 0
             wordsList.clear()
             this.vWordsList = null
             this.vWordsScrolled = []
+            this.vWordsOBJList = []
             this.score = 0
             this.newHighScore = false
             this.strikes = 0
@@ -145,17 +168,20 @@ const app = Vue.createApp({
             this.customScore, this.tpScore = null
             this.wordCard.word = null
             this.wordCard.type = null
-            this.wordCard.def = null
+            this.wordCard.defs = null
             this.wordCard.syllablesOther = null
             this.wordCard.syllablesCustom = null
-            this.wordCard.sortOrder = null
             this.foundClosest = false,
             this.closest = null
             this.$refs.input.style.outlineColor = "#8875FF"
 
         },
         newGame() {
+            this.tutorialOn = false
             this.started = true
+            if (this.isRandomOrder == true){}
+            else{this.alphaX = 0}
+            this.currentLetter = this.alpha[this.alphaX]
             this.time = setInterval(this.timer, 1000);
         },
         tutorialToggle(){
@@ -199,12 +225,11 @@ const app = Vue.createApp({
                     alert("Sorry, there was a problem.")
                 })
             }
-        },
-        
+        },     
         enterWord(){
             this.resetTimer()
             gsap.to(window, {
-                scrollTo: this.$refs.appWrap.offsetTop,
+                scrollTo: {y: this.$refs.appWrap.offsetTop, autokill: true},
                 duration: .5
             })
             try{
@@ -253,7 +278,6 @@ const app = Vue.createApp({
                 this.wordCard.word = "Not a Word"
             }
         },
-
         strike(){
             this.strikes++
             this.$refs.input.style.outlineColor = "red"
@@ -265,7 +289,6 @@ const app = Vue.createApp({
                 this.wordCard.defs = null
                 this.stopTimerAndGame()
                 document.cookie = `score=${this.score}; max-age=${60*60*24*365}; sameSite=lax` 
-
                 if (this.score > this.cookieHighScore){
                     newHighScore = true
                     this.cookieHighScore = this.score
@@ -291,13 +314,21 @@ const app = Vue.createApp({
         },
         hasBeenUsed(){
             if (wordsList.has(this.input)){
-                for (let f = this.$refs.wl.children.length-1; f > -1; f--){
-                    if (this.$refs.wl.children[f].innerHTML == this.input){
-                        this.$refs.wl.scrollTo(this.$refs.wl.children[f].offsetLeft - this.$refs.wl.children[f].clientWidth, 0)
-                        this.$refs.wl.children[f].style.outline = "4.5px solid #8875FF"
-                        setTimeout(() => {
-                            this.$refs.wl.children[f].style.outline = "0px solid black" 
-                        }, 2000);
+                for (let f = 0; f < this.$refs.wl.children.length; f++){
+                    if (this.$refs.wl.children[f].innerHTML.includes(this.input)){
+                        gsap.to(this.$refs.wl, {
+                            scrollTo: {y: 0, x: (this.$refs.wl.children[f].offsetLeft - (this.$refs.wl.clientWidth / 2) + (this.$refs.wl.children[f].clientWidth / 2)), autokill: true},
+                            duration: .5
+                        })
+                        gsap.to(this.$refs.wl.children[f].children[0], {
+                            outline: "6px solid #8875FF",
+                            duration: .3
+                        })
+                        gsap.to(this.$refs.wl.children[f].children[0], {
+                            outline: "0px solid black",
+                            duration: .3,
+                            delay: 2
+                        })
                     }
                 }
                 return true
@@ -313,13 +344,14 @@ const app = Vue.createApp({
                     this.wordCard.word = data[0].meta.stems[i]
                     this.wordCard.type = data[0].fl
                     this.wordCard.defs = data[0].shortdef
-                    this.wordCard.sortOrder = data[0].meta.sort
                 }
+            }
+            if(this.wordCard.defs != null){
+                this.vWordsOBJList.push(Object.values(toRaw(this.wordCard)))  
             }
         },
         syllableCountCustom(input, data){
             let stemSyllableArray = []
-        
             for (let i = 0; i < data[0].meta.stems.length; i++){
                 if (input == data[0].meta.stems[i]){
                     if (data[0].hwi != undefined){
@@ -353,7 +385,6 @@ const app = Vue.createApp({
             if (toRaw(this.wordCard.syllablesCustom) < 3 && toRaw(this.wordCard.syllablesOther) < 3){
                 return this.wordPlayed = false
             }
-        
             // SUCCESS
             // NULL CASE
             else if(toRaw(this.wordCard.syllablesCustom) == null && toRaw(this.wordCard.syllablesOther) != null && toRaw(this.wordCard.syllablesOther) >= 3){
@@ -396,49 +427,90 @@ const app = Vue.createApp({
             this.vWordsList = wordsList  
         },
         scoreKeeper(){
-
             if (this.wordPlayed && this.tpScore){
                 this.score += this.wordCard.syllablesOther
+                this.cookieScore = this.score
+                document.cookie = `score=${this.cookieScore}; max-age=${60*60*24*365}; sameSite=lax` 
             }
             else if (this.wordPlayed && this.customScore){
                 this.score += this.wordCard.syllablesCustom
+                this.cookieScore = this.score
+                document.cookie = `score=${this.cookieScore}; max-age=${60*60*24*365}; sameSite=lax` 
             }
             if (this.score > this.cookieHighScore){
                 this.newHighScore = true
                 this.cookieHighScore = this.score
                 document.cookie = `highScore=${this.cookieHighScore}; max-age=${60*60*24*365}; sameSite=lax` 
             }
-
         },
         nextLetter() {
-            if (this.alphaX == 25){
-                this.alphaX = 0
-                this.currentLetter = this.alpha[this.alphaX]
-                this.rounds++
+            if (this.isRandomOrder == true){
+                if (this.randomCounter == 26){
+                    this.rounds++
+                    this.randomCounter = 0
+                    this.alphaX = Math.floor(Math.random() * 26)
+                    this.currentLetter = this.alpha[this.alphaX]
+                }
+                else {
+                    this.randomCounter++
+                    this.alphaX = Math.floor(Math.random() * 26)
+                    this.currentLetter = this.alpha[this.alphaX]
+                }
             }
             else{
-                this.alphaX++
-                this.currentLetter = this.alpha[this.alphaX]
+                if (this.alphaX == 25){
+                    this.alphaX = 0
+                    this.currentLetter = this.alpha[this.alphaX]
+                    this.rounds++
+                }
+                else{
+                    this.alphaX++
+                    this.currentLetter = this.alpha[this.alphaX]
+                }
             }
             this.tpScore, this.customScore = false
+            this.wordPlayed = false
             this.$refs.input.focus()
         },
         scroll(){
             setTimeout(() => {
                 this.vWordsScrolled.push(this.$refs.wl.children[this.$refs.wl.children.length-1].scrollWidth)
                 gsap.to(this.$refs.wl, {
-                    scrollTo: {y: 0, x: this.$refs.wl.scrollWidth},
-                    duration: 2
+                    scrollTo: {y: 0, x: this.$refs.wl.scrollWidth, autokill: true},
+                    duration: .5
                 })
             }, 100);
+        },
+        replaceWordCard(event){
+            this.finalWord = ''
+            for (let e = 0; e < this.vWordsOBJList.length; e++){
+                if (event.target.innerHTML == this.vWordsOBJList[e][0]){
+                    this.wordCard.word = this.vWordsOBJList[e][0]
+                    this.wordCard.type = this.vWordsOBJList[e][1]
+                    this.wordCard.defs = this.vWordsOBJList[e][2]
+                }
+            }
+            gsap.to(this.$refs.wl, {
+                scrollTo: {y: 0, x: (event.target.offsetLeft - (this.$refs.wl.clientWidth / 2) + (event.target.clientWidth / 2)), autokill: true},
+                duration: .5
+            })
+        },
+        randomOrder(event, boolean){
+            if (boolean == false){{
+                this.isRandomOrder = false
+                this.alphaX = 0
+                this.currentLetter = this.alpha[this.alphaX]
+            }}
+            else{
+                this.isRandomOrder = true
+                this.alphaX = Math.floor(Math.random() * 26)
+                this.currentLetter = this.alpha[this.alphaX]
+            }
+
         }
     },
-    beforeCreate() {
-
-    },
-    beforeMount() {
-
-    },
+    beforeCreate() {},
+    beforeMount() {},
     mounted: function initialize(){
         // COOKIES
         if (document.cookie == ""){
@@ -459,7 +531,6 @@ const app = Vue.createApp({
 
             this.tutorialToggle()
         }
-
         // GSAP
         document.addEventListener("DOMContentLoaded", ()=>{
             gsap.registerPlugin(Flip,TextPlugin,CustomEase,ScrollToPlugin)
@@ -488,26 +559,18 @@ const app = Vue.createApp({
             .set("#app", {
                 display: "flex"
             })
-            .fromTo([this.$refs.startBtn, ".credit"], {
-                opacity: 0,
-                y: "0%"
-            }, {
-                opacity: 1,
-                duration: .3
-            }, "<+=.2")
-            .fromTo(".tut-card", {
+            .fromTo(".card", {
                 opacity: 0
             }, {
                 opacity: 1,
-                duration: 1
-            }, "<")
+                duration: .5
+            }, "<+=.25")
             .call(function(){
                 $("body")[0].classList.add("overflow")
 
             })
         })
-
-        // RESET FOCUS COLOR
+        // RESET FOCUS COLOR ON TYPE
         this.$refs.input.addEventListener("keydown", ()=>{
             this.$refs.input.style.outlineColor = "#8875FF"
         })
@@ -516,20 +579,14 @@ const app = Vue.createApp({
         if (this.$refs.wl.children.length > 3){
             this.$refs.wl.style.justifyContent = "initial"
         }
-
         if (this.started){
             $("html")[0].style.height = "auto"
             $("html")[0].style.overflow = "scroll"
             gsap.to([".logo", ".logo-holster"], {
                 height: 0,
-                duration: 1
+                duration: .5
             })
             if (this.t == 0){
-                scroll = gsap.timeline()
-                .to(window, {
-                    scrollTo: this.$refs.appWrap.offsetTop,
-                    duration: .5,
-                })
                 setTimeout(() => {
                     this.$refs.input.focus()
                 }, 500);
@@ -537,21 +594,19 @@ const app = Vue.createApp({
         }
         else{
             if (this.lost == true){
-                gsap.to(".logo", {
+                restart = gsap.timeline()
+                .to(".logo", {
                     height: "100px",
-                    duration: 1
+                    duration: .5
                 })
-                gsap.to(".logo-holster", {
+                .to(".logo-holster", {
                     height: "110px",
-                    duration: 1
+                    duration: .5
                 }, "<")
             }
             $("html")[0].style.height = "100%"
         }
-
-
     }
-
 }).mount('#app')
 
 

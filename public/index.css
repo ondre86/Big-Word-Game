@@ -45,10 +45,10 @@ input:focus, .btn:focus {
 }
 
 .btn:hover {
-  background-color: #C8B014;
+  background-color: #dec20f;
 }
 
-.card, input, .btn {
+kbd, .example, .card, input, .btn {
   border: 3px solid black;
   border-top-left-radius: 17px 100px;
   border-top-right-radius: 13px 90px;
@@ -74,11 +74,11 @@ input:focus, .btn:focus {
   opacity: 0;
 }
 
-.letter-wrap, .gap1 {
+.lost-card, .letter-wrap, .gap1 {
   gap: 1rem;
 }
 
-.lost-card, .tut-card, .form, .main, .gap2 {
+.tut-card, .form, .main, .gap2 {
   gap: 2rem;
 }
 
@@ -131,8 +131,8 @@ a {
   min-width: 320px;
   height: auto;
   min-height: 90%;
-  justify-content: space-between;
-  padding: 2rem 0 0 0;
+  justify-content: flex-start;
+  padding: 2rem 0;
 }
 
 .meat {
@@ -167,12 +167,17 @@ a {
   cursor: pointer;
 }
 
+.active {
+  background-color: #dec20f;
+  outline: 4.5px solid #8875FF;
+}
+
 .intro {
   justify-self: center;
-  margin: 5vh 0;
+  margin: 2rem 0;
 }
 .intro .btn {
-  font-size: 5rem;
+  font-size: 3rem;
 }
 
 .timer-wrap {
@@ -253,15 +258,24 @@ input {
   display: none;
 }
 
+.middle-example {
+  border-top: 3px solid black;
+  border-bottom: 3px solid black;
+}
+
 .card {
   max-width: 300px;
   background-color: #fddc02;
   transition: all 0.3s;
 }
 
+.example {
+  width: 100%;
+  padding: 1rem 0;
+}
+
 .tut-card {
   padding: 2rem;
-  margin: 2rem 0;
 }
 .tut-card .btn {
   transition: all 0.3s;
@@ -299,7 +313,7 @@ input {
   a {
     color: white;
   }
-  .btn, .card {
+  .btn, .card, .example {
     background-color: #471686;
     color: white;
     border-color: white;
@@ -316,6 +330,9 @@ input {
     color: white;
     background-color: #1F0C48;
   }
+  .active {
+    background-color: #1F0C48;
+  }
   input {
     border-color: #1F0C48;
   }
@@ -324,5 +341,9 @@ input {
   }
   .wl-wrap::after {
     background-image: linear-gradient(270deg, #212121, rgba(0, 0, 0, 0));
+  }
+  .middle-example {
+    border-top: 3px solid white;
+    border-bottom: 3px solid white;
   }
 }/*# sourceMappingURL=index.css.map */

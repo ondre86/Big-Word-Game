@@ -1,6 +1,6 @@
 $bg: #f5f5f5
 $yellow: #fddc02
-$yellowDark: #C8B014
+$yellowDark: #dec20f
 $green: #169B00
 $red: #CA0505
 $purple: #8875FF
@@ -123,8 +123,8 @@ a
     height: auto
     min-height: 90%
     @extend %flex-v, %center
-    justify-content: space-between
-    padding: 2rem 0 0 0
+    justify-content: flex-start
+    padding: 2rem 0
 
 .meat
     @extend %flex-v, %center
@@ -175,11 +175,15 @@ a
     &:hover
         cursor: pointer
 
+.active
+    background-color: $yellowDark
+    outline: 4.5px solid $purple
+
 .intro  
     justify-self: center
-    margin: 5vh 0
+    margin: 2rem 0
     .btn      
-        font-size: 5rem
+        font-size: 3rem
 
 .timer-wrap
     @extend %flex-h, %center
@@ -197,6 +201,7 @@ a
     @extend %f2, %f2-m, %flex-h, %center
     justify-content: space-between
     width: 100%
+
 .bottom-txt
     align-items: initial
     
@@ -263,7 +268,9 @@ input
     &::-webkit-scrollbar
         display: none
 
-
+.middle-example
+    border-top: 3px solid black
+    border-bottom: 3px solid black
 
 .card
     max-width: 300px
@@ -271,10 +278,14 @@ input
     @extend %f2, %f2-m, %flex-v, %border, %btn
     transition: all .3s
 
+.example
+    width: 100%
+    padding: 1rem 0
+    @extend %border
+
 .tut-card
     @extend %flex-v, %gap2
     padding: 2rem
-    margin: 2rem 0
 
     .btn
         transition: all .3s
@@ -286,9 +297,12 @@ input
         box-shadow: 0px 3px 6px 2px #8f8f8f
         
 .lost-card
-    @extend %gap2
+    @extend %gap1
     overflow: hidden
     padding: 0.5rem 2rem
+
+kbd
+    @extend %border
 
 @media (max-width:500px)
     .app-wrap
@@ -307,7 +321,7 @@ input
     a
         color: white
         
-    .btn, .card
+    .btn, .card, .example
         background-color: $dm-purple
         color: white
         border-color: white
@@ -323,6 +337,8 @@ input
             color: white
             background-color: $dm-purpleDark
 
+    .active
+        background-color: $dm-purpleDark
 
     input
         border-color: $dm-purpleDark
@@ -333,3 +349,7 @@ input
 
         &::after
             background-image: linear-gradient(270deg,  $dm-bg, rgba(0, 0, 0, 0))
+
+    .middle-example
+        border-top: 3px solid white
+        border-bottom: 3px solid white
