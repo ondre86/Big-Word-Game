@@ -298,7 +298,7 @@ const app = Vue.createApp({
             })
             try{
                 if (this.input == ''){}
-                else if (toRaw(this.data.data[0].hwi) == undefined || this.data.data[0] == undefined){
+                else if (this.data.data[0] == undefined || toRaw(this.data.data[0].hwi) == undefined){
                     if (typeof toRaw(this.data.data[0]) != null){
                         this.foundClosest = true
                         this.closest = toRaw(this.data.data[0])
