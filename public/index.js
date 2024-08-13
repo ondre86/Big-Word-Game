@@ -789,7 +789,6 @@ const app = Vue.createApp({
             else {this.order = "default"}
             this.webSocket = new WebSocket(`wss://${window.location.hostname}:${window.location.port}`)
             this.webSocket.addEventListener("open", (event) => {
-                this.resetStats()
                 this.webSocket.send(JSON.stringify({
                     mode: this.mode,
                     order: this.order
@@ -797,7 +796,6 @@ const app = Vue.createApp({
             })
             this.webSocket.addEventListener("message", (event) => {
                 rep = JSON.parse(event.data)
-                console.log (rep)
                 if (rep.waiting == true){
                     this.isWaiting = true
                 }
@@ -962,6 +960,7 @@ const app = Vue.createApp({
                     this.mpScoreFinal(rep.totalScore)
                     this.stopTimerAndGame()
                     this.webSocket.close()
+                    this.mpClassicTut, this.mpSpeedTut, this.mpWarTut = false
                 }
                 else if (rep.won == true){
                     this.mpLost = false
@@ -971,6 +970,7 @@ const app = Vue.createApp({
                     this.mpScoreFinal(rep.totalScore)
                     this.stopTimerAndGame()
                     this.webSocket.close()
+                    this.mpClassicTut, this.mpSpeedTut, this.mpWarTut = false
                 }
                 else if (rep.tie == true){
                     this.mpLost = false
@@ -981,6 +981,7 @@ const app = Vue.createApp({
                     this.mpScoreFinal(rep.totalScore)
                     this.stopTimerAndGame()
                     this.webSocket.close()
+                    this.mpClassicTut, this.mpSpeedTut, this.mpWarTut = false
                 }
             })
             this.webSocket.addEventListener("close", (event) => {
