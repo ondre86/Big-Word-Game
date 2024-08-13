@@ -352,7 +352,7 @@ app.ws('/', function(ws, req) {
                     if (lobbies[l].details.mode == 'speed'){
 
                         if (lobbies[l].player1.time < lobbies[l].player2.time){
-                            if (lobbies[l].player1.word != null){
+                            if (lobbies[l].player1.word != null && lobbies[l].player1.autoSent != true){
                                 lobbies[l].player1.totalScore += lobbies[l].player1.score
                                 lobbies[l].changeLetter()
                                 lobbies[l].player1.socket.send(JSON.stringify({
@@ -404,7 +404,7 @@ app.ws('/', function(ws, req) {
                             }
                         }
                         else if (lobbies[l].player1.time > lobbies[l].player2.time) { 
-                            if (lobbies[l].player2.word != null){
+                            if (lobbies[l].player2.word != null && lobbies[l].player2.autoSent != true){
                                 lobbies[l].player2.totalScore += lobbies[l].player2.score
                                 lobbies[l].changeLetter()
                                 lobbies[l].player2.socket.send(JSON.stringify({
