@@ -910,7 +910,7 @@ const app = Vue.createApp({
                         if (rep.score == 0 || this.classicModeOn){}
                         else {
                             if (this.wordPlayed == false){}
-                            else {this.mpWordMessage('tie')}
+                            else {this.mpWordMessage(this.mode)}
                         }
                         this.mpNextLetter(rep.letter, rep.letterIndex)
                         try {
