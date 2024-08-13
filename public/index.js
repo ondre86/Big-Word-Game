@@ -250,15 +250,17 @@ const app = Vue.createApp({
             }
         },
         async callServerDictionary(event){
-            if (this.t != 0){this.autoSent = false}
             if ((this.input == "" || this.input == null) && this.t > 0){}
             if ((event != undefined || event != null) && this.t <= 1){}
             else if ((this.input == "" || this.input == null) && this.t == 0){ 
+                this.autoSent = false
                 this.strike() 
                 this.foundClosest = false
                 this.wordCard.word = "Ran Out of Time"
             }
             else {
+                if (this.t != 0){this.autoSent = false}
+                else {this.autoSent = true}
                 this.paused = true
                 fetch(serverURL, {
                     method: 'POST',
@@ -772,7 +774,6 @@ const app = Vue.createApp({
             this.lost = false
         },
         startWebSocket(){
-            this.resetStats()
             if (this.mpClassicTut){
                 this.mode = "classic"
             }
@@ -788,6 +789,7 @@ const app = Vue.createApp({
             else {this.order = "default"}
             this.webSocket = new WebSocket(`wss://${window.location.hostname}:${window.location.port}`)
             this.webSocket.addEventListener("open", (event) => {
+                this.resetStats()
                 this.webSocket.send(JSON.stringify({
                     mode: this.mode,
                     order: this.order
