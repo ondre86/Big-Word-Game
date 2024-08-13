@@ -59,8 +59,6 @@ const app = Vue.createApp({
 
             wordMsg: '',
 
-            approved: true,
-
             mode: "",
             order: "",
             classicModeOn: false,
@@ -775,7 +773,6 @@ const app = Vue.createApp({
         },
         startWebSocket(){
             this.resetStats()
-            this.approved = false
             if (this.mpClassicTut){
                 this.mode = "classic"
             }
@@ -830,7 +827,6 @@ const app = Vue.createApp({
                 // DOM UPDATE & SCORE LOGIC
                 if (this.wordCard != null || this.wordCard != undefined){
                     if (rep.winner == true){
-                        this.approved = true
                         mpWordCard = rep.winningWord
                         toRaw(this.wordCard).word = rep.winningWord.word
                         toRaw(this.wordCard).type = rep.winningWord.type
@@ -871,7 +867,6 @@ const app = Vue.createApp({
                         }
                     }
                     else if (rep.winner == false){
-                        this.approved = true
                         mpWordCard = rep.winningWord
                         toRaw(this.wordCard).word = rep.winningWord.word
                         toRaw(this.wordCard).type = rep.winningWord.type
