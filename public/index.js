@@ -398,7 +398,12 @@ const app = Vue.createApp({
                 this.wordCard.type = null
                 this.wordCard.defs = null
                 this.stopTimerAndGame()
-                document.cookie = `score=${this.score}; max-age=${60*60*24*365}; sameSite=lax` 
+                if (this.score == 0){
+                    document.cookie = `score=0; max-age=${60*60*24*365}; sameSite=lax`
+                }
+                else {
+                    document.cookie = `score=${this.score}; max-age=${60*60*24*365}; sameSite=lax`
+                }
                 if (this.score > this.cookieHighScore){
                     this.newHighScore = true
                     this.cookieHighScore = this.score
@@ -962,7 +967,6 @@ const app = Vue.createApp({
                     this.webSocket.close()
                     this.mpClassicTut, this.mpSpeedTut, this.mpWarTut = false
                     this.classicModeOn = false
-                    this.multiPlayer = false
                     this.mode = ""
                 }
                 else if (rep.won == true){
@@ -975,7 +979,6 @@ const app = Vue.createApp({
                     this.webSocket.close()
                     this.mpClassicTut, this.mpSpeedTut, this.mpWarTut = false
                     this.classicModeOn = false
-                    this.multiPlayer = false
                     this.mode = ""
                 }
                 else if (rep.tie == true){
@@ -989,7 +992,6 @@ const app = Vue.createApp({
                     this.webSocket.close()
                     this.mpClassicTut, this.mpSpeedTut, this.mpWarTut = false
                     this.classicModeOn = false
-                    this.multiPlayer = false
                     this.mode = ""
                 }
             })
