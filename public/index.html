@@ -420,7 +420,7 @@
                 <div class="word-card-scroller">
                     <div id="wordCard" class="card word-card gap1" v-show="started == true && wordCard.word != null && tutorialOn == false" style="padding: 1rem 1rem 1.5rem;" ref="wordCardDisplay">
                         <span class="font1 tvc">{{ wordCard.word }}</span>
-                        <span v-show="foundClosest == true && wordCard.type == null" >Did you mean: "{{ closest }}"?</span>
+                        <span class="tvc" v-show="foundClosest == true && wordCard.type == null" >Did you mean: "{{ closest }}"?</span>
                         <span v-show="wordCard.type != null" class="tvc">{{ wordCard.type }}</span>
                         <ul v-show="wordCard.defs != null" style="margin: 0; padding-right: 11.5px;">
                             <li v-for="def in wordCard.defs">{{ def }}</li>

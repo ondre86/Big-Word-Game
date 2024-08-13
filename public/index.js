@@ -413,6 +413,8 @@ const app = Vue.createApp({
                 }
                 else { 
                     this.mpStopTimer() 
+                    if (this.classicModeOn){}
+                    else {this.mpResetTimer()}
                 }
                 this.wordCard.word = null
                 this.wordCard.type = null
