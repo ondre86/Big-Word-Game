@@ -295,7 +295,7 @@ input:focus {
 }
 
 .card {
-  max-width: 300px;
+  max-width: 320px;
   background-color: #FEEB72;
   transition: all 0.3s;
 }
@@ -333,6 +333,7 @@ li.tvc.card {
   margin: 0.5rem 0 0 0;
   position: relative;
   height: 50vh;
+  min-width: 300px;
 }
 .word-card-wrap::before {
   content: "";
@@ -359,7 +360,8 @@ li.tvc.card {
 
 .word-card-scroller {
   padding: 10% 3%;
-  overflow: scroll;
+  overflow-y: scroll;
+  overflow-x: hidden;
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
