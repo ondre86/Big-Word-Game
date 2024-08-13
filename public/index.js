@@ -798,6 +798,7 @@ const app = Vue.createApp({
             })
             this.webSocket.addEventListener("message", (event) => {
                 rep = JSON.parse(event.data)
+                console.log (rep)
                 if (rep.waiting == true){
                     this.isWaiting = true
                 }
