@@ -635,8 +635,15 @@ const app = Vue.createApp({
             }
             if (this.score > this.cookieHighScore){
                 this.newHighScore = true
-                this.cookieHighScore = this.score
-                document.cookie = `highScore=${this.cookieHighScore}; max-age=${60*60*24*365}; sameSite=lax` 
+                document.cookie = `highScore=${this.score}; max-age=${60*60*24*365}; sameSite=lax` 
+            }
+        },
+
+        mpScoreFinal(s){
+            document.cookie = `score=${s}; max-age=${60*60*24*365}; sameSite=lax` 
+            if (s > this.cookieHighScore){
+                this.newHighScore = true
+                document.cookie = `highScore=${s}; max-age=${60*60*24*365}; sameSite=lax` 
             }
         },
 
