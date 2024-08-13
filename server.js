@@ -350,7 +350,8 @@ app.ws('/', function(ws, req) {
                     }
 
                     if (lobbies[l].details.mode == 'speed'){
-                        if((lobbies[l].player1.autoSent == true && lobbies[l].player2.autoSent == true) || (lobbies[l].player1.score == 0 && lobbies[l].player2.score == 0)){
+                        console.log(msg)
+                        if((lobbies[l].player1.autoSent == true && lobbies[l].player2.autoSent == true)){
                             lobbies[l].player1.socket.send(JSON.stringify({
                                 winner: "tie",
                                 letter: lobbies[l].currentLetter,
