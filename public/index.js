@@ -77,6 +77,7 @@ const app = Vue.createApp({
             isWaiting: false,
 
             mpLost: null,
+            mpTie: null,
             mpLostReason: null,
             mpFinalScore: null,
             autoSent: false
@@ -201,6 +202,7 @@ const app = Vue.createApp({
             this.paused = false
             this.lost = null
             this.currentLetter = ''
+            this.finalWord = ''
             this.randomCounter = 0
             wordsList.clear()
             this.vWordsList = null
@@ -219,10 +221,12 @@ const app = Vue.createApp({
             this.foundClosest = false,
             this.closest = null
             this.$refs.input.style.outlineColor = wcoc
+            
             this.mpLost = null
             this.mpTie = null
             this.mpLostReason = null
             this.mpFinalScore = null
+            this.autoSent = false
         },
         newGame() {
             this.tutorialOn = false
@@ -770,6 +774,7 @@ const app = Vue.createApp({
             this.lost = false
         },
         startWebSocket(){
+            this.resetStats()
             this.approved = false
             if (this.mpClassicTut){
                 this.mode = "classic"
