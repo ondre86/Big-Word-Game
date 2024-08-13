@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
     <link rel="manifest" href="site.webmanifest">
     <link rel="preload" href="fonts/FreckleFace-Regular.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="fonts/NanumPenScript-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="fonts/NanumPen.woff2" as="font" type="font/woff2" crossorigin>
     <link href="index.css" rel="stylesheet"></script>
     <script defer src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
@@ -26,7 +26,7 @@
 </head>
 <body>
     <div class="logo-holster" style="height: 100%; display: flex; justify-content: center; align-items: center;">
-        <a href="/">
+        <a id="logo" href="/" tabindex="-1">
             <picture style="display: flex; justify-content: center; align-items: center;">
                 <source media="(prefers-color-scheme:dark)" srcset="img/logo(night).webp">
                 <img class="logo" src="img/logo(day).webp" alt="The Big Word Game">
@@ -36,49 +36,53 @@
     <noscript style="display: flex; justify-content: center;"><div class="card">Please enable JavaScript to play</div></noscript>
     <div id="app" style="height: 0%; display: none;" hidden>
         <div class="app-wrap" ref="appWrap">
-            <div v-show="tutorialOn == true" class="card tut-card">
-                <div class="flex" style="flex-direction: column; gap: 4rem;">
-                    <div>
-                        <span style="justify-content: center;" class="font1 flex">How to Play</span>
-                        <div class="vert" style="margin-top: 2rem;">
-                            <span class="tvc">You have <em style="text-decoration: underline;">ten seconds.</em><br><br>
-                                Type a word that: <br>
-                                <ul style="align-items: flex-start; padding: 0 0 0 1rem; margin: 1rem 0 2rem; gap: 1rem; list-style-type: none;"  class="vert">
-                                    <li class="tvc" style="width: 100%; text-decoration: underline;">starts with the current letter</li>
-                                    <li class="tvc">AND</li>
-                                    <li class="tvc" style="width: 100%; text-decoration: underline;">contains at least 3 syllables</li>
-                                </ul>
-                                You gain a point for each syllable detected in a correct word.<br><br>
-                            </span>
-                            <div class="vert gap1" style="width: 100%;">
-                                <span class="tvc font1" style="font-size: 1.5rem; margin-bottom: .5rem;">examples:<br></span>
-                                <div class="vert example">
-                                    <span class="tvc vert"><span style="width: 100%; font-size: 2.25rem;">an <span style="font-size: 1.5rem;">*</span> gry </span>2 syllables = 0 points &nbsp;❌<br></span>
-                                    <span class="tvc vert middle-example" style="width: 100%; padding: .5rem 0; margin: .5rem 0;"><span style="font-size: 2.25rem;">as <span style="font-size: 1.5rem;">*</span> tro <span style="font-size: 1.5rem;">*</span> naut</span>3 syllables = 3 points &nbsp;✅<br></span>
-                                    <span class="tvc vert"><span style="width: 100%; font-size: 2.25rem;">as <span style="font-size: 1.5rem;">*</span> tro <span style="font-size: 1.5rem;">*</span> lo <span style="font-size: 1.5rem;">*</span> gy</span>4 syllables = 4 points &nbsp;✅<br></span>
-                                </div>
+            <div id="soloTutorial" v-show="tutorialOn == true" class="card tut-card vert">
+                <button @click="tutorialToggle" class="back btn font2">back</button>
+                <div class="vert gap2">
+                    <div class="vert">
+                        <div class="vert gap1">
+                            <span style="justify-content: center;" class="font1 flex">Single Player</span>
+                            <div class="vert">
+                                <span class="tvc">Enter a word that starts with the target letter and contains at least 3 syllables. <br><br>
+                                    You gain points for each syllable detected in a correct word.<br><br>
+                                    The target letter advances after each correct word played.<br><br>
+                                    Unlimited rounds.<br>Play until you strike out.<br><br>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="vert gap1" style="width: 100%;">
+                            <span class="tvc font1" style="font-size: 1.5rem; margin-bottom: .5rem;">examples:<br></span>
+                            <div class="vert example">
+                                <span class="tvc vert" style="padding: 0 0 .5rem;"><span style="width: 100%; font-size: 2.25rem;">an <span style="font-size: 1.5rem;">*</span> gry </span>2 syllables = 0 points &nbsp;❌<br></span>
+                                <span class="tvc vert middle-example" style="width: 100%; padding: 1rem 0; margin: .5rem 0;"><span style="font-size: 2.25rem;">as <span style="font-size: 1.5rem;">*</span> tro <span style="font-size: 1.5rem;">*</span> naut</span>3 syllables = 3 points &nbsp;✅<br></span>
+                                <span class="tvc vert" style="padding: .5rem 0;"><span style="width: 100%; font-size: 2.25rem;">bal <span style="font-size: 1.5rem;">*</span> le <span style="font-size: 1.5rem;">*</span> ri <span style="font-size: 1.5rem;">*</span> na</span>4 syllables = 4 points &nbsp;✅<br></span>
                             </div>
                         </div>
                     </div>
                     <div class="vert">
                         <span style="justify-content: center;" class="font1 flex">Rules</span>
-                        <ul style="align-items: flex-start; padding: 0 0 0 1rem; margin: 2rem 0; gap: 1rem;"  class="vert">
-                            <li class="tvc" style="width: 100%; ">
-                                <span style="text-decoration: underline; font-size: 1.75rem;">Play within 10 seconds</span><br>
-                                <span style="font-size: 1.25rem;">&#40;timer stops when input is out of view or game is paused&#41;</span>
+                        <ul style="align-items: flex-start; padding: 0; margin: 2rem 0; gap: 1.5rem; list-style-type: none;"  class="vert">
+                            <li class="tvc card">
+                                <span style="font-size: 1.75rem;">Play within 10 seconds</span>
+                                <span style="font-size: 1.25rem; margin-top: .25rem;">&#40;you can pause with the button or by scrolling past the input&#41;</span>
                             </li>
-                            <li class="tvc" style="width: 100%; font-size: 1.75rem;  text-decoration: underline;">Word must contain at least three &#40;3&#41; syllables</li>
-                            <li class="tvc" style="width: 100%; font-size: 1.75rem;  text-decoration: underline;">Word must start with correct letter<br></li>
-                            <li class="tvc" style="width: 100%; font-size: 1.75rem;  text-decoration: underline;">No offensive words</li>
-                            <li class="tvc" style="width: 100%; font-size: 1.75rem;  text-decoration: underline;">No reused words</li>
+                            <li class="tvc card" style="font-size: 1.75rem;">Word must contain at least three &#40;3&#41; syllables</li>
+                            <li class="tvc card" style="font-size: 1.75rem;">Word must start with the correct letter<br></li>
+                            <li class="tvc card" style="font-size: 1.75rem;">No offensive words</li>
+                            <li class="tvc card" style="font-size: 1.75rem;">
+                                <span>No two-part words</span>
+                                <span style="font-size: 1.25rem; margin-top: .25rem;">&#40;no hyphens or spaces&#41;</span>
+                            </li>
+                            <li class="tvc card" style="font-size: 1.75rem;">Cannot reuse words</li>
                         </ul>
-                        <span><br>Break a rule; get a strike.<br><br></span>
-                        <span style="text-decoration: underline;">Three strikes and you're out!</span>
-                        <span class="tvc"><br><br>not 100% accurate, so have fun! :&#41;</span>
+                        <div class="vert gap1" style="margin: 2rem 0;">
+                            <span>Break a rule; get a strike.</span>
+                            <span style="text-decoration: underline;">Three strikes and you're out!</span>
+                        </div>
                     </div>
                 </div>
-                <div class="vert gap1">
-                    <button style="width: 100%;" class="btn" ref="tutBtn1" @click.prevent="tutorialToggle(); startTimer()">play</button>
+                <div class="vert gap1" style="width: 100%;">
+                    <button style="width: 100%;" class="btn" ref="tutBtn1" @click.prevent="tutorialToggle(); startTimer()">Play Solo</button>
                     <div class="vert" style="gap: .5rem">
                         <span style="grid-column: 1 / 2;">Letter Order:</span>
                         <div class="flex gap1">
@@ -87,24 +91,245 @@
                         </div>
                     </div>
                 </div>
+                <button style="width: fit-content; margin-top: 2rem;" class="btn font2" @click="tutorialToggle">Go Back</button>
             </div>
-            <div v-show="!started && tutorialOn == false && (lost == null || lost == false)" class="card tut-card" style="align-self: center;">
-                <span class="tvc font1">Welcome Back!</span>
-                <div class="vert gap1">
+            <div id="introInteractive" v-show="!started && tutorialOn == false && (lost == null || lost == false) && multiPlayer == false" class="card tut-card" style="align-self: center;">
+                <button style="left: -2rem; top: -2rem" class="btn font2 back" ref="tutBtn2" @click.prevent="tutorialToggle()">show rules</button>
+                <span class="tvc font1">Let's Play!</span>
+                <div class="vert gap1" style="margin-bottom: 1rem;">
                     <span class="tvc font1" style="font-size: 1.75rem;">Last Score: {{ cookieScore }}</span>
                     <span class="tvc font1" style="font-size: 1.75rem;">High Score: {{ cookieHighScore }}</span>
                 </div>
-                <button class="btn" ref="tutBtn2" @click.prevent="tutorialToggle()">Forgot the Rules?</button>
-                <button class="btn" @click="startTimer" ref="startBtn">Play</button>
-                <div class="vert" style="gap: .5rem">
-                    <span style="grid-column: 1 / 2;">Letter Order:</span>
-                    <div class="flex gap1">
-                        <button :class="{ active: isRandomOrder == false }" @click="randomOrder($event, false)" class="btn font2 order-picker">A to Z</button>
-                        <button :class="{ active: isRandomOrder == true }" @click="randomOrder($event, true)" class="btn font2 order-picker">Random</button>
+                <div class="vert gap1">
+                    <button style="width: 100%;" class="btn" @click="twoPlayer" ref="startBtn2P">Play Online</button>
+                    <button style="width: 100%;" class="btn" @click="startTimer" ref="startBtn">Play Solo</button>
+                    <div class="vert gap2">
+                        <div class="vert" style="gap: 0.5rem;">
+                            <span style="grid-column: 1 / 2;">Letter Order:</span>
+                            <div class="flex gap1">
+                                <button :class="{ active: isRandomOrder == false }" @click="randomOrder($event, false)" class="btn font2 order-picker">A to Z</button>
+                                <button :class="{ active: isRandomOrder == true }" @click="randomOrder($event, true)" class="btn font2 order-picker">Random</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div v-show="tutorialOn == false" class="meat" ref="meat">
+
+            <div id="multiplayerPath" v-show="!started && tutorialOn == false && (lost == null || lost == false) && multiPlayer == true" class="card tut-card" style="align-self: center;">
+                <div class="vert gap2" v-show="!mpClassicTut && !mpSpeedTut && !mpWarTut">
+                    <div class="vert">
+                        <span class="font1 flex">Choose Mode</span>
+                        <span class="font2 tvc">Play against others globally!</span>
+                    </div>
+                    <div class="vert gap1" style="width: 100%;">
+                        <button style="width: 100%;" class="btn" @click.prevent="classicTutToggle" ref="tutBtnMPClassic">Classic</button>
+                        <button style="width: 100%;" class="btn" @click.prevent="speedTutToggle" ref="tutBtnMPSpeed">Speed</button>
+                        <button style="width: 100%;" class="btn" @click.prevent="warTutToggle" ref="tutBtnMPWar">War</button>
+                    </div>
+                    <button class="btn font2" @click.prevent="twoPlayer">Go Back</button>
+                </div>
+                <div class="vert gap2" v-show="mpClassicTut == true">
+                    <button @click="mpCTHidden" class="back btn font2" v-if="!mpCTisHidden">hide rules</button>
+                    <button @click="mpCTHidden" class="back btn font2" v-else>show rules</button>
+                    <div class="vert">
+                        <span class="font1 flex">Classic Mode</span>
+                        <span class="font2 tvc">Take turns playing big words!</span>
+                    </div>
+                    <div class="vert gap2" v-show="!mpCTisHidden">
+                        <div class="vert gap1">
+                            <div class="vert">
+                                <span class="tvc">
+                                    Two players take turns entering a word that start with the target letter and contain at least three syllables.<br><br>
+                                    You gain points for each syllable detected in a correct word.<br><br>
+                                    The target letter advances after each correct word played. <br> <br>
+                                    Unlimited rounds.<br>Play until someone strikes out.
+                                </span>
+                            </div>
+                            <div class="vert gap1" style="width: 100%; margin-top: 1rem;">
+                                <span class="tvc font1" style="font-size: 1.5rem; margin-bottom: .5rem;">examples:<br></span>
+                                <div class="vert example">
+                                    <span class="tvc vert" style="padding: 0 0 .5rem;"><span style="width: 100%; font-size: 2.25rem;">an <span style="font-size: 1.5rem;">*</span> gry </span>2 syllables &nbsp;❌<br>0 points</span>
+                                    <span class="tvc vert middle-example" style="width: 100%; padding: 1rem 0; margin: .5rem 0;"><span style="font-size: 2.25rem;">as <span style="font-size: 1.5rem;">*</span> tro <span style="font-size: 1.5rem;">*</span> naut</span>3 syllables &nbsp;✅<br>3 points</span>
+                                    <span class="tvc vert" style="padding: .5rem 0;"><span style="width: 100%; font-size: 2.25rem;">bal <span style="font-size: 1.5rem;">*</span> le <span style="font-size: 1.5rem;">*</span> ri <span style="font-size: 1.5rem;">*</span> na</span>4 syllables &nbsp;✅<br>4 points</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="vert gap1">
+                            <div class="vert gap1">
+                                <span style="justify-content: center;" class="font1 flex">Rules</span>
+                                <ul style="align-items: flex-start; padding: 0; margin: 0; gap: 1rem; list-style-type: none;"  class="vert">
+                                    <li class="tvc card">
+                                        <span style="font-size: 1.75rem;">Play within 10 seconds</span>
+                                        <span style="font-size: 1.25rem;">no pausing!</span>
+                                    </li>
+                                    <li class="tvc card" style="font-size: 1.75rem;">Word must contain at least three &#40;3&#41; syllables</li>
+                                    <li class="tvc card" style="font-size: 1.75rem;">Word must start with the correct letter<br></li>
+                                    <li class="tvc card" style="font-size: 1.75rem;">No offensive words</li>
+                                    <li class="tvc card" style="font-size: 1.75rem;">
+                                        <span>No two-part words</span>
+                                        <span style="font-size: 1.25rem; margin-top: .25rem;">&#40;no hyphens or spaces&#41;</span>
+                                    </li>
+                                    <li class="tvc card" style="font-size: 1.75rem;">Cannot reuse words</li>
+                                </ul>
+                            </div>
+                            <div class="vert gap1" style="margin: 2rem 0;">
+                                <span>Break a rule; get a strike.</span>
+                                <span style="text-decoration: underline;">Three strikes and you're out!</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vert gap1" style="width: 100%;" v-show="isWaiting">
+                        <span class="tvc font2" v-show="isWaiting">waiting for match...</span>
+                        <button style="width: 100%;" class="btn" @click.prevent="closeWebSocket">Cancel</button>
+                    </div>
+                    <div class="vert gap1" style="width: 100%;" v-show="!isWaiting">
+                        <button style="width: 100%;" class="btn" @click.prevent="startWebSocket">Join Match</button>
+                        <div class="vert" style="gap: .5rem">
+                            <span style="grid-column: 1 / 2;">Letter Order:</span>
+                            <div class="flex gap1">
+                                <button :class="{ active: isRandomOrder == false }" @click="randomOrder($event, false)" class="btn font2 order-picker">A to Z</button>
+                                <button :class="{ active: isRandomOrder == true }" @click="randomOrder($event, true)" class="btn font2 order-picker">Random</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button v-show="!isWaiting" style="margin-top: 2rem;" class="btn font2" @click.prevent="classicTutToggle">Go Back</button>
+                </div>
+                <div class="vert gap2" v-show="mpSpeedTut == true">
+                    <button @click="mpSTHidden" class="back btn font2" v-if="!mpSTisHidden">hide rules</button>
+                    <button @click="mpSTHidden" class="back btn font2" v-else>show rules</button>
+                    <div class="vert">
+                        <span class="font1 flex">Speed Mode</span>
+                        <span class="font2 tvc">Race to play your big word first!</span>
+                    </div>
+                    <div class="vert gap2" v-show="!mpSTisHidden">
+                        <div class="vert gap1">
+                            <div class="vert">
+                                <span class="tvc">
+                                    Two players race to enter a word that starts with the target letter and contains at least three syllables.<br><br>
+                                    Whoever is first, gets the points.<br><br>
+                                    The target letter advances after a word has won.<br> <br>
+                                    You gain points for each syllable detected in a correct word.<br><br>
+                                    One round.<br>OR until someone strikes out.
+                                </span>
+                            </div>
+                            <div class="vert gap1" style="width: 100%; margin-top: 1rem;">
+                                <span class="tvc font1" style="font-size: 1.5rem; margin-bottom: .5rem;">examples:<br></span>
+                                <div class="vert example">
+                                    <span class="tvc vert top-example" style="width: 100%; padding: 0 0 1rem; margin: 0 0 .5rem;"><span style="width: 100%; font-size: 2.25rem;">a <span style="font-size: 1.5rem;">*</span> po <span style="font-size: 1.5rem;">*</span> lo <span style="font-size: 1.5rem;">*</span> gy</span>time: 4.7 sec<br>0 points</span>
+                                    <span class="tvc vert" style=" padding: .5rem 0;"><span style="width: 100%; font-size: 2.25rem;">as <span style="font-size: 1.5rem;">*</span> tro <span style="font-size: 1.5rem;">*</span> lo <span style="font-size: 1.5rem;">*</span> gy</span>time: 3.4 sec &nbsp;✅<br>4 points</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="vert gap1">
+                            <div class="vert gap1">
+                                <span style="justify-content: center;" class="font1 flex">Rules</span>
+                                <ul style="align-items: flex-start; padding: 0; margin: 0; gap: 1rem; list-style-type: none;"  class="vert">
+                                    <li class="tvc card">
+                                        <span style="font-size: 1.75rem;">Play within 10 seconds</span>
+                                        <span style="font-size: 1.25rem;">no pausing!</span>
+                                    </li>
+                                    <li class="tvc card" style="font-size: 1.75rem;">Word must contain at least three &#40;3&#41; syllables</li>
+                                    <li class="tvc card" style="font-size: 1.75rem;">Word must start with the correct letter<br></li>
+                                    <li class="tvc card" style="font-size: 1.75rem;">No offensive words</li>
+                                    <li class="tvc card" style="font-size: 1.75rem;">
+                                        <span>No two-part words</span>
+                                        <span style="font-size: 1.25rem; margin-top: .25rem;">&#40;no hyphens or spaces&#41;</span>
+                                    </li>
+                                    <li class="tvc card" style="font-size: 1.75rem;">Cannot reuse words</li>
+                                </ul>
+                            </div>
+                            <div class="vert gap1" style="margin: 2rem 0;">
+                                <span>Break a rule; get a strike.</span>
+                                <span style="text-decoration: underline;">Three strikes and you're out!</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vert gap1" style="width: 100%;" v-show="isWaiting">
+                        <span class="tvc font2" v-show="isWaiting">waiting for match...</span>
+                        <button style="width: 100%;" class="btn" @click.prevent="closeWebSocket">Cancel</button>
+                    </div>
+                    <div class="vert gap1" style="width: 100%;" v-show="!isWaiting">
+                        <button style="width: 100%;" class="btn" @click.prevent="startWebSocket">Join Match</button>
+                        <div class="vert" style="gap: .5rem">
+                            <span style="grid-column: 1 / 2;">Letter Order:</span>
+                            <div class="flex gap1">
+                                <button :class="{ active: isRandomOrder == false }" @click="randomOrder($event, false)" class="btn font2 order-picker">A to Z</button>
+                                <button :class="{ active: isRandomOrder == true }" @click="randomOrder($event, true)" class="btn font2 order-picker">Random</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button v-show="!isWaiting" style="margin-top: 2rem;" class="btn font2" @click.prevent="speedTutToggle">Go Back</button>
+                </div>
+                <div class="vert gap2" v-show="mpWarTut == true">
+                    <button @click="mpWTHidden" class="back btn font2" v-if="!mpWTisHidden">hide rules</button>
+                    <button @click="mpWTHidden" class="back btn font2" v-else>show rules</button>
+                    <div class="vert">
+                        <span class="font1 flex">War Mode</span>
+                        <span class="font2 tvc">Play the biggest word!</span>
+                    </div>
+                    <div class="vert gap2" v-show="!mpWTisHidden">
+                        <div class="vert gap1">
+                            <div class="vert">
+                                <span class="tvc">
+                                    Two players battle to enter the word with the most syllables that starts with the target letter.<br><br>
+                                    The highest syllable word wins.<br>If there is a tie, players repeat the same letter until one word is higher.<br><br>
+                                    The target letter advances after a word has won.<br> <br>
+                                    You gain points for each syllable detected in the winning word.<br><br>
+                                    One round.<br>OR until someone strikes out.
+                                </span>
+                            </div>
+                            <div class="vert gap1" style="width: 100%; margin-top: 1rem;">
+                                <span class="tvc font1" style="font-size: 1.5rem; margin-bottom: .5rem;">examples:<br></span>
+                                <div class="vert example">
+                                    <span class="tvc vert top-example" style="width: 100%; padding: 0 0 1rem; margin: 0 0 .5rem;"><span style="font-size: 2.25rem;">as <span style="font-size: 1.5rem;">*</span> tro <span style="font-size: 1.5rem;">*</span> naut</span>3 syllables<br>no points</span>
+                                    <span class="tvc vert" style="padding: .5rem 0;"><span style="width: 100%; font-size: 2.25rem;">as <span style="font-size: 1.5rem;">*</span> tro <span style="font-size: 1.5rem;">*</span> lo <span style="font-size: 1.5rem;">*</span> gy</span>4 syllables &nbsp;✅<br>4 points</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="vert gap1">
+                            <div class="vert gap1">
+                                <span style="justify-content: center;" class="font1 flex">Rules</span>
+                                <ul style="align-items: flex-start; padding: 0; margin: 0; gap: 1rem; list-style-type: none;"  class="vert">
+                                    <li class="tvc card">
+                                        <span style="font-size: 1.75rem;">Play within 10 seconds</span>
+                                        <span style="font-size: 1.25rem;">no pausing!</span>
+                                    </li>
+                                    <li class="tvc card" style="font-size: 1.75rem;">Word must contain at least three &#40;3&#41; syllables</li>
+                                    <li class="tvc card" style="font-size: 1.75rem;">Word must start with the correct letter<br></li>
+                                    <li class="tvc card" style="font-size: 1.75rem;">No offensive words</li>
+                                    <li class="tvc card" style="font-size: 1.75rem;">
+                                        <span>No two-part words</span>
+                                        <span style="font-size: 1.25rem; margin-top: .25rem;">&#40;no hyphens or spaces&#41;</span>
+                                    </li>
+                                    <li class="tvc card" style="font-size: 1.75rem;">Cannot reuse words</li>
+                                </ul>
+                            </div>
+                            <div class="vert gap1" style="margin: 2rem 0;">
+                                <span>Break a rule; get a strike.</span>
+                                <span style="text-decoration: underline;">Three strikes and you're out!</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vert gap1" style="width: 100%;" v-show="isWaiting">
+                        <span class="tvc font2" v-show="isWaiting">waiting for match...</span>
+                        <button style="width: 100%;" class="btn" @click.prevent="closeWebSocket">Cancel</button>
+                    </div>
+                    <div class="vert gap1" style="width: 100%;" v-show="!isWaiting">
+                        <button style="width: 100%;" class="btn" @click.prevent="startWebSocket">Join Match</button>
+                        <div class="vert" style="gap: .5rem">
+                            <span style="grid-column: 1 / 2;">Letter Order:</span>
+                            <div class="flex gap1">
+                                <button :class="{ active: isRandomOrder == false }" @click="randomOrder($event, false)" class="btn font2 order-picker">A to Z</button>
+                                <button :class="{ active: isRandomOrder == true }" @click="randomOrder($event, true)" class="btn font2 order-picker">Random</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button v-show="!isWaiting" style="margin-top: 2rem;" class="btn font2" @click.prevent="warTutToggle">Go Back</button>
+                </div>
+            </div>
+
+
+            <div id="coreGame" v-show="tutorialOn == false && started == true" class="meat" ref="meat">
                 <div class="txt-card" v-show="started == true" style="align-items: flex-start;">
                     <div class="vert" style="align-items: flex-start;">
                         <span>score: 
@@ -112,11 +337,12 @@
                         </span>
                         <span v-show="newHighScore == true" class="font2">new high score!</span>
                     </div>
+                    <span ref="wordMsg" class="font2">{{ wordMsg }}</span>
                     <span>strikes: <span class="font1">{{ strikes }}</span></span>
                 </div>
                 <div class="main" v-show="started == true">
                     <form class="form" spellcheck="false" autocapitalize="off" autocomplete="off">
-                        <input v-model="input" @enter.prevent="callServerDictionary()" type="search" ref="input" onpaste="return false">
+                        <input v-model="input" type="search" ref="input" onpaste="return false">
                         <button style="display: none;" id="post" class="btn" @click.prevent="callServerDictionary()" ref="post">enter</button>
                     </form>
                     <div class="txt-card bottom-txt">
@@ -124,72 +350,95 @@
                             <div class="timer-wrap">
                                 <span class="font2 font">timer: </span><span class="timer">{{ t }}</span>
                             </div>
-                            <button style="height: fit-content;" class="card btn" ref="pauseBtn" @click.prevent="pause()">
+                            <button style="height: fit-content;" class="btn font2" ref="pauseBtn" @click.prevent="pause()" v-show="!multiPlayer">
                                 <span v-if="paused && pausePress" class="tvc">resume</span>
                                 <span v-else class="tvc">pause</span>
                             </button>
                         </div>
-
                         <div class="letter-meta">
                             <div class="letter-wrap">
-                                <span class="font2 tvc">current letter: </span>
+                                <span class="font2 tvc">starting letter: </span>
                                 <span class="font1 tvc">{{ currentLetter }}</span>
                             </div>
                             <div class="letter-wrap">
                                 <span class="font2 tvc">round: </span>
                                 <span class="font1 tvc">{{ rounds }}</span>
                             </div>
+                            <div class="letter-wrap def-pop" v-show="vWordsList != null">
+                                <span v-show="multiPlayer == false" class="font2 tvc">scroll for details</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
             <!-- GAME OVER -->
-            <div class="game-over card tut-card vert" style="align-self: center; margin: 0 0 2rem;" v-show="started == false && lost == true && tutorialOn == false" >
-                <span class="font1 tc">Game Over</span>
-                <div class="font1" style="display: flex; flex-direction: column; gap: .5rem; width: 100%;">
-                    <span class="tvc">Score: {{ score }}</span>
-                    <span class="tvc">High Score: {{ cookieHighScore }}</span>
+            <div id="gameOverInteractive" class="game-over card tut-card vert" style="align-self: center; margin: 0 0 2rem;" v-show="started == false && lost == true && tutorialOn == false" >
+                <button style="left: -2rem; top: -2rem" class="btn font2 back" ref="tutBtn2" @click.prevent="tutorialToggle()">show rules</button>
+                <span class="font1 tvc" v-if="!multiPlayer">Game Over</span>
+                <div v-else>
+                    <div class="vert gap1" v-if="mpLost">
+                        <span class="font1 tvc">You Lost!</span>
+                        <span class="font2 tvc">{{ mpLostReason }}</span>
+                    </div>
+                    <div class="vert gap1" v-else-if="!mpLost && mpTie">
+                        <span class="font1 tvc">You Tied!</span>
+                        <span class="font2 tvc">{{ mpLostReason }}</span>
+                    </div>
+                    <div class="vert gap1" v-else>
+                        <span class="font1 tvc">You Won!</span>
+                        <span class="font2 tvc">{{ mpLostReason }}</span>
+                    </div>
+                </div>
+                <div class="font1 vert gap1" style="width: 100%; margin-bottom: 1rem;">
+                    <span style="font-size: 1.75rem;" class="tvc">Score: {{ score }}</span>
+                    <span style="font-size: 1.75rem;" class="tvc">High Score: {{ cookieHighScore }}</span>
                     <span v-show="newHighScore" class="tvc font2">new high score!</span>
                 </div>
-                <button class="btn" ref="tutBtn2" @click.prevent="tutorialToggle()">Forgot the Rules?</button>
-                <button class="btn" @click="startTimer" ref="startBtn">Play Again</button>
-                <div class="vert" style="gap: .5rem">
+                <div class="vert gap1" style="gap: .5rem; width: 100%;">
+                    <button style="width: 100%;" class="btn" @click="resetStats(); backToMulti();" ref="startBtn2P">Play Online</button>
+                    <button style="width: 100%;" class="btn" @click="backToSolo(); startTimer();" ref="startBtn">Play Solo</button>
                     <span style="grid-column: 1 / 2;">Letter Order:</span>
-                    <div class="flex gap1">
-                        <button :class="{ active: isRandomOrder == false }" @click="randomOrder($event, false)" class="btn font2 order-picker">A to Z</button>
-                        <button :class="{ active: isRandomOrder == true }" @click="randomOrder($event, true)" class="btn font2 order-picker">Random</button>
+                    <div class="vert gap2">
+                        <div class="flex gap1">
+                            <button :class="{ active: isRandomOrder == false }" @click="randomOrder($event, false)" class="btn font2 order-picker">A to Z</button>
+                            <button :class="{ active: isRandomOrder == true }" @click="randomOrder($event, true)" class="btn font2 order-picker">Random</button>
+                        </div>
                     </div>
+
                 </div>
             </div>
 
 
-            <div class="wl-wrap" v-show="vWordsList != null && tutorialOn == false">
+            <div id="wordList" class="wl-wrap" v-show="vWordsList != null && tutorialOn == false">
                 <span class="font1 tvc">Words Used:</span>
                 <span class="font2 tvc" style="font-size: 1rem;">scroll left & right &nbsp;//&nbsp;  shift + wouse wheel &#8597;</span>
                 <ul tabindex="-1" class="wl" ref="wl">
                     <li v-for="w in vWordsList"><button @click.prevent="replaceWordCard" @enter.prevent="replaceWordCard" @space.prevent="replaceWordCard" class="btn font2">{{ w }}</button></li>
                 </ul>
             </div>
-            <div class="card word-card gap1" v-show="started == true && wordCard.word != null && tutorialOn == false" style="padding: 1rem 1rem 1.5rem;">
-                <span class="font1 tvc">{{ wordCard.word }}</span>
-                <span v-show="foundClosest == true && wordCard.type == null" >Did you mean: "{{ closest }}"?</span>
-                <span v-show="wordCard.type != null" class="tvc">{{ wordCard.type }}</span>
-                <ul v-show="wordCard.defs != null" style="margin: 0; padding-right: 11.5px;">
-                    <li v-for="def in wordCard.defs">{{ def }}</li>
-                </ul>
+            <div class="word-card-wrap" v-show="wordCard.word != null && tutorialOn == false">
+                <div class="word-card-scroller">
+                    <div id="wordCard" class="card word-card gap1" v-show="started == true && wordCard.word != null && tutorialOn == false" style="padding: 1rem 1rem 1.5rem;" ref="wordCardDisplay">
+                        <span class="font1 tvc">{{ wordCard.word }}</span>
+                        <span v-show="foundClosest == true && wordCard.type == null" >Did you mean: "{{ closest }}"?</span>
+                        <span v-show="wordCard.type != null" class="tvc">{{ wordCard.type }}</span>
+                        <ul v-show="wordCard.defs != null" style="margin: 0; padding-right: 11.5px;">
+                            <li v-for="def in wordCard.defs">{{ def }}</li>
+                        </ul>
+                    </div>
+                    <div id="gameOverWordCard" class="card lost-card" v-show="started == false && lost == true && wordCard.word != null && tutorialOn == false" style="padding: 1rem 1rem 1.5rem;">
+                        <span v-show="(finalWord != '')" class="font1 tvc">"{{ finalWord }}"
+                        </span>
+                        <span class="font1 tvc">{{ wordCard.word }}</span>
+                        <span v-show="wordCard.type != null" class="tvc">{{ wordCard.type }}</span>
+                        <ul v-show="wordCard.defs != null" style="margin: 0; padding-right: 11.5px;">
+                            <li v-for="def in wordCard.defs">{{ def }}</li>
+                        </ul>
+                        <span class="tvc" v-show="foundClosest == true && wordCard.type == null">Did you mean: "{{ closest }}"?</span>
+                    </div>
+                </div>
             </div>
-
-            <div class="card lost-card" v-show="started == false && lost == true && wordCard.word != null && tutorialOn == false" style="margin: 1rem 0; padding: 1rem 1rem 1.5rem;">
-                <span v-show="(finalWord != '')" class="font1 tvc">"{{ finalWord }}"
-                </span>
-                <span class="font1 tvc">{{ wordCard.word }}</span>
-                <span v-show="wordCard.type != null" class="tvc">{{ wordCard.type }}</span>
-                <ul v-show="wordCard.defs != null" style="margin: 0; padding-right: 11.5px;">
-                    <li v-for="def in wordCard.defs">{{ def }}</li>
-                </ul>
-                <span class="tvc" v-show="foundClosest == true && wordCard.type == null">Did you mean: "{{ closest }}"?</span>
-            </div>
-            <a class="card btn credit" style="display: flex; position: relative; bottom: 0; margin: 2rem auto" v-show="!started && !lost && !tutorialOn" href="https://ondre.org"><span class="font2">created by ondre</span></a>
+            <a id="credit" class="card btn credit" style="display: flex; position: relative; bottom: 0; margin: 2rem auto" v-show="!started && !lost && !tutorialOn" href="https://ondre.org" target="_blank"><span class="font2">created by ondre</span></a>
         </div>
     </div>
 </body>

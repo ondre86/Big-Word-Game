@@ -1,6 +1,8 @@
 $bg: #f5f5f5
 $yellow: #fddc02
+$yellowLight: #FEEB72
 $yellowDark: #dec20f
+$yellowDark2: #B79E01
 $green: #169B00
 $red: #CA0505
 $purple: #8875FF
@@ -16,7 +18,7 @@ $dm-bg: #212121
 
 @font-face 
     font-family: 'nanum'
-    src: url("/fonts/NanumPenScript-Regular.woff2")
+    src: url("/fonts/NanumPen.woff2")
     font-weight: 600
     font-style: normal
 
@@ -42,7 +44,7 @@ $dm-bg: #212121
     background-color: $yellow
 %focus
     &:focus
-        outline: 9px solid $purple
+        outline: 9px solid $yellowDark2
         color: black
 %active
     &:active
@@ -111,7 +113,15 @@ body
 a   
     text-decoration: none
     color: black
+
+    @extend %focus
     
+#logo
+    &:focus
+        outline: none
+    &:active
+        outline: 0px
+
 .overflow
     overflow-y: scroll
 #app
@@ -159,8 +169,6 @@ a
     @extend %flex-h
 .vert
     @extend %flex-v, %center
-.tc
-    text-align: center
 .gap1
     @extend %flex-h, %gap1
 .gap2
@@ -173,7 +181,10 @@ a
     color: black
     text-decoration: none
 
-    transition: all .3s
+    -webkit-transition: all 0.3s ease-in-out
+    -moz-transition: all 0.3s ease-in-out
+    -o-transition: all 0.3s ease-in-out
+    transition: all 0.3s ease-in-out
 
     &:active
         outline: 0px solid #000
@@ -181,9 +192,21 @@ a
     &:hover
         cursor: pointer
 
+
 .active
     background-color: $yellowDark
-    outline: 4.5px solid $purple
+    outline: 4.5px solid #B79E01
+
+.btn-highlight
+    outline: 9px solid $yellowDark2
+    transition: all 0.3s ease-in-out
+
+.btn-highlight2
+    outline: 0px solid $yellowDark2
+    transition: all 0.3s ease-in-out
+
+#credit
+    background-color: $yellow
 
 .intro  
     justify-self: center
@@ -197,8 +220,6 @@ a
     gap: .5rem
     min-width: 120px
     justify-content: space-between
-    // align-items: flex-start
-
 
 .timer
     @extend %f1, %f1-l
@@ -216,10 +237,14 @@ a
     width: fit-content
 
 input
-    @extend %border, %focus, %f1, %f1-l
+    @extend %border, %f1, %f1-l
     width: 100%
     padding: 1rem
     transition: all .3s
+
+    &:focus
+        outline: 9px solid $yellow
+        color: black
 
 .letter-meta
     @extend %flex-v
@@ -277,12 +302,28 @@ input
 .middle-example
     border-top: 3px solid black
     border-bottom: 3px solid black
+.top-example
+    border-bottom: 3px solid black
 
 .card
     max-width: 300px
-    background-color: $yellow
+    background-color: $yellowLight
     @extend %f2, %f2-m, %flex-v, %border, %btn
     transition: all .3s
+
+li.tvc.card
+    padding: 1.5rem
+
+.back
+    position: absolute
+    top: -1.5rem
+    left: -.5rem
+    // transform: translate(-50%)
+.back2
+    position: absolute
+    top: -1.5rem
+    right: -.5rem
+    // transform: translate(50%)
 
 .example
     width: 100%
@@ -292,20 +333,53 @@ input
 .tut-card
     @extend %flex-v, %gap2
     padding: 2rem
+    position: relative
 
     .btn
         transition: all .3s
 
-.word-card
-    margin: 2rem 0
-    padding: 1rem 1rem 1.5rem 1rem
-    transition: box-shadow .5s
+.word-card-wrap
+    @extend %flex-v
+    margin: .5rem 0 0 0
+    position: relative
+    height: 50vh
 
-    &:hover
-        box-shadow: 0px 3px 6px 2px #8f8f8f
+    &::before
+        content: ""
+        position: absolute
+        top: 0
+        left: 0
+        width: 100%
+        height: 10%
+        background-image: linear-gradient(0deg, rgba(0, 0, 0, 0), $bg)
+        background-color: rgba(0, 0, 0, 0)
+        z-index: 100
+
+    &::after
+        content: ""
+        position: absolute
+        bottom: 0
+        left: 0
+        width: 100%
+        height: 10%
+        background-image: linear-gradient(0deg,  $bg, rgba(0, 0, 0, 0))
+        background-color: rgba(0, 0, 0, 0)
+        z-index: 100
+
+.word-card-scroller
+    padding: 10% 0
+    overflow: scroll
+    -ms-overflow-style: none
+    scrollbar-width: none
+    &::-webkit-scrollbar
+        display: none
+
+.word-card
+    padding: 1rem 1rem 1.5rem 1rem
+    transition: all .5s
+
         
 .lost-card
-    overflow: hidden
     padding: 1rem 1rem 1.5rem 1rem
 
     @extend %gap1
@@ -315,7 +389,7 @@ input
 kbd
     @extend %border
 
-@media (max-width:500px)
+@media (max-width: 500px)
     .app-wrap
         max-width: 90%
     #post
@@ -324,7 +398,11 @@ kbd
         &:hover
             background-color: $yellow
 
-@media (prefers-color-scheme:dark)
+@media (prefers-color-scheme: dark)
+    %focus
+        &:focus
+            outline: 9px solid $purple
+
     html, body
         background-color: $dm-bg
         color: white
@@ -348,11 +426,26 @@ kbd
             color: white
             background-color: $dm-purpleDark
 
+    .btn-highlight
+        outline: 9px solid $purple
+        transition: all 0.3s ease-in-out
+
+    .btn-highlight2
+        outline: 0px solid $purple
+        transition: all 0.3s ease-in-out
+
     .active
         background-color: $dm-purpleDark
+        outline: 4.5px solid $purple
+
+    #credit
+        background-color: $dm-purple
 
     input
         border-color: $dm-purpleDark
+        &:focus
+            outline: 9px solid $purple
+            color: black
 
     .wl-wrap
         &::before
@@ -361,6 +454,16 @@ kbd
         &::after
             background-image: linear-gradient(270deg,  $dm-bg, rgba(0, 0, 0, 0))
 
+    .word-card-wrap
+        &::before
+            background-image: linear-gradient(0deg, rgba(0, 0, 0, 0), $dm-bg)
+
+        &::after
+            background-image: linear-gradient(0deg,  $dm-bg, rgba(0, 0, 0, 0))
+
     .middle-example
         border-top: 3px solid white
+        border-bottom: 3px solid white
+
+    .top-example
         border-bottom: 3px solid white
