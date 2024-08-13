@@ -350,7 +350,7 @@ app.ws('/', function(ws, req) {
                     }
 
                     if (lobbies[l].details.mode == 'speed'){
-                        if(lobbies[l].player1.time == lobbies[l].player2.time || (lobbies[l].player1.word == null && lobbies[l].player2.word == null) || (lobbies[l].player1.autoSent == true && lobbies[l].player2.autoSent == true)){
+                        if((lobbies[l].player1.autoSent == true && lobbies[l].player2.autoSent == true) || (lobbies[l].player1.score == 0 && lobbies[l].player2.score == 0)){
                             lobbies[l].player1.socket.send(JSON.stringify({
                                 winner: "tie",
                                 letter: lobbies[l].currentLetter,
@@ -364,44 +364,8 @@ app.ws('/', function(ws, req) {
                                 score: lobbies[l].player2.score
                             }))
                         }
-                        else if (lobbies[l].player1.time < lobbies[l].player2.time && (lobbies[l].player1.autoSent != true && lobbies[l].player2.autoSent != true)){
-                            if (lobbies[l].player1.word == null && lobbies[l].player2.word != null){
-                                lobbies[l].player2.totalScore += lobbies[l].player2.score
-                                lobbies[l].changeLetter()
-                                lobbies[l].player2.socket.send(JSON.stringify({
-                                    winner: true,
-                                    winningWord: lobbies[l].player2.word,
-                                    letter: lobbies[l].currentLetter,
-                                    letterIndex: lobbies[l].clIndex,
-                                    score: lobbies[l].player2.score
-                                }))
-                                lobbies[l].player1.socket.send(JSON.stringify({
-                                    winner: false,
-                                    winningWord: lobbies[l].player2.word,
-                                    letter: lobbies[l].currentLetter,
-                                    letterIndex: lobbies[l].clIndex,
-                                    score: lobbies[l].player1.score
-                                }))
-                            }
-                            lobbies[l].player1.totalScore += lobbies[l].player1.score
-                            lobbies[l].changeLetter()
-                            lobbies[l].player1.socket.send(JSON.stringify({
-                                winner: true,
-                                winningWord: lobbies[l].player1.word,
-                                letter: lobbies[l].currentLetter,
-                                letterIndex: lobbies[l].clIndex,
-                                score: lobbies[l].player1.score
-                            }))
-                            lobbies[l].player2.socket.send(JSON.stringify({
-                                winner: false,
-                                winningWord: lobbies[l].player1.word,
-                                letter: lobbies[l].currentLetter,
-                                letterIndex: lobbies[l].clIndex,
-                                score: lobbies[l].player2.score
-                            }))
-                        }
-                        else if (lobbies[l].player1.time > lobbies[l].player2.time && (lobbies[l].player1.autoSent != true && lobbies[l].player2.autoSent != true)) { 
-                            if (lobbies[l].player2.word == null && lobbies[l].player1.word != null){
+                        else if (lobbies[l].player1.time < lobbies[l].player2.time && (lobbies[l].player1.autoSent != true)){
+                            if (lobbies[l].player1.word != null){
                                 lobbies[l].player1.totalScore += lobbies[l].player1.score
                                 lobbies[l].changeLetter()
                                 lobbies[l].player1.socket.send(JSON.stringify({
@@ -419,22 +383,26 @@ app.ws('/', function(ws, req) {
                                     score: lobbies[l].player2.score
                                 }))
                             }
-                            lobbies[l].player2.totalScore += lobbies[l].player2.score
-                            lobbies[l].changeLetter()
-                            lobbies[l].player2.socket.send(JSON.stringify({
-                                winner: true,
-                                winningWord: lobbies[l].player2.word,
-                                letter: lobbies[l].currentLetter,
-                                letterIndex: lobbies[l].clIndex,
-                                score: lobbies[l].player2.score
-                            }))
-                            lobbies[l].player1.socket.send(JSON.stringify({
-                                winner: false,
-                                winningWord: lobbies[l].player2.word,
-                                letter: lobbies[l].currentLetter,
-                                letterIndex: lobbies[l].clIndex,
-                                score: lobbies[l].player1.score
-                            }))
+                        }
+                        else if (lobbies[l].player1.time > lobbies[l].player2.time && (lobbies[l].player2.autoSent != true)) { 
+                            if (lobbies[l].player2.word != null){
+                                lobbies[l].player2.totalScore += lobbies[l].player2.score
+                                lobbies[l].changeLetter()
+                                lobbies[l].player2.socket.send(JSON.stringify({
+                                    winner: true,
+                                    winningWord: lobbies[l].player2.word,
+                                    letter: lobbies[l].currentLetter,
+                                    letterIndex: lobbies[l].clIndex,
+                                    score: lobbies[l].player2.score
+                                }))
+                                lobbies[l].player1.socket.send(JSON.stringify({
+                                    winner: false,
+                                    winningWord: lobbies[l].player2.word,
+                                    letter: lobbies[l].currentLetter,
+                                    letterIndex: lobbies[l].clIndex,
+                                    score: lobbies[l].player1.score
+                                }))
+                            }
                         }
 
                         if (lobbies[l].lettersPlayed == 26){
