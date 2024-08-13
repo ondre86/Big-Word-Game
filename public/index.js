@@ -961,6 +961,9 @@ const app = Vue.createApp({
                     this.stopTimerAndGame()
                     this.webSocket.close()
                     this.mpClassicTut, this.mpSpeedTut, this.mpWarTut = false
+                    this.classicModeOn = false
+                    this.multiPlayer = false
+                    this.mode = ""
                 }
                 else if (rep.won == true){
                     this.mpLost = false
@@ -971,6 +974,9 @@ const app = Vue.createApp({
                     this.stopTimerAndGame()
                     this.webSocket.close()
                     this.mpClassicTut, this.mpSpeedTut, this.mpWarTut = false
+                    this.classicModeOn = false
+                    this.multiPlayer = false
+                    this.mode = ""
                 }
                 else if (rep.tie == true){
                     this.mpLost = false
@@ -982,6 +988,9 @@ const app = Vue.createApp({
                     this.stopTimerAndGame()
                     this.webSocket.close()
                     this.mpClassicTut, this.mpSpeedTut, this.mpWarTut = false
+                    this.classicModeOn = false
+                    this.multiPlayer = false
+                    this.mode = ""
                 }
             })
             this.webSocket.addEventListener("close", (event) => {
