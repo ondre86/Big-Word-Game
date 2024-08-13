@@ -221,7 +221,7 @@ const app = Vue.createApp({
             this.foundClosest = false,
             this.closest = null
             this.$refs.input.style.outlineColor = wcoc
-            
+
             this.mpLost = null
             this.mpTie = null
             this.mpLostReason = null
@@ -911,9 +911,11 @@ const app = Vue.createApp({
                             outline: `0px solid ${wcoc}`,
                             duration: .5
                         }, "<+=2")
-                        if (this.classicModeOn){}
-                        else { this.mpWordMessage(this.mode) }
-                        
+                        if (rep.score == 0 || this.classicModeOn){}
+                        else {
+                            if (this.wordPlayed == false){}
+                            else {this.mpWordMessage('tie')}
+                        }
                         this.mpNextLetter(rep.letter, rep.letterIndex)
                         try {
                             this.scroll()  
@@ -933,7 +935,10 @@ const app = Vue.createApp({
                             this.$refs.input.style.outlineColor = wcoc
                         }
                         if (rep.score == 0 || this.classicModeOn){}
-                        else {this.mpWordMessage('tie')}
+                        else {
+                            if (this.wordPlayed == false){}
+                            else {this.mpWordMessage('tie')}
+                        }
                         this.mpNextLetter(rep.letter, rep.letterIndex)
                         if (this.classicModeOn){}
                         else {
