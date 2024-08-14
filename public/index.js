@@ -37,7 +37,7 @@ const app = Vue.createApp({
             },
             foundClosest: false,
             closest: null, 
-            alpha: "ABCDEFGHiJKLMNOPQRSTUVWXYZ".split(""),
+            alpha: "abcdefghijklmnopqrstuvwxyz".split(""),
             alphaX: 0,
             currentLetter: '',
             isRandomOrder: false,
@@ -180,7 +180,6 @@ const app = Vue.createApp({
             else {}
             this.$refs.input.focus()
             this.t = 10
-            console.log(this.time)
             this.time = setInterval(this.timer, 1000)
         },
         mpStopTimer(){
@@ -193,7 +192,6 @@ const app = Vue.createApp({
             this.paused = false
             this.$refs.input.focus()
             this.t = 10
-            console.log(this.time)
             this.time = setInterval(this.timer, 1000)
         },
         stopTimerAndGame(){
@@ -390,7 +388,6 @@ const app = Vue.createApp({
                 this.strike()
                 this.foundClosest = false
                 this.wordCard.word = "Not a Word"
-                console.error(error)
             }
         },
         strike(){
@@ -483,7 +480,6 @@ const app = Vue.createApp({
             if(this.wordCard.defs != null){
                 this.vWordsOBJList.push(Object.values(toRaw(this.wordCard)))  
             }
-
         },
         syllableCountCustom(input, data){
             let stemSyllableArray = []

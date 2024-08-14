@@ -406,11 +406,11 @@
                     </div>
                 </div>
                 <div class="font1 vert gap1" style="width: 100%; margin-bottom: 1rem;">
+                    <span v-show="newHighScore" style="font-size: 1.25rem;" class="tvc font2">new high score!</span>
                     <span style="font-size: 1.75rem;" class="tvc" v-if="multiPlayer == false">Score: {{ score }}</span>
                     <span style="font-size: 1.75rem;" class="tvc" v-else>Your Score: {{ score }}</span>
                     <span style="font-size: 1.75rem;" class="tvc" v-if="multiPlayer == false">High Score: {{ cookieHighScore }}</span>
                     <span style="font-size: 1.75rem;" class="tvc" v-else>Their Score: {{ opponentScore }}</span>
-                    <span v-show="newHighScore" style="font-size: 1.25rem;" class="tvc font2">new high score!</span>
                 </div>
                 <div class="vert gap1" style="gap: .5rem; width: 100%;">
                     <button style="width: 100%;" class="btn" @click="resetStats(); backToMulti();" ref="startBtn2P">Play Online</button>
