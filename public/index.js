@@ -1046,18 +1046,17 @@ const app = Vue.createApp({
             gsap.registerPlugin(Flip,TextPlugin,CustomEase,ScrollToPlugin)
             introTL = gsap.timeline()
             .to(".logo", {
-                height: "100px",
-                width: "160px",
+                height: "80px",
+                width: "140px",
                 duration: .75,
                 delay: .35,
                 margin: 0,
                 ease: "power4.inOut"
             })
             .to(".logo-holster", {
-                height: `110px`,
+                height: `90px`,
                 duration: 1,
                 ease: "power4.inOut"
-    
             }, "<")
             .to("#app", {
                 height: "auto",
