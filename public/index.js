@@ -37,7 +37,7 @@ const app = Vue.createApp({
             },
             foundClosest: false,
             closest: null, 
-            alpha: "abcdefghijklmnopqrstuvwxyz".split(""),
+            alpha: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""),
             alphaX: 0,
             currentLetter: '',
             isRandomOrder: false,
@@ -73,6 +73,8 @@ const app = Vue.createApp({
 
             webSocket: null,
             isWaiting: false,
+            countingDown: false,
+            countdown: 3,
 
             mpLost: null,
             mpTie: null,
@@ -147,7 +149,7 @@ const app = Vue.createApp({
                 if (this.t == 0 && this.strikes != 3){
                     this.$refs.input.disabled = true
                     this.autoSent = true
-                    this.callServerDictionary()  
+                    this.callServerDictionary() 
                 }
                 else if(this.t == 0 && this.strikes == 3){
                     this.stopTimerAndGame()
@@ -250,6 +252,7 @@ const app = Vue.createApp({
             }
         },
         async callServerDictionary(event){
+            if (event){event.preventDefault()}
             if ((this.input == "" || this.input == null) && this.t > 0){}
             if ((event != undefined || event != null) && this.t <= 1){}
             else if ((this.input == "" || this.input == null) && this.t == 0){ 
@@ -406,8 +409,7 @@ const app = Vue.createApp({
                 }
                 if (this.score > this.cookieHighScore){
                     this.newHighScore = true
-                    this.cookieHighScore = this.score
-                    document.cookie = `highScore=${this.cookieHighScore}; max-age=${60*60*24*365}; sameSite=lax` 
+                    document.cookie = `highScore=${this.score}; max-age=${60*60*24*365}; sameSite=lax` 
                 }
                 else{
                     this.newHighScore = false
@@ -435,7 +437,7 @@ const app = Vue.createApp({
         },
         isCurrentLetter(){
             this.currentLetter = this.alpha[this.alphaX]
-            return this.input.split("")[0].toLowerCase() === this.alpha[this.alphaX]
+            return this.input.split("")[0].toLowerCase() == this.alpha[this.alphaX].toLowerCase()
         },
         hasBeenUsed(){
             if (wordsList.has(this.input) || wordsList.has(this.input.charAt(0).toUpperCase() + this.input.slice(1))){
@@ -635,6 +637,7 @@ const app = Vue.createApp({
             }
             if (this.score > this.cookieHighScore){
                 this.newHighScore = true
+                this.cookieScore = this.score
                 document.cookie = `highScore=${this.score}; max-age=${60*60*24*365}; sameSite=lax` 
             }
         },
@@ -805,12 +808,22 @@ const app = Vue.createApp({
                 if (rep.isClassic == true){
                     this.classicModeOn = true
                 }
-                else if (rep.waiting != true && rep.inGame == true){
-                    if (this.classicModeOn){
-                        this.mpClassicNewGame()
-                    }
-                    else {this.newGame()}
-                    this.mpNextLetter(rep.letter, rep.letterIndex)
+                else if (rep.waiting == false && rep.inGame == true){
+                    this.countingDown = true
+                    mpCountdown = setInterval(() => {
+                        this.countdown--
+                        if (this.countdown == 0){
+                            clearInterval(mpCountdown)
+                            this.countdown = 3
+                            this.countingDown = false
+
+                            if (this.classicModeOn){
+                                this.mpClassicNewGame()
+                            }
+                            else {this.newGame()}
+                            this.mpNextLetter(rep.letter, rep.letterIndex)
+                        }
+                    }, 1000);
                 }
                 if (rep.opponentForfeit == true){
                     this.stopTimerAndGame()
@@ -820,8 +833,7 @@ const app = Vue.createApp({
                     document.cookie = `score=${this.score}; max-age=${60*60*24*365}; sameSite=lax` 
                     if (this.score > this.cookieHighScore){
                         this.newHighScore = true
-                        this.cookieHighScore = this.score
-                        document.cookie = `highScore=${this.cookieHighScore}; max-age=${60*60*24*365}; sameSite=lax` 
+                        document.cookie = `highScore=${this.score}; max-age=${60*60*24*365}; sameSite=lax` 
                     }
                     else{
                         this.newHighScore = false
@@ -1010,6 +1022,7 @@ const app = Vue.createApp({
     beforeCreate() {},
     beforeMount() {},
     mounted: function initialize(){
+        $("#form")[0].addEventListener("submit", this.callServerDictionary)
         window.addEventListener("beforeunload", (event) => {
             if (this.webSocket == null){}
             else this.webSocket.close()
@@ -1103,6 +1116,15 @@ const app = Vue.createApp({
                     height: "110px",
                     duration: .5
                 }, "<")
+
+                this.cookieScore = document.cookie
+                .split("; ")
+                .find((row) => row.startsWith("score="))
+                ?.split("=")[1];
+                this.cookieHighScore = document.cookie
+                .split("; ")
+                .find((row) => row.startsWith("highScore="))
+                ?.split("=")[1];
             }
             $("html")[0].style.height = "100%"
         }

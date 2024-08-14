@@ -332,7 +332,7 @@ li.tvc.card {
 .word-card-wrap {
   margin: 0.5rem 0 0 0;
   position: relative;
-  height: 50vh;
+  height: 40vh;
   min-width: 300px;
 }
 .word-card-wrap::before {

@@ -176,11 +176,15 @@
                             </div>
                         </div>
                     </div>
-                    <div class="vert gap1" style="width: 100%;" v-show="isWaiting">
-                        <span class="tvc font2" v-show="isWaiting">waiting for match...</span>
+                    <div class="vert gap1" style="width: 100%;" v-show="countingDown">
+                        <span class="tvc font2">starting match in:</span>
+                        <span class="tvc font1">{{ countdown }}</span>
+                    </div>
+                    <div class="vert gap1" style="width: 100%;" v-show="isWaiting && !inGame && !countingDown">
+                        <span class="tvc font2">waiting for match...</span>
                         <button style="width: 100%;" class="btn" @click.prevent="closeWebSocket">Cancel</button>
                     </div>
-                    <div class="vert gap1" style="width: 100%;" v-show="!isWaiting">
+                    <div class="vert gap1" style="width: 100%;" v-show="!isWaiting && countingDown != true">
                         <button style="width: 100%;" class="btn" @click.prevent="startWebSocket">Join Match</button>
                         <div class="vert" style="gap: .5rem">
                             <span style="grid-column: 1 / 2;">Letter Order:</span>
@@ -242,11 +246,15 @@
                             </div>
                         </div>
                     </div>
-                    <div class="vert gap1" style="width: 100%;" v-show="isWaiting">
-                        <span class="tvc font2" v-show="isWaiting">waiting for match...</span>
+                    <div class="vert gap1" style="width: 100%;" v-show="countingDown">
+                        <span class="tvc font2">starting match in:</span>
+                        <span class="tvc font1">{{ countdown }}</span>
+                    </div>
+                    <div class="vert gap1" style="width: 100%;" v-show="isWaiting && !inGame && !countingDown">
+                        <span class="tvc font2">waiting for match...</span>
                         <button style="width: 100%;" class="btn" @click.prevent="closeWebSocket">Cancel</button>
                     </div>
-                    <div class="vert gap1" style="width: 100%;" v-show="!isWaiting">
+                    <div class="vert gap1" style="width: 100%;" v-show="!isWaiting && countingDown != true">
                         <button style="width: 100%;" class="btn" @click.prevent="startWebSocket">Join Match</button>
                         <div class="vert" style="gap: .5rem">
                             <span style="grid-column: 1 / 2;">Letter Order:</span>
@@ -308,11 +316,15 @@
                             </div>
                         </div>
                     </div>
-                    <div class="vert gap1" style="width: 100%;" v-show="isWaiting">
-                        <span class="tvc font2" v-show="isWaiting">waiting for match...</span>
+                    <div class="vert gap1" style="width: 100%;" v-show="countingDown">
+                        <span class="tvc font2">starting match in:</span>
+                        <span class="tvc font1">{{ countdown }}</span>
+                    </div>
+                    <div class="vert gap1" style="width: 100%;" v-show="isWaiting && !inGame && !countingDown">
+                        <span class="tvc font2">waiting for match...</span>
                         <button style="width: 100%;" class="btn" @click.prevent="closeWebSocket">Cancel</button>
                     </div>
-                    <div class="vert gap1" style="width: 100%;" v-show="!isWaiting">
+                    <div class="vert gap1" style="width: 100%;" v-show="!isWaiting && countingDown != true">
                         <button style="width: 100%;" class="btn" @click.prevent="startWebSocket">Join Match</button>
                         <div class="vert" style="gap: .5rem">
                             <span style="grid-column: 1 / 2;">Letter Order:</span>
@@ -325,23 +337,21 @@
                     <button v-show="!isWaiting" style="margin-top: 2rem;" class="btn font2" @click.prevent="warTutToggle">Go Back</button>
                 </div>
             </div>
-
-
             <div id="coreGame" v-show="tutorialOn == false && started == true" class="meat" ref="meat">
                 <div class="txt-card" v-show="started == true" style="align-items: flex-start;">
                     <div class="vert" style="align-items: flex-start;">
                         <span>score: 
                             <span class="font1">{{ score }}</span>
                         </span>
-                        <span v-show="newHighScore == true" class="font2">new high score!</span>
+                        <span v-show="newHighScore == true" style="font-size: 1.25rem;" class="font2">new high score!</span>
                     </div>
-                    <span ref="wordMsg" class="font2" style="font-size: 1rem; padding-top: .5rem;">{{ wordMsg }}</span>
+                    <span ref="wordMsg" class="font2" style="font-size: 1.25rem; padding-top: .5rem;">{{ wordMsg }}</span>
                     <span>strikes: <span class="font1">{{ strikes }}</span></span>
                 </div>
                 <div class="main" v-show="started == true">
-                    <form class="form" spellcheck="false" autocapitalize="off" autocomplete="off">
-                        <input v-model="input" type="search" ref="input" onpaste="return false">
-                        <button style="display: none;" id="post" class="btn" @click.prevent="callServerDictionary()" ref="post">enter</button>
+                    <form id="form" class="form" spellcheck="false" autocapitalize="off" autocomplete="off" action="">
+                        <input v-model="input" type="text" ref="input" onpaste="return false">
+                        <input type="submit" value="" id="post" style="display: none;" ref="post"></input>
                     </form>
                     <div class="txt-card bottom-txt">
                         <div class="flex gap1" style="flex-direction: column; padding-bottom: 1rem;">
@@ -363,7 +373,7 @@
                                 <span class="font1 tvc">{{ rounds }}</span>
                             </div>
                             <div class="letter-wrap def-pop" v-show="vWordsList != null">
-                                <span v-show="multiPlayer == false" class="font2 tvc">scroll for details</span>
+                                <span v-show="multiPlayer == false" style="font-size: 1.25rem;" class="font2 tvc">scroll for details</span>
                             </div>
                         </div>
                     </div>
@@ -390,7 +400,7 @@
                 <div class="font1 vert gap1" style="width: 100%; margin-bottom: 1rem;">
                     <span style="font-size: 1.75rem;" class="tvc">Score: {{ score }}</span>
                     <span style="font-size: 1.75rem;" class="tvc">High Score: {{ cookieHighScore }}</span>
-                    <span v-show="newHighScore" class="tvc font2">new high score!</span>
+                    <span v-show="newHighScore" style="font-size: 1.25rem;" class="tvc font2">new high score!</span>
                 </div>
                 <div class="vert gap1" style="gap: .5rem; width: 100%;">
                     <button style="width: 100%;" class="btn" @click="resetStats(); backToMulti();" ref="startBtn2P">Play Online</button>
