@@ -1047,7 +1047,7 @@ const app = Vue.createApp({
             introTL = gsap.timeline()
             .to(".logo", {
                 height: "80px",
-                width: "140px",
+                width: "120px",
                 duration: .75,
                 delay: .35,
                 margin: 0,
