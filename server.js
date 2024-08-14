@@ -30,7 +30,7 @@ app.get("/", (req, res) => {
 
 let sockets = []
 let lobbies = []
-let letterArray = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")
+let letterArray = "abcdefghijklmnopqrstuvwxyz".split("")
 
 function receiveSocketAndPlaceInLobby(ws, msg) {
     sockets.push({
@@ -89,7 +89,7 @@ function receiveSocketAndPlaceInLobby(ws, msg) {
                             socket: x.socket,
                             uuid: x.uuid,
                             score: null,
-                            totalScore: null,
+                            totalScore: 0,
                             time: null,
                             word: null,
                             strikes: null,
@@ -99,7 +99,7 @@ function receiveSocketAndPlaceInLobby(ws, msg) {
                             socket: client.socket,
                             uuid: client.uuid,
                             score: null,
-                            totalScore: null,
+                            totalScore: 0,
                             time: null,
                             word: null,
                             strikes: null,
@@ -222,27 +222,61 @@ app.ws('/', function(ws, req) {
                             lobbies[l].player1.socket.send(JSON.stringify({
                                 lost: true,
                                 totalScore: lobbies[l].player1.totalScore,
+                                otherScore: lobbies[l].player2.totalScore,
                                 reason: "You struck out"
                             }))
                             lobbies[l].player2.socket.send(JSON.stringify({
                                 won: true,
                                 totalScore: lobbies[l].player2.totalScore,
+                                otherScore: lobbies[l].player1.totalScore,
                                 reason: "Opponent struck out"
                             }))
                             lobbies[l].player1.socket.close()
                             lobbies[l].player2.socket.close()
                         }
                         else if (lobbies[l].player1.strikes == 3 && lobbies[l].player2.strikes == 3){
-                            lobbies[l].player1.socket.send(JSON.stringify({
-                                lost: true,
-                                totalScore: lobbies[l].player1.totalScore,
-                                reason: "You struck out"
-                            }))
-                            lobbies[l].player2.socket.send(JSON.stringify({
-                                lost: true,
-                                totalScore: lobbies[l].player2.totalScore,
-                                reason: "You struck out"
-                            }))
+                            if (lobbies[l].player1.totalScore > lobbies[l].player2.totalScore){
+                                lobbies[l].player1.socket.send(JSON.stringify({
+                                    won: true,
+                                    totalScore: lobbies[l].player1.totalScore,
+                                    otherScore: lobbies[l].player2.totalScore,
+                                    reason: "You both struck out, but your score was higher!"
+                                }))
+                                lobbies[l].player2.socket.send(JSON.stringify({
+                                    lost: true,
+                                    totalScore: lobbies[l].player2.totalScore,
+                                    otherScore: lobbies[l].player1.totalScore,
+                                    reason: "You both struck out, but your score was lower."
+                                }))
+                            }
+                            else if (lobbies[l].player1.totalScore == lobbies[l].player2.totalScore){
+                                lobbies[l].player1.socket.send(JSON.stringify({
+                                    tie: true,
+                                    totalScore: lobbies[l].player1.totalScore,
+                                    otherScore: lobbies[l].player2.totalScore,
+                                    reason: "You both struck out...and you tied!"
+                                }))
+                                lobbies[l].player2.socket.send(JSON.stringify({
+                                    tie: true,
+                                    totalScore: lobbies[l].player2.totalScore,
+                                    otherScore: lobbies[l].player1.totalScore,
+                                    reason: "You both struck out...and you tied!"
+                                }))
+                            }
+                            else {
+                                lobbies[l].player1.socket.send(JSON.stringify({
+                                    lost: true,
+                                    totalScore: lobbies[l].player1.totalScore,
+                                    otherScore: lobbies[l].player2.totalScore,
+                                    reason: "You both struck out, but your score was lower"
+                                }))
+                                lobbies[l].player2.socket.send(JSON.stringify({
+                                    won: true,
+                                    totalScore: lobbies[l].player2.totalScore,
+                                    otherScore: lobbies[l].player1.totalScore,
+                                    reason: "You both struck out, but your score was higher!"
+                                }))
+                            }
                             lobbies[l].player1.socket.close()
                             lobbies[l].player2.socket.close()
                         }
@@ -252,27 +286,61 @@ app.ws('/', function(ws, req) {
                             lobbies[l].player2.socket.send(JSON.stringify({
                                 lost: true,
                                 totalScore: lobbies[l].player2.totalScore,
+                                otherScore: lobbies[l].player1.totalScore,
                                 reason: "You struck out"
                             }))
                             lobbies[l].player1.socket.send(JSON.stringify({
                                 won: true,
                                 totalScore: lobbies[l].player1.totalScore,
+                                otherScore: lobbies[l].player2.totalScore,
                                 reason: "Opponent struck out"
                             }))
                             lobbies[l].player1.socket.close()
                             lobbies[l].player2.socket.close()
                         }
                         else if (lobbies[l].player1.strikes == 3 && lobbies[l].player2.strikes == 3){
-                            lobbies[l].player1.socket.send(JSON.stringify({
-                                lost: true,
-                                totalScore: lobbies[l].player1.totalScore,
-                                reason: "You struck out"
-                            }))
-                            lobbies[l].player2.socket.send(JSON.stringify({
-                                lost: true,
-                                totalScore: lobbies[l].player2.totalScore,
-                                reason: "You struck out"
-                            }))
+                            if (lobbies[l].player1.totalScore > lobbies[l].player2.totalScore){
+                                lobbies[l].player1.socket.send(JSON.stringify({
+                                    won: true,
+                                    totalScore: lobbies[l].player1.totalScore,
+                                    otherScore: lobbies[l].player2.totalScore,
+                                    reason: "You both struck out, but your score was higher!"
+                                }))
+                                lobbies[l].player2.socket.send(JSON.stringify({
+                                    lost: true,
+                                    totalScore: lobbies[l].player2.totalScore,
+                                    otherScore: lobbies[l].player1.totalScore,
+                                    reason: "You both struck out, but your score was lower."
+                                }))
+                            }
+                            else if (lobbies[l].player1.totalScore == lobbies[l].player2.totalScore){
+                                lobbies[l].player1.socket.send(JSON.stringify({
+                                    tie: true,
+                                    totalScore: lobbies[l].player1.totalScore,
+                                    otherScore: lobbies[l].player2.totalScore,
+                                    reason: "You both struck out...and you tied!"
+                                }))
+                                lobbies[l].player2.socket.send(JSON.stringify({
+                                    tie: true,
+                                    totalScore: lobbies[l].player2.totalScore,
+                                    otherScore: lobbies[l].player1.totalScore,
+                                    reason: "You both struck out...and you tied!"
+                                }))
+                            }
+                            else {
+                                lobbies[l].player1.socket.send(JSON.stringify({
+                                    lost: true,
+                                    totalScore: lobbies[l].player1.totalScore,
+                                    otherScore: lobbies[l].player2.totalScore,
+                                    reason: "You both struck out, but your score was lower"
+                                }))
+                                lobbies[l].player2.socket.send(JSON.stringify({
+                                    won: true,
+                                    totalScore: lobbies[l].player2.totalScore,
+                                    otherScore: lobbies[l].player1.totalScore,
+                                    reason: "You both struck out, but your score was higher!"
+                                }))
+                            }
                             lobbies[l].player1.socket.close()
                             lobbies[l].player2.socket.close()
                         }
@@ -561,34 +629,21 @@ app.ws('/', function(ws, req) {
                                     lobbies[l].player1.socket.send(JSON.stringify({
                                         lost: true,
                                         totalScore: lobbies[l].player1.totalScore,
+                                        otherScore: lobbies[l].player2.totalScore,
                                         reason: "You struck out"
                                     }))
                                     lobbies[l].player2.socket.send(JSON.stringify({
                                         won: true,
                                         totalScore: lobbies[l].player2.totalScore,
+                                        otherScore: lobbies[l].player1.totalScore,
                                         reason: "Opponent struck out"
                                     }))
                                     lobbies[l].player1.socket.close()
                                     lobbies[l].player2.socket.close()
                                 }
-                                else if (lobbies[l].player1.strikes == 3 && lobbies[l].player2.strikes == 3){
-                                    lobbies[l].player1.socket.send(JSON.stringify({
-                                        lost: true,
-                                        totalScore: lobbies[l].player1.totalScore,
-                                        reason: "You struck out"
-                                    }))
-                                    lobbies[l].player2.socket.send(JSON.stringify({
-                                        lost: true,
-                                        totalScore: lobbies[l].player2.totalScore,
-                                        reason: "You struck out"
-                                    }))
-                                    lobbies[l].player1.socket.close()
-                                    lobbies[l].player2.socket.close()
-                                }
                             }
-
                         }
-                    }
+                    }      
                     if (lobbies[l].player1Turn == false){
                         if (lobbies[l].player2.word != null) { 
                             lobbies[l].player2.totalScore += lobbies[l].player2.score
@@ -628,26 +683,14 @@ app.ws('/', function(ws, req) {
                                     lobbies[l].player2.socket.send(JSON.stringify({
                                         lost: true,
                                         totalScore: lobbies[l].player2.totalScore,
+                                        otherScore: lobbies[l].player1.totalScore,
                                         reason: "You struck out"
                                     }))
                                     lobbies[l].player1.socket.send(JSON.stringify({
                                         won: true,
                                         totalScore: lobbies[l].player1.totalScore,
+                                        otherScore: lobbies[l].player2.totalScore,
                                         reason: "Opponent struck out"
-                                    }))
-                                    lobbies[l].player1.socket.close()
-                                    lobbies[l].player2.socket.close()
-                                }
-                                else if (lobbies[l].player1.strikes == 3 && lobbies[l].player2.strikes == 3){
-                                    lobbies[l].player1.socket.send(JSON.stringify({
-                                        lost: true,
-                                        totalScore: lobbies[l].player1.totalScore,
-                                        reason: "You struck out"
-                                    }))
-                                    lobbies[l].player2.socket.send(JSON.stringify({
-                                        lost: true,
-                                        totalScore: lobbies[l].player2.totalScore,
-                                        reason: "You struck out"
                                     }))
                                     lobbies[l].player1.socket.close()
                                     lobbies[l].player2.socket.close()
