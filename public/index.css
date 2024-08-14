@@ -48,7 +48,7 @@ input, .timer {
   background-color: #dec20f;
 }
 
-kbd, .example, .card, input, .btn {
+.example, .card, input, .btn {
   border: 3px solid black;
   border-top-left-radius: 17px 100px;
   border-top-right-radius: 13px 90px;
@@ -175,8 +175,16 @@ a {
   cursor: pointer;
 }
 
-.pause:hover {
-  background-color: #fddc02;
+.pause:hover, .quit:hover {
+  background-color: #dec20f;
+}
+
+.quit {
+  position: absolute;
+  left: 50%;
+  bottom: 1rem;
+  transform: translate(-50%);
+  height: fit-content;
 }
 
 .active {
@@ -195,6 +203,13 @@ a {
 .btn-highlight2 {
   outline: 0px solid #B79E01;
   transition: all 0.3s ease-in-out;
+}
+
+.waitingMsg {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
 }
 
 #credit {
@@ -225,6 +240,7 @@ a {
 }
 
 .bottom-txt {
+  position: relative;
   align-items: initial;
 }
 
@@ -235,11 +251,24 @@ a {
 input {
   width: 100%;
   padding: 1rem;
+  font-size: 3rem;
   transition: all 0.3s;
 }
 input:focus {
   outline: 9px solid #fddc02;
   color: black;
+}
+input::placeholder {
+  font-size: 3rem;
+}
+input::-moz-placeholder {
+  font-size: 3rem;
+}
+input:-ms-input-placeholder {
+  font-size: 3rem;
+}
+input:-ms-input-placeholder {
+  font-size: 3rem;
 }
 
 .letter-wrap {
@@ -403,9 +432,12 @@ li.tvc.card {
   a {
     color: white;
   }
-  .btn, .card, .example {
+  .btn, .card {
     background-color: #5318a0;
     color: white;
+    border-color: white;
+  }
+  .example {
     border-color: white;
   }
   .card {
@@ -431,7 +463,7 @@ li.tvc.card {
     outline: 0px solid #8875FF;
     transition: all 0.3s ease-in-out;
   }
-  .pause:hover {
+  .pause:hover, .quit:hover {
     background-color: #5318a0;
   }
   .active {

@@ -146,26 +146,35 @@ function receiveSocketAndPlaceInLobby(ws, msg) {
                         lobby.player1Turn = true
                         lobby.player1.socket.send(JSON.stringify({
                             isClassic: true,
-                            isYourTurn: true
+                            isYourTurn: true,
+                            inGame: true,
+                            waiting: false,
+                            letter: lobby.currentLetter,
+                            letterIndex: lobby.clIndex,
                         }))
                         lobby.player2.socket.send(JSON.stringify({
                             isClassic: true,
-                            isYourTurn: false
+                            isYourTurn: false,
+                            inGame: true,
+                            waiting: false,
+                            letter: lobby.currentLetter,
+                            letterIndex: lobby.clIndex,
                         }))
                     }
-
-                    x.socket.send(JSON.stringify({
-                        inGame: true,
-                        waiting: false,
-                        letter: lobby.currentLetter,
-                        letterIndex: lobby.clIndex,
-                    }))
-                    client.socket.send(JSON.stringify({
-                        inGame: true,
-                        waiting: false,
-                        letter: lobby.currentLetter,
-                        letterIndex: lobby.clIndex,
-                    }))
+                    else {
+                        x.socket.send(JSON.stringify({
+                            inGame: true,
+                            waiting: false,
+                            letter: lobby.currentLetter,
+                            letterIndex: lobby.clIndex,
+                        }))
+                        client.socket.send(JSON.stringify({
+                            inGame: true,
+                            waiting: false,
+                            letter: lobby.currentLetter,
+                            letterIndex: lobby.clIndex,
+                        }))
+                    }
 
                     sockets = sockets.filter(s => s.uuid !== client.uuid)
                     sockets = sockets.filter(s => s.uuid !== x.uuid)

@@ -192,9 +192,16 @@ a
     &:hover
         cursor: pointer
 
-.pause
+.pause, .quit
     &:hover
-        background-color: $yellow
+        background-color: $yellowDark
+
+.quit
+    position: absolute
+    left: 50%
+    bottom: 1rem
+    transform: translate(-50%)
+    height: fit-content
 
 .active
     &:hover
@@ -211,7 +218,11 @@ a
     outline: 0px solid $yellowDark2
     transition: all 0.3s ease-in-out
 
-
+.waitingMsg
+    position: absolute
+    left: 50%
+    top: 50%
+    transform: translate(-50%, -50%)
 
 #credit
     background-color: $yellow
@@ -240,6 +251,7 @@ a
     width: 100%
 
 .bottom-txt
+    position: relative
     align-items: initial
     
 .form
@@ -250,11 +262,22 @@ input
     @extend %border, %f1, %f1-l
     width: 100%
     padding: 1rem
+    font-size: 3rem
     transition: all .3s
 
     &:focus
         outline: 9px solid $yellow
         color: black
+
+    &::placeholder
+        font-size: 3rem
+    &::-moz-placeholder
+        font-size: 3rem
+    &:-ms-input-placeholder
+        font-size: 3rem
+    &:-ms-input-placeholder
+        font-size: 3rem
+                  
 
 .letter-meta
     @extend %flex-v
@@ -393,13 +416,8 @@ li.tvc.card
         
 .lost-card
     padding: 1rem 1rem 1.5rem 1rem
-
     @extend %gap1
 
-
-
-kbd
-    @extend %border
 
 @media (max-width: 500px)
     .app-wrap
@@ -417,11 +435,12 @@ kbd
     a
         color: white
         
-    .btn, .card, .example
+    .btn, .card
         background-color: $dm-purple
         color: white
         border-color: white
-
+    .example
+        border-color: white
     .card
         background-color: $dm-purpleDark2
 
@@ -444,7 +463,7 @@ kbd
         outline: 0px solid $purple
         transition: all 0.3s ease-in-out
 
-    .pause
+    .pause, .quit
         &:hover
             background-color: $dm-purple
 

@@ -23,7 +23,7 @@ const app = Vue.createApp({
             startBtn: null,
             tutBtn: null,
             lost: null,
-            tutorialOn: false,
+            tutorialOn: true,
             data: null,
             input: "",
             finalWord: '',
@@ -37,7 +37,7 @@ const app = Vue.createApp({
             },
             foundClosest: false,
             closest: null, 
-            alpha: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""),
+            alpha: "ABCDEFGHiJKLMNOPQRSTUVWXYZ".split(""),
             alphaX: 0,
             currentLetter: '',
             isRandomOrder: false,
@@ -290,14 +290,15 @@ const app = Vue.createApp({
                         this.$refs.input.focus()
                         this.$refs.input.click()
                     }
-                    }
-                )
+                })
                 .then(()=>{
                     if (!this.multiPlayer){
                         this.resetTimer()
                     }
                     else {
                         this.mpStopTimer()
+                        this.$refs.input.style.textAlign = "center"
+                        this.$refs.input.placeholder = "waiting..."
                     }
                 })
                 .catch(error => {
@@ -730,6 +731,10 @@ const app = Vue.createApp({
                 scrollTo: {y: 0, x: (event.target.offsetLeft - (this.$refs.wl.clientWidth / 2) + (event.target.clientWidth / 2)), autokill: true},
                 duration: .5
             })
+            gsap.to(this.$refs.wcScroller, {
+                scrollTo: 0,
+                duration: .5
+            })
         },
         randomOrder(event, boolean){
             if (boolean == false){{
@@ -775,6 +780,7 @@ const app = Vue.createApp({
         },
         backToMulti(){
             this.mpClassicTut = false
+            this.classicModeOn = false
             this.mpSpeedTut = false
             this.mpWarTut = false
             this.multiPlayer = true
@@ -782,10 +788,39 @@ const app = Vue.createApp({
         },
         backToSolo(){
             this.mpClassicTut = false
+            this.classicModeOn = false
             this.mpSpeedTut = false
             this.mpWarTut = false
             this.multiPlayer = false
             this.lost = false
+        },
+        quit(){
+            this.started = false
+            this.tutorialOn = false
+            this.backToSolo()
+
+            restart = gsap.timeline()
+            .to(".logo", {
+                height: "80px",
+                duration: .5
+            })
+            .to(".logo-holster", {
+                height: "90px",
+                margin: "0 0 2rem",
+                duration: .5
+            }, "<")
+
+            if (this.score > this.cookieHighScore){
+                this.newHighScore = true
+                this.cookieScore = this.score
+                document.cookie = `highScore=${this.score}; max-age=${60*60*24*365}; sameSite=lax` 
+            }
+            this.cookieScore = document.cookie.split("; ").find((row) => row.startsWith("score="))?.split("=")[1];
+            if (this.cookieScore == null){this.cookieScore = 0}
+            this.cookieHighScore = document.cookie.split("; ").find((row) => row.startsWith("highScore="))?.split("=")[1];
+            if (this.cookieHighScore == null || this.cookieHighScore == ""){this.cookieHighScore = 0}
+
+            this.resetStats()
         },
         startWebSocket(){
             if (this.mpClassicTut){
@@ -813,10 +848,10 @@ const app = Vue.createApp({
                 if (rep.waiting == true){
                     this.isWaiting = true
                 }
-                if (rep.isClassic == true){
-                    this.classicModeOn = true
-                }
                 else if (rep.waiting == false && rep.inGame == true){
+                    if (rep.isClassic == true){
+                        this.classicModeOn = true
+                    }
                     this.countingDown = true
                     mpCountdown = setInterval(() => {
                         this.countdown--
@@ -838,17 +873,12 @@ const app = Vue.createApp({
                     this.lost = true
                     this.mpLost = false
                     this.mpLostReason = "Opponent quit or disconnected"
-                    document.cookie = `score=${this.score}; max-age=${60*60*24*365}; sameSite=lax` 
-                    if (this.score > this.cookieHighScore){
-                        this.newHighScore = true
-                        document.cookie = `highScore=${this.score}; max-age=${60*60*24*365}; sameSite=lax` 
-                    }
-                    else{
-                        this.newHighScore = false
-                    }
+                    this.mpScoreFinal(this.score)
                 }
                 // DOM UPDATE & SCORE LOGIC
                 if (this.wordCard != null || this.wordCard != undefined){
+                    this.$refs.input.style.textAlign = "left"
+                    this.$refs.input.placeholder = ""
                     if (rep.winner == true){
                         mpWordCard = rep.winningWord
                         toRaw(this.wordCard).word = rep.winningWord.word
@@ -968,9 +998,13 @@ const app = Vue.createApp({
                     if (this.classicModeOn == true){
                         if (rep.isYourTurn == false){
                             this.mpStopTimer()
+                            this.$refs.input.style.textAlign = "center"
+                            this.$refs.input.placeholder = "waiting..."
                         }
                         if (rep.isYourTurn == true){
                             this.mpResetTimer()
+                            this.$refs.input.style.textAlign = "left"
+                            this.$refs.input.placeholder = ""
                         }
                     }
                 }
@@ -1023,6 +1057,26 @@ const app = Vue.createApp({
                 this.webSocket.close()
                 this.isWaiting = false
                 this.webSocket = null
+                this.started = false
+                this.backToMulti()
+                this.resetStats()
+                restart = gsap.timeline()
+                .to(".logo", {
+                    height: "80px",
+                    duration: .5
+                })
+                .to(".logo-holster", {
+                    height: "90px",
+                    margin: "0 0 2rem",
+                    duration: .5
+                }, "<")
+                if (this.score > this.cookieHighScore){
+                    this.newHighScore = true
+                    this.cookieScore = this.score
+                    document.cookie = `highScore=${this.score}; max-age=${60*60*24*365}; sameSite=lax` 
+                }
+                this.cookieScore = document.cookie.split("; ").find((row) => row.startsWith("score="))?.split("=")[1];
+                this.cookieHighScore = document.cookie.split("; ").find((row) => row.startsWith("highScore="))?.split("=")[1];
             }
             else {}
         }
@@ -1034,20 +1088,21 @@ const app = Vue.createApp({
         window.addEventListener("beforeunload", (event) => {
             if (this.webSocket == null){}
             else this.webSocket.close()
+            document.cookie = `score=${this.score}; max-age=${60*60*24*365}; sameSite=lax` 
+            if (this.score > this.cookieHighScore){
+                this.newHighScore = true
+                document.cookie = `highScore=${this.score}; max-age=${60*60*24*365}; sameSite=lax` 
+            }
         });
         if (document.cookie == ""){
             document.cookie = `score=0; max-age=${60*60*24*365}; sameSite=lax`; 
             document.cookie = `highScore=0; max-age=${60*60*24*365}; sameSite=lax`; 
         }
         else{
-            this.cookieScore = document.cookie
-            .split("; ")
-            .find((row) => row.startsWith("score="))
-            ?.split("=")[1];
-            this.cookieHighScore = document.cookie
-            .split("; ")
-            .find((row) => row.startsWith("highScore="))
-            ?.split("=")[1];
+            this.cookieScore = document.cookie.split("; ").find((row) => row.startsWith("score="))?.split("=")[1];
+            if (this.cookieScore == null){this.cookieScore = 0}
+            this.cookieHighScore = document.cookie.split("; ").find((row) => row.startsWith("highScore="))?.split("=")[1];
+            if (this.cookieHighScore == null || this.cookieHighScore == ""){this.cookieHighScore = 0}
         }
         // GSAP
         document.addEventListener("DOMContentLoaded", ()=>{
@@ -1126,15 +1181,8 @@ const app = Vue.createApp({
                     margin: "0 0 2rem",
                     duration: .5
                 }, "<")
-
-                this.cookieScore = document.cookie
-                .split("; ")
-                .find((row) => row.startsWith("score="))
-                ?.split("=")[1];
-                this.cookieHighScore = document.cookie
-                .split("; ")
-                .find((row) => row.startsWith("highScore="))
-                ?.split("=")[1];
+                this.cookieScore = document.cookie.split("; ").find((row) => row.startsWith("score="))?.split("=")[1];
+                this.cookieHighScore = document.cookie.split("; ").find((row) => row.startsWith("highScore="))?.split("=")[1];
             }
             $("html")[0].style.height = "100%"
         }

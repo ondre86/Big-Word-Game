@@ -35,16 +35,16 @@
     <div id="app" style="height: 0%; display: none;" hidden>
         <div class="app-wrap" ref="appWrap">
             <div id="soloTutorial" v-show="tutorialOn == true" class="card tut-card vert">
-                <button @click="tutorialToggle" class="back btn font2">back</button>
+                <button @click="tutorialToggle" class="back btn font2">hide rules</button>
                 <div class="vert gap2">
                     <div class="vert">
                         <div class="vert gap1">
-                            <span style="justify-content: center;" class="font1 flex">Single Player</span>
+                            <span style="justify-content: center;" class="font1 flex">How to Play</span>
                             <div class="vert">
                                 <span class="tvc">Enter a word that starts with the target letter and contains at least 3 syllables. <br><br>
                                     You gain points for each syllable detected in a correct word.<br><br>
                                     The target letter advances after each correct word played.<br><br>
-                                    Unlimited rounds.<br>Play until you strike out.<br><br>
+                                    Play until you strike out.<br><br>
                                 </span>
                             </div>
                         </div>
@@ -80,6 +80,7 @@
                     </div>
                 </div>
                 <div class="vert gap1" style="width: 100%;">
+                    <button style="width: 100%;" class="btn" @click="tutorialToggle(); twoPlayer();" ref="startBtn2P">Play Online</button>
                     <button style="width: 100%;" class="btn" ref="tutBtn1" @click.prevent="tutorialToggle(); startTimer()">Play Solo</button>
                     <div class="vert" style="gap: .5rem">
                         <span style="grid-column: 1 / 2;">Letter Order:</span>
@@ -89,7 +90,7 @@
                         </div>
                     </div>
                 </div>
-                <button style="width: fit-content; margin-top: 1rem;" class="btn font2" @click="tutorialToggle">Go Back</button>
+                <button style="width: fit-content; margin-top: 1rem;" class="btn font2" @click="tutorialToggle">Hide Rules</button>
             </div>
             <div id="introInteractive" v-show="!started && tutorialOn == false && (lost == null || lost == false) && multiPlayer == false" class="card tut-card" style="align-self: center;">
                 <button style="left: -2rem; top: -2rem" class="btn font2 back" ref="tutBtn2" @click.prevent="tutorialToggle()">show rules</button>
@@ -211,7 +212,7 @@
                                     Whoever is first, gets the points.<br><br>
                                     The target letter advances after a word has won.<br> <br>
                                     You gain points for each syllable detected in a correct word.<br><br>
-                                    One round.<br>OR until someone strikes out.
+                                    One round (26 letters)<br>OR<br>until someone strikes out.
                                 </span>
                             </div>
                             <div class="vert gap1" style="width: 100%; margin-top: 1rem;">
@@ -281,7 +282,7 @@
                                     The highest syllable word wins.<br>If there is a tie, players repeat the same letter until one word is higher.<br><br>
                                     The target letter advances after a word has won.<br> <br>
                                     You gain points for each syllable detected in the winning word.<br><br>
-                                    One round.<br>OR until someone strikes out.
+                                    One round (26 letters)<br>OR<br>until someone strikes out.
                                 </span>
                             </div>
                             <div class="vert gap1" style="width: 100%; margin-top: 1rem;">
@@ -363,7 +364,13 @@
                                 <span v-if="paused && pausePress" class="tvc">resume</span>
                                 <span v-else class="tvc">pause</span>
                             </button>
+                            <button class="pause btn font2" @click.prevent="closeWebSocket()" v-show="multiPlayer">
+                                <span class="tvc">quit</span>
+                            </button>
                         </div>
+                        <button class="quit btn font2" @click.prevent="quit()" v-show="!multiPlayer">
+                            <span class="tvc">quit</span>
+                        </button>
                         <div class="letter-meta">
                             <div class="letter-wrap">
                                 <span class="font2 tvc">starting letter: </span>
@@ -426,7 +433,7 @@
                 </ul>
             </div>
             <div class="word-card-wrap" v-show="wordCard.word != null && tutorialOn == false">
-                <div class="word-card-scroller">
+                <div class="word-card-scroller" ref="wcScroller">
                     <div id="wordCard" class="card word-card gap1" v-show="started == true && wordCard.word != null && tutorialOn == false" style="padding: 1rem 1rem 1.5rem;" ref="wordCardDisplay">
                         <span class="font1 tvc">{{ wordCard.word }}</span>
                         <span class="tvc" v-show="foundClosest == true && wordCard.type == null" >Did you mean: "{{ closest }}"?</span>
@@ -436,7 +443,7 @@
                         </ul>
                     </div>
                     <div id="gameOverWordCard" class="card lost-card" v-show="started == false && lost == true && wordCard.word != null && tutorialOn == false" style="padding: 1rem 1rem 1.5rem;">
-                        <span v-show="(finalWord != '')" class="font1 tvc">"{{ finalWord }}"
+                        <span v-show="(finalWord != '')" class="font1 tvc" style="word-break: break-all;">"{{ finalWord }}"
                         </span>
                         <span class="font1 tvc">{{ wordCard.word }}</span>
                         <span v-show="wordCard.type != null" class="tvc">{{ wordCard.type }}</span>
