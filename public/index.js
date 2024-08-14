@@ -801,7 +801,7 @@ const app = Vue.createApp({
                 this.order = "random"
             }
             else {this.order = "default"}
-            this.webSocket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}`)
+            this.webSocket = new WebSocket(`wss://${window.location.hostname}:${window.location.port}`)
             this.webSocket.addEventListener("open", (event) => {
                 this.webSocket.send(JSON.stringify({
                     mode: this.mode,
