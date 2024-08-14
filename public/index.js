@@ -754,15 +754,15 @@ const app = Vue.createApp({
             if(this.multiPlayer == true){this.multiPlayer = false}
             else {this.multiPlayer = true}
         },
-        mpCTHidden(){
+        mpCTHide(){
             if (this.mpCTisHidden == false){this.mpCTisHidden = true}
             else{this.mpCTisHidden = false}
         },
-        mpSTHidden(){
+        mpSTHide(){
             if (this.mpSTisHidden == false){this.mpSTisHidden = true}
             else{this.mpSTisHidden = false}
         },
-        mpWTHidden(){
+        mpWTHide(){
             if (this.mpWTisHidden == false){this.mpWTisHidden = true}
             else{this.mpWTisHidden = false}
         },

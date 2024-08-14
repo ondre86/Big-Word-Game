@@ -128,8 +128,8 @@
                     <button class="btn font2" @click.prevent="twoPlayer">Go Back</button>
                 </div>
                 <div class="vert gap2" v-show="mpClassicTut == true">
-                    <button @click="mpCTHidden" class="back btn font2" v-if="!mpCTisHidden">hide rules</button>
-                    <button @click="mpCTHidden" class="back btn font2" v-else>show rules</button>
+                    <button @click="mpCTHide" class="back btn font2" v-if="!mpCTisHidden">hide rules</button>
+                    <button @click="mpCTHide" class="back btn font2" v-else>show rules</button>
                     <div class="vert">
                         <span class="font1 flex">Classic Mode</span>
                         <span class="font2 tvc">Take turns playing big words!</span>
@@ -185,7 +185,7 @@
                         <span class="tvc font2">waiting for match...</span>
                         <button style="width: 100%;" class="btn" @click.prevent="closeWebSocket">Cancel</button>
                     </div>
-                    <div class="vert gap1" style="width: 100%;" v-show="!isWaiting && countingDown != true">
+                    <div class="vert gap1" style="width: 100%;" v-show="!isWaiting && countingDown != true" @click="mpCTisHidden = true">
                         <button style="width: 100%;" class="btn" @click.prevent="startWebSocket">Join Match</button>
                         <div class="vert" style="gap: .5rem">
                             <span style="grid-column: 1 / 2;">Letter Order:</span>
@@ -198,8 +198,8 @@
                     <button v-show="!isWaiting" style="margin-top: 1rem;" class="btn font2" @click.prevent="classicTutToggle">Go Back</button>
                 </div>
                 <div class="vert gap2" v-show="mpSpeedTut == true">
-                    <button @click="mpSTHidden" class="back btn font2" v-if="!mpSTisHidden">hide rules</button>
-                    <button @click="mpSTHidden" class="back btn font2" v-else>show rules</button>
+                    <button @click="mpSTHide" class="back btn font2" v-if="!mpSTisHidden">hide rules</button>
+                    <button @click="mpSTHide" class="back btn font2" v-else>show rules</button>
                     <div class="vert">
                         <span class="font1 flex">Speed Mode</span>
                         <span class="font2 tvc">Race to play your big word first!</span>
@@ -255,7 +255,7 @@
                         <span class="tvc font2">waiting for match...</span>
                         <button style="width: 100%;" class="btn" @click.prevent="closeWebSocket">Cancel</button>
                     </div>
-                    <div class="vert gap1" style="width: 100%;" v-show="!isWaiting && countingDown != true">
+                    <div class="vert gap1" style="width: 100%;" v-show="!isWaiting && countingDown != true" @click="mpSTisHidden = true">
                         <button style="width: 100%;" class="btn" @click.prevent="startWebSocket">Join Match</button>
                         <div class="vert" style="gap: .5rem">
                             <span style="grid-column: 1 / 2;">Letter Order:</span>
@@ -268,8 +268,8 @@
                     <button v-show="!isWaiting" style="margin-top: 1rem;" class="btn font2" @click.prevent="speedTutToggle">Go Back</button>
                 </div>
                 <div class="vert gap2" v-show="mpWarTut == true">
-                    <button @click="mpWTHidden" class="back btn font2" v-if="!mpWTisHidden">hide rules</button>
-                    <button @click="mpWTHidden" class="back btn font2" v-else>show rules</button>
+                    <button @click="mpWTHide" class="back btn font2" v-if="!mpWTisHidden">hide rules</button>
+                    <button @click="mpWTHide" class="back btn font2" v-else>show rules</button>
                     <div class="vert">
                         <span class="font1 flex">War Mode</span>
                         <span class="font2 tvc">Play the biggest word!</span>
@@ -325,7 +325,7 @@
                         <span class="tvc font2">waiting for match...</span>
                         <button style="width: 100%;" class="btn" @click.prevent="closeWebSocket">Cancel</button>
                     </div>
-                    <div class="vert gap1" style="width: 100%;" v-show="!isWaiting && countingDown != true">
+                    <div class="vert gap1" style="width: 100%;" v-show="!isWaiting && countingDown != true" @click="mpWTisHidden = true">
                         <button style="width: 100%;" class="btn" @click.prevent="startWebSocket">Join Match</button>
                         <div class="vert" style="gap: .5rem">
                             <span style="grid-column: 1 / 2;">Letter Order:</span>
@@ -407,7 +407,8 @@
                 </div>
                 <div class="font1 vert gap1" style="width: 100%; margin-bottom: 1rem;">
                     <span style="font-size: 1.75rem;" class="tvc">Score: {{ score }}</span>
-                    <span style="font-size: 1.75rem;" class="tvc">High Score: {{ cookieHighScore }}</span>
+                    <span style="font-size: 1.75rem;" class="tvc" v-if="multiPlayer == false">High Score: {{ cookieHighScore }}</span>
+                    <span style="font-size: 1.75rem;" class="tvc" v-else>Their Score: {{ opponentScore }}</span>
                     <span v-show="newHighScore" style="font-size: 1.25rem;" class="tvc font2">new high score!</span>
                 </div>
                 <div class="vert gap1" style="gap: .5rem; width: 100%;">
