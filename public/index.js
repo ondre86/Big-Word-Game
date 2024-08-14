@@ -1019,8 +1019,7 @@ const app = Vue.createApp({
                     this.isWaiting = false
                     this.mpScoreFinal(rep.totalScore)
                     this.opponentScore = rep.opponentTotalScore
-                    console.log("oppscore: "+this.opponentScore)
-                    console.log("reotherscore: "+ rep.otherScore)
+                    console.log(rep)
                     this.stopTimerAndGame()
                     this.webSocket.close()
                     this.mpClassicTut, this.mpSpeedTut, this.mpWarTut = false
@@ -1034,8 +1033,7 @@ const app = Vue.createApp({
                     this.isWaiting = false
                     this.mpScoreFinal(rep.totalScore)
                     this.opponentScore = rep.opponentTotalScore
-                    console.log("oppscore: "+this.opponentScore)
-                    console.log("reotherscore: "+ rep.otherScore)
+                    console.log(rep)
                     this.stopTimerAndGame()
                     this.webSocket.close()
                     this.mpClassicTut, this.mpSpeedTut, this.mpWarTut = false
@@ -1050,8 +1048,7 @@ const app = Vue.createApp({
                     this.isWaiting = false
                     this.mpScoreFinal(rep.totalScore)
                     this.opponentScore = rep.opponentTotalScore
-                    console.log("oppscore: "+this.opponentScore)
-                    console.log("reotherscore: "+ rep.otherScore)
+                    console.log(rep)
                     this.stopTimerAndGame()
                     this.webSocket.close()
                     this.mpClassicTut, this.mpSpeedTut, this.mpWarTut = false
