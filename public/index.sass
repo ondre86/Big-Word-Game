@@ -6,9 +6,11 @@ $yellowDark2: #B79E01
 $green: #169B00
 $red: #CA0505
 $purple: #8875FF
-$dm-purple: #471686
-$dm-purpleDark: #1F0C48
+$dm-purple: #5318a0
+$dm-purpleDark: #3c1889
+$dm-purpleDark2: #2e0e57
 $dm-bg: #212121
+$dm-bgLight: #2c2c2c
 
 @font-face 
     font-family: 'freckle'
@@ -82,6 +84,12 @@ $dm-bg: #212121
 %gap2
     gap: 2rem
 
+*
+    -ms-overflow-style: none
+    scrollbar-width: none
+    &::-webkit-scrollbar
+        display: none  
+
 html, body
     margin: 0
     padding: 0 
@@ -90,10 +98,6 @@ html, body
 html
     height: 100%
     min-height: 100%
-    -ms-overflow-style: none
-    scrollbar-width: none
-    &::-webkit-scrollbar
-        display: none
     
 body
     position: relative
@@ -101,11 +105,7 @@ body
     height: 100%
     max-height: 100%
     overflow-x: hidden
-    -ms-overflow-style: none
-    scrollbar-width: none
-
-    &::-webkit-scrollbar
-        display: none
+        
     @extend %flex-v
 
     transition: all .5s
@@ -138,7 +138,7 @@ a
     min-height: 90%
     @extend %flex-v, %center
     justify-content: flex-start
-    padding: 2rem 0
+    padding: .5rem 0 2rem
     transition: all .5s
 
 
@@ -151,7 +151,7 @@ a
     @extend %flex-h, %center
     height: 100%
     width: 100vw
-
+    margin: 0 0 2rem
 
 .logo
     width: 50%
@@ -192,8 +192,14 @@ a
     &:hover
         cursor: pointer
 
+.pause
+    &:hover
+        background-color: $yellow
 
 .active
+    &:hover
+        background-color: $yellowDark
+
     background-color: $yellowDark
     outline: 4.5px solid #B79E01
 
@@ -205,8 +211,12 @@ a
     outline: 0px solid $yellowDark2
     transition: all 0.3s ease-in-out
 
+
+
 #credit
     background-color: $yellow
+    &:hover
+        background-color: $yellowDark
 
 .intro  
     justify-self: center
@@ -342,7 +352,7 @@ li.tvc.card
     @extend %flex-v
     margin: .5rem 0 0 0
     position: relative
-    height: 50vh
+    height: 40vh
     min-width: 300px
 
     &::before
@@ -394,11 +404,6 @@ kbd
 @media (max-width: 500px)
     .app-wrap
         max-width: 90%
-    #post
-        display: none
-    .btn
-        &:hover
-            background-color: $yellow
 
 @media (prefers-color-scheme: dark)
     %focus
@@ -417,16 +422,19 @@ kbd
         color: white
         border-color: white
 
+    .card
+        background-color: $dm-purpleDark2
+
     .btn
         &:focus
             color: white
-            background-color: $dm-purpleDark
+            background-color: $dm-purpleDark2
         &:active
             color: white
-            background-color: $dm-purpleDark
+            background-color: $dm-purpleDark2
         &:hover
             color: white
-            background-color: $dm-purpleDark
+            background-color: $dm-purpleDark2
 
     .btn-highlight
         outline: 9px solid $purple
@@ -436,18 +444,32 @@ kbd
         outline: 0px solid $purple
         transition: all 0.3s ease-in-out
 
+    .pause
+        &:hover
+            background-color: $dm-purple
+
     .active
-        background-color: $dm-purpleDark
+        &:hover
+            background-color: $dm-purpleDark2
+
+        background-color: $dm-purpleDark2
         outline: 4.5px solid $purple
 
     #credit
         background-color: $dm-purple
+        &:hover
+            background-color: $dm-purpleDark2
+        &:focus
+            background-color: $dm-purpleDark2
 
     input
-        border-color: $dm-purpleDark
+        background-color: $dm-bgLight
+        color: white
+        border-color: white
+        caret-color: white
         &:focus
             outline: 9px solid $purple
-            color: black
+            color: white
 
     .wl-wrap
         &::before

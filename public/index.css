@@ -82,6 +82,14 @@ kbd, .example, .card, input, .btn {
   gap: 2rem;
 }
 
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
+
 html, body {
   margin: 0;
   padding: 0;
@@ -91,11 +99,6 @@ html, body {
 html {
   height: 100%;
   min-height: 100%;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-html::-webkit-scrollbar {
-  display: none;
 }
 
 body {
@@ -104,12 +107,7 @@ body {
   height: 100%;
   max-height: 100%;
   overflow-x: hidden;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
   transition: all 0.5s;
-}
-body::-webkit-scrollbar {
-  display: none;
 }
 
 a {
@@ -141,7 +139,7 @@ a {
   height: auto;
   min-height: 90%;
   justify-content: flex-start;
-  padding: 2rem 0;
+  padding: 0.5rem 0 2rem;
   transition: all 0.5s;
 }
 
@@ -152,6 +150,7 @@ a {
 .logo-holster {
   height: 100%;
   width: 100vw;
+  margin: 0 0 2rem;
 }
 
 .logo {
@@ -176,9 +175,16 @@ a {
   cursor: pointer;
 }
 
+.pause:hover {
+  background-color: #fddc02;
+}
+
 .active {
   background-color: #dec20f;
   outline: 4.5px solid #B79E01;
+}
+.active:hover {
+  background-color: #dec20f;
 }
 
 .btn-highlight {
@@ -193,6 +199,9 @@ a {
 
 #credit {
   background-color: #fddc02;
+}
+#credit:hover {
+  background-color: #dec20f;
 }
 
 .intro {
@@ -382,12 +391,6 @@ li.tvc.card {
   .app-wrap {
     max-width: 90%;
   }
-  #post {
-    display: none;
-  }
-  .btn:hover {
-    background-color: #fddc02;
-  }
 }
 @media (prefers-color-scheme: dark) {
   a:focus, .btn:focus {
@@ -401,21 +404,24 @@ li.tvc.card {
     color: white;
   }
   .btn, .card, .example {
-    background-color: #471686;
+    background-color: #5318a0;
     color: white;
     border-color: white;
   }
+  .card {
+    background-color: #2e0e57;
+  }
   .btn:focus {
     color: white;
-    background-color: #1F0C48;
+    background-color: #2e0e57;
   }
   .btn:active {
     color: white;
-    background-color: #1F0C48;
+    background-color: #2e0e57;
   }
   .btn:hover {
     color: white;
-    background-color: #1F0C48;
+    background-color: #2e0e57;
   }
   .btn-highlight {
     outline: 9px solid #8875FF;
@@ -425,19 +431,34 @@ li.tvc.card {
     outline: 0px solid #8875FF;
     transition: all 0.3s ease-in-out;
   }
+  .pause:hover {
+    background-color: #5318a0;
+  }
   .active {
-    background-color: #1F0C48;
+    background-color: #2e0e57;
     outline: 4.5px solid #8875FF;
   }
+  .active:hover {
+    background-color: #2e0e57;
+  }
   #credit {
-    background-color: #471686;
+    background-color: #5318a0;
+  }
+  #credit:hover {
+    background-color: #2e0e57;
+  }
+  #credit:focus {
+    background-color: #2e0e57;
   }
   input {
-    border-color: #1F0C48;
+    background-color: #2c2c2c;
+    color: white;
+    border-color: white;
+    caret-color: white;
   }
   input:focus {
     outline: 9px solid #8875FF;
-    color: black;
+    color: white;
   }
   .wl-wrap::before {
     background-image: linear-gradient(270deg, rgba(0, 0, 0, 0), #212121);

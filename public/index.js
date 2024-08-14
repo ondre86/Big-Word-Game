@@ -253,7 +253,7 @@ const app = Vue.createApp({
         },
         async callServerDictionary(event){
             if (event){event.preventDefault()}
-            if ((this.input == "" || this.input == null) && this.t > 0){}
+            if ((this.input == "" || this.input == null || this.input.replace(/[^A-Za-z]/g, '').length == 0) && this.t > 0){return}
             if ((event != undefined || event != null) && this.t <= 1){}
             else if ((this.input == "" || this.input == null) && this.t == 0){ 
                 this.autoSent = false
@@ -277,11 +277,19 @@ const app = Vue.createApp({
                 .then((response) => response.json())
                 .then((success) => {
                     this.input = this.input.replace(/[^A-Za-z]/g, '').toLowerCase()
-                    this.setData(success)
-                    this.enterWord()
-                    this.input = ''
-                    this.$refs.input.focus()
-                    this.$refs.input.click()
+                    if (this.input.replace(/[^A-Za-z]/g, '').length == 0){
+                        this.autoSent = false
+                        this.strike() 
+                        this.foundClosest = false
+                        this.wordCard.word = "Invalid Input"
+                    }
+                    else {
+                        this.setData(success)
+                        this.enterWord()
+                        this.input = ''
+                        this.$refs.input.focus()
+                        this.$refs.input.click()
+                    }
                     }
                 )
                 .then(()=>{
@@ -793,7 +801,7 @@ const app = Vue.createApp({
                 this.order = "random"
             }
             else {this.order = "default"}
-            this.webSocket = new WebSocket(`wss://${window.location.hostname}:${window.location.port}`)
+            this.webSocket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}`)
             this.webSocket.addEventListener("open", (event) => {
                 this.webSocket.send(JSON.stringify({
                     mode: this.mode,
@@ -1051,13 +1059,14 @@ const app = Vue.createApp({
                 duration: .75,
                 delay: .35,
                 margin: 0,
-                ease: "power4.inOut"
+                ease: "power3.inOut"
             })
             .to(".logo-holster", {
                 height: `90px`,
                 duration: 1,
                 ease: "power4.inOut"
-            }, "<")
+    
+            }, "<+=0.0125")
             .to("#app", {
                 height: "auto",
                 duration: .15,
@@ -1096,6 +1105,7 @@ const app = Vue.createApp({
             $("html")[0].style.overflow = "scroll"
             gsap.to([".logo", ".logo-holster"], {
                 height: 0,
+                margin: 0,
                 duration: .5
             })
             if (this.t == 10){
@@ -1108,11 +1118,12 @@ const app = Vue.createApp({
             if (this.lost == true){
                 restart = gsap.timeline()
                 .to(".logo", {
-                    height: "100px",
+                    height: "80px",
                     duration: .5
                 })
                 .to(".logo-holster", {
-                    height: "110px",
+                    height: "90px",
+                    margin: "0 0 2rem",
                     duration: .5
                 }, "<")
 

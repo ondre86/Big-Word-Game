@@ -89,7 +89,7 @@
                         </div>
                     </div>
                 </div>
-                <button style="width: fit-content; margin-top: 2rem;" class="btn font2" @click="tutorialToggle">Go Back</button>
+                <button style="width: fit-content; margin-top: 1rem;" class="btn font2" @click="tutorialToggle">Go Back</button>
             </div>
             <div id="introInteractive" v-show="!started && tutorialOn == false && (lost == null || lost == false) && multiPlayer == false" class="card tut-card" style="align-self: center;">
                 <button style="left: -2rem; top: -2rem" class="btn font2 back" ref="tutBtn2" @click.prevent="tutorialToggle()">show rules</button>
@@ -194,7 +194,7 @@
                             </div>
                         </div>
                     </div>
-                    <button v-show="!isWaiting" style="margin-top: 2rem;" class="btn font2" @click.prevent="classicTutToggle">Go Back</button>
+                    <button v-show="!isWaiting" style="margin-top: 1rem;" class="btn font2" @click.prevent="classicTutToggle">Go Back</button>
                 </div>
                 <div class="vert gap2" v-show="mpSpeedTut == true">
                     <button @click="mpSTHidden" class="back btn font2" v-if="!mpSTisHidden">hide rules</button>
@@ -264,7 +264,7 @@
                             </div>
                         </div>
                     </div>
-                    <button v-show="!isWaiting" style="margin-top: 2rem;" class="btn font2" @click.prevent="speedTutToggle">Go Back</button>
+                    <button v-show="!isWaiting" style="margin-top: 1rem;" class="btn font2" @click.prevent="speedTutToggle">Go Back</button>
                 </div>
                 <div class="vert gap2" v-show="mpWarTut == true">
                     <button @click="mpWTHidden" class="back btn font2" v-if="!mpWTisHidden">hide rules</button>
@@ -334,9 +334,10 @@
                             </div>
                         </div>
                     </div>
-                    <button v-show="!isWaiting" style="margin-top: 2rem;" class="btn font2" @click.prevent="warTutToggle">Go Back</button>
+                    <button v-show="!isWaiting" style="margin-top: 1rem;" class="btn font2" @click.prevent="warTutToggle">Go Back</button>
                 </div>
             </div>
+
             <div id="coreGame" v-show="tutorialOn == false && started == true" class="meat" ref="meat">
                 <div class="txt-card" v-show="started == true" style="align-items: flex-start;">
                     <div class="vert" style="align-items: flex-start;">
@@ -345,7 +346,7 @@
                         </span>
                         <span v-show="newHighScore == true" style="font-size: 1.25rem;" class="font2">new high score!</span>
                     </div>
-                    <span ref="wordMsg" class="font2" style="font-size: 1.25rem; padding-top: .5rem;">{{ wordMsg }}</span>
+                    <span ref="wordMsg" class="font2" style="font-size: 1.25rem; padding-top: 1rem;">{{ wordMsg }}</span>
                     <span>strikes: <span class="font1">{{ strikes }}</span></span>
                 </div>
                 <div class="main" v-show="started == true">
@@ -358,7 +359,7 @@
                             <div class="timer-wrap">
                                 <span class="font2 font">timer: </span><span class="timer">{{ t }}</span>
                             </div>
-                            <button style="height: fit-content;" class="btn font2" ref="pauseBtn" @click.prevent="pause()" v-show="!multiPlayer">
+                            <button style="height: fit-content;" class="pause btn font2" :class="{ active: pausePress == true }" ref="pauseBtn" @click.prevent="pause()" v-show="!multiPlayer">
                                 <span v-if="paused && pausePress" class="tvc">resume</span>
                                 <span v-else class="tvc">pause</span>
                             </button>
@@ -419,7 +420,7 @@
 
             <div id="wordList" class="wl-wrap" v-show="vWordsList != null && tutorialOn == false">
                 <span class="font1 tvc">Words Used:</span>
-                <span class="font2 tvc" style="font-size: 1rem;">scroll left & right &nbsp;//&nbsp;  shift + wouse wheel &#8597;</span>
+                <span class="font2 tvc" style="font-size: 1rem; margin-top: .25rem;">scroll left & right &nbsp;//&nbsp;  shift + wouse wheel &nbsp;↕</span>
                 <ul tabindex="-1" class="wl" ref="wl">
                     <li v-for="w in vWordsList"><button @click.prevent="replaceWordCard" @enter.prevent="replaceWordCard" @space.prevent="replaceWordCard" class="btn font2">{{ w }}</button></li>
                 </ul>
