@@ -1019,6 +1019,8 @@ const app = Vue.createApp({
                     this.isWaiting = false
                     this.mpScoreFinal(rep.totalScore)
                     this.opponentScore = rep.opponentTotalScore
+                    console.log("oppscore: "+this.opponentScore)
+                    console.log("reotherscore: "+ rep.otherScore)
                     this.stopTimerAndGame()
                     this.webSocket.close()
                     this.mpClassicTut, this.mpSpeedTut, this.mpWarTut = false
@@ -1032,6 +1034,8 @@ const app = Vue.createApp({
                     this.isWaiting = false
                     this.mpScoreFinal(rep.totalScore)
                     this.opponentScore = rep.opponentTotalScore
+                    console.log("oppscore: "+this.opponentScore)
+                    console.log("reotherscore: "+ rep.otherScore)
                     this.stopTimerAndGame()
                     this.webSocket.close()
                     this.mpClassicTut, this.mpSpeedTut, this.mpWarTut = false
@@ -1046,6 +1050,8 @@ const app = Vue.createApp({
                     this.isWaiting = false
                     this.mpScoreFinal(rep.totalScore)
                     this.opponentScore = rep.opponentTotalScore
+                    console.log("oppscore: "+this.opponentScore)
+                    console.log("reotherscore: "+ rep.otherScore)
                     this.stopTimerAndGame()
                     this.webSocket.close()
                     this.mpClassicTut, this.mpSpeedTut, this.mpWarTut = false
@@ -1059,7 +1065,7 @@ const app = Vue.createApp({
             })
         },
         closeWebSocket(){
-            if (this.webSocket != null || this.webSocket == undefined){
+            if (this.webSocket != null || this.webSocket != undefined){
                 this.webSocket.close()
                 this.isWaiting = false
                 this.webSocket = null
