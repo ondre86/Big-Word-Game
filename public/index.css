@@ -464,7 +464,7 @@ li.tvc.card {
     transition: all 0.3s ease-in-out;
   }
   .pause:hover, .quit:hover {
-    background-color: #3c1889;
+    background-color: #2e0e57;
   }
   .active {
     background-color: #2e0e57;
