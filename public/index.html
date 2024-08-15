@@ -411,7 +411,7 @@
                     <h2 style="font-size: 1.75rem;" class="tvc" v-if="multiPlayer == false">High Score: {{ cookieHighScore }}</h2>
                     <h2 style="font-size: 1.75rem;" class="tvc" v-else>Their Score: {{ opponentScore }}</h2>
                 </div>
-                <div class="vert gap1" style="gap: .5rem; width: 100%;">
+                <div class="vert gap1" style="width: 100%;">
                     <button style="width: 100%;" class="btn" @click="resetStats(); backToMulti();" ref="startBtn2P">Play Online</button>
                     <button style="width: 100%;" class="btn" @click="backToSolo(); startTimer();" ref="startBtn">Play Solo</button>
                     <span style="grid-column: 1 / 2;">Letter Order:</span>

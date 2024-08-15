@@ -222,6 +222,8 @@ const app = Vue.createApp({
             this.foundClosest = false,
             this.closest = null
             this.$refs.input.style.outlineColor = wcoc
+            clearInterval(this.time)
+            this.time = null
 
             this.mpLost = null
             this.mpTie = null
@@ -860,9 +862,13 @@ const app = Vue.createApp({
                             this.countingDown = false
 
                             if (this.classicModeOn){
+                                this.resetStats()
                                 this.mpClassicNewGame()
                             }
-                            else {this.newGame()}
+                            else {
+                                this.resetStats()
+                                this.newGame()
+                            }
                             this.mpNextLetter(rep.letter, rep.letterIndex)
                         }
                     }, 1000);
