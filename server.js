@@ -7,9 +7,22 @@ const expressWS = require('express-ws')(app)
 const port = 8383
 let data
 
-app.use(express.static('public')).use(express.json())
-app.use(helmet())
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            scriptSrc: ["'self'", 
+                "https://unpkg.com/vue@3/dist/vue.global.prod.js", 
+                "https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js", 
+                "https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/Flip.min.js", 
+                "https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/TextPlugin.min.js", 
+                "https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/CustomEase.min.js", 
+                "https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollToPlugin.min.js", 
+                "'unsafe-eval'"],
+        },
+      },
+}))
 app.disable('x-powered-by')
+app.use(express.static('public')).use(express.json())
 
 app.post('/', async (req, res)=>{
     if(!req.body){

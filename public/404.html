@@ -18,18 +18,21 @@
     <link rel="preload" href="fonts/NanumPen.woff2" as="font" type="font/woff2" crossorigin>
 </head>
 <body class="flex" style="flex-direction: column; justify-content: flex-start; height: 100vh;">
-    <div class="logo-holster" style="height: 110px; display: flex; justify-content: center; align-items: center; position: fixed;">
-        <a href="/" tabindex="-1">
-            <picture style="display: flex; justify-content: center; align-items: center; height: 110px; width: auto;">
+    <header class="logo-holster" style="height: 100%; display: flex; justify-content: center; align-items: center; height: fit-content;">
+        <a id="logo" href="/" tabindex="-1">
+            <picture style="display: flex; justify-content: center; align-items: center;">
                 <source media="(prefers-color-scheme:dark)" srcset="img/logo(night).webp">
-                <img style="height: 110px; width: auto;" class="logo" src="img/logo(day).webp" alt="The Big Word Game">
+                <img class="logo" src="img/logo(day).webp" alt="The Big Word Game" aria-label="The Big Word Game" style="height: 80px; width: 120px" >
             </picture>
         </a>
-    </div>
-    <div class="card tut-card" style="margin: auto;">
-        <span class="tvc">Sorry!<br><br>The page you requested does not exist.</span>
+    </header>
+    <section class="card tut-card" style="margin: auto;">
+        <h1 class="tvc font1">Sorry!</h1>
+        <span class="tvc">The page you requested does not exist.</span>
         <a class="tvc btn" href="/">Play Now</a>
-    </div>
-    <a class="card btn credit" style="display: flex; position: fixed; left:50%; bottom: 0; transform: translate(-50%); margin: 2rem auto" v-show="!started && !lost && !tutorialOn" href="https://ondre.org" target="_blank"><span class="font2">created by ondre</span></a>
+    </section>
+    <footer>
+        <a class="card btn credit font2" style="display: flex; left:50%; bottom: 0; margin: 2rem auto; width: fit-content;" v-show="!started && !lost && !tutorialOn" href="https://ondre.org" target="_blank">created by ondre</a>
+    </footer>
 </body>
 </html>
