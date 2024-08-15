@@ -1152,6 +1152,10 @@ const app = Vue.createApp({
         this.$refs.input.addEventListener("keydown", (e)=>{
             if (e.keyCode === 32){e.preventDefault();}
         })
+        this.$refs.input.addEventListener("paste", (e)=>{
+            e.preventDefault()
+            return false
+        })
     },
     updated: function log(){
         if (this.$refs.wl.children.length > 3){
