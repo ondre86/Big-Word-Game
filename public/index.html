@@ -341,14 +341,14 @@
             </section>
             <section id="coreGame" v-show="tutorialOn == false && started == true" class="meat" ref="meat">
                 <div class="txt-card" v-show="started == true" style="align-items: flex-start;">
+                    <span>strikes: <span class="font1">{{ strikes }}</span></span>
+                    <span ref="wordMsg" class="font2" style="font-size: 1.25rem; padding-top: 1rem;">{{ wordMsg }}</span>
                     <div class="vert" style="align-items: flex-start;">
                         <span>score: 
                             <span class="font1">{{ score }}</span>
                         </span>
                         <span v-show="newHighScore == true" style="font-size: 1.25rem;" class="font2">new high score!</span>
                     </div>
-                    <span ref="wordMsg" class="font2" style="font-size: 1.25rem; padding-top: 1rem;">{{ wordMsg }}</span>
-                    <span>strikes: <span class="font1">{{ strikes }}</span></span>
                 </div>
                 <div class="main" v-show="started == true">
                     <form id="form" class="form" spellcheck="false" autocapitalize="off" autocomplete="off" action="">
@@ -356,22 +356,7 @@
                         <input type="submit" value="" id="post" style="display: none;" ref="post"></input>
                     </form>
                     <div class="txt-card bottom-txt">
-                        <div class="flex gap1" style="flex-direction: column; padding-bottom: 1rem;">
-                            <div class="timer-wrap">
-                                <span class="font2 font">timer: </span><span class="timer">{{ t }}</span>
-                            </div>
-                            <button style="height: fit-content;" class="pause btn font2" :class="{ active: pausePress == true }" ref="pauseBtn" @click.prevent="pause()" v-show="!multiPlayer">
-                                <span v-if="paused && pausePress" class="tvc">resume</span>
-                                <span v-else class="tvc">pause</span>
-                            </button>
-                            <button class="pause btn font2" @click.prevent="closeWebSocket()" v-show="multiPlayer">
-                                <span class="tvc">quit</span>
-                            </button>
-                        </div>
-                        <button class="quit btn font2" @click.prevent="quit()" v-show="!multiPlayer">
-                            <span class="tvc">quit</span>
-                        </button>
-                        <div class="letter-meta">
+                        <div class="letter-meta" style="align-items: flex-start;">
                             <div class="letter-wrap">
                                 <span class="font2 tvc">starting letter: </span>
                                 <span class="font1 tvc">{{ currentLetter }}</span>
@@ -383,6 +368,21 @@
                             <div class="letter-wrap def-pop" v-show="vWordsList != null">
                                 <span v-show="multiPlayer == false" style="font-size: 1.25rem;" class="font2 tvc">scroll for details</span>
                             </div>
+                        </div>
+                        <button class="quit btn font2" @click.prevent="quit()" v-show="!multiPlayer">
+                            <span class="tvc">quit</span>
+                        </button>
+                        <div class="flex gap1" style="flex-direction: column; padding-bottom: 1rem;">
+                            <div class="timer-wrap">
+                                <span class="font2 font">timer: </span><span class="timer">{{ t }}</span>
+                            </div>
+                            <button style="height: fit-content;" class="pause btn font2" :class="{ active: pausePress == true }" ref="pauseBtn" @click.prevent="pause()" v-show="!multiPlayer">
+                                <span v-if="paused && pausePress" class="tvc">resume</span>
+                                <span v-else class="tvc">pause</span>
+                            </button>
+                            <button class="pause btn font2" @click.prevent="closeWebSocket()" v-show="multiPlayer">
+                                <span class="tvc">quit</span>
+                            </button>
                         </div>
                     </div>
                 </div>

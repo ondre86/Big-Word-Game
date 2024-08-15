@@ -18,11 +18,11 @@ input, .timer, .btn, .font1 {
   font-family: "nanum";
 }
 
-input, .timer {
+input {
   font-size: 3rem;
 }
 
-.font1 {
+.timer, .font1 {
   font-size: 2.5rem;
 }
 
@@ -235,7 +235,7 @@ h1, h2, h3, h4 {
 .timer-wrap {
   height: fit-content;
   gap: 0.5rem;
-  min-width: 120px;
+  min-width: 105px;
   justify-content: space-between;
 }
 
@@ -421,7 +421,7 @@ li.tvc.card {
   padding: 1rem 1rem 1.5rem 1rem;
 }
 
-@media (max-width: 500px) {
+@media (max-width: 535px) {
   .app-wrap {
     max-width: 90%;
   }
