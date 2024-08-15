@@ -1114,7 +1114,7 @@ const app = Vue.createApp({
         }
         // GSAP
         document.addEventListener("DOMContentLoaded", ()=>{
-            gsap.registerPlugin(Flip,TextPlugin,CustomEase,ScrollToPlugin)
+            gsap.registerPlugin(ScrollToPlugin)
             introTL = gsap.timeline()
             .to(".logo", {
                 height: "80px",
