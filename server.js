@@ -10,12 +10,14 @@ let data
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
+            formAction: ["'self",
+                "https://api-gateway.umami.dev/api/send"
+            ],
             scriptSrc: ["'self'", 
                 "https://unpkg.com/vue@3.4.38/dist/vue.global.prod.js", 
                 "https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js", 
                 "https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollToPlugin.min.js", 
                 "https://cloud.umami.is/script.js",
-                "https://api-gateway.umami.dev/api/send",
                 "'unsafe-eval'"],
         },
       },
