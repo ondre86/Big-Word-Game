@@ -412,15 +412,10 @@ const app = Vue.createApp({
                 this.wordCard.type = null
                 this.wordCard.defs = null
                 this.stopTimerAndGame()
-                if (this.score == 0){
-                    document.cookie = `score=0; max-age=${60*60*24*365}; sameSite=lax`
-                }
-                else {
-                    document.cookie = `score=${this.score}; max-age=${60*60*24*365}; sameSite=lax`
-                }
+                localStorage.setItem("lastScore", `${this.score}`)
                 if (this.score > this.cookieHighScore){
                     this.newHighScore = true
-                    document.cookie = `highScore=${this.score}; max-age=${60*60*24*365}; sameSite=lax` 
+                    localStorage.setItem("highScore", `${this.score}`)
                 }
                 else{
                     this.newHighScore = false
@@ -637,25 +632,26 @@ const app = Vue.createApp({
                 this.cycleWordMessage(this.wordCard.syllablesOther)
                 this.score += this.wordCard.syllablesOther
                 this.cookieScore = this.score
-                document.cookie = `score=${this.cookieScore}; max-age=${60*60*24*365}; sameSite=lax` 
+                localStorage.setItem("lastScore", `${this.score}`)
             }
             else if (this.wordPlayed && this.customScore){
                 this.cycleWordMessage(this.wordCard.syllablesCustom)
                 this.score += this.wordCard.syllablesCustom
                 this.cookieScore = this.score
-                document.cookie = `score=${this.cookieScore}; max-age=${60*60*24*365}; sameSite=lax` 
+                localStorage.setItem("lastScore", `${this.score}`)
+                
             }
             if (this.score > this.cookieHighScore){
                 this.newHighScore = true
                 this.cookieScore = this.score
-                document.cookie = `highScore=${this.score}; max-age=${60*60*24*365}; sameSite=lax` 
+                localStorage.setItem("highScore", `${this.score}`)
             }
         },
         mpScoreFinal(s){
-            document.cookie = `score=${s}; max-age=${60*60*24*365}; sameSite=lax` 
+            localStorage.setItem("lastScore", `${s}`)
             if (s > this.cookieHighScore){
                 this.newHighScore = true
-                document.cookie = `highScore=${s}; max-age=${60*60*24*365}; sameSite=lax` 
+                localStorage.setItem("highScore", `${s}`)
             }
         },
         nextLetter() {
@@ -814,11 +810,11 @@ const app = Vue.createApp({
             if (this.score > this.cookieHighScore){
                 this.newHighScore = true
                 this.cookieScore = this.score
-                document.cookie = `highScore=${this.score}; max-age=${60*60*24*365}; sameSite=lax` 
+                localStorage.setItem("highScore", `${this.score}`)
             }
-            this.cookieScore = document.cookie.split("; ").find((row) => row.startsWith("score="))?.split("=")[1];
+            this.cookieScore = localStorage.getItem("lastScore")
             if (this.cookieScore == null){this.cookieScore = 0}
-            this.cookieHighScore = document.cookie.split("; ").find((row) => row.startsWith("highScore="))?.split("=")[1];
+            this.cookieHighScore = localStorage.getItem("highScore")
             if (this.cookieHighScore == null || this.cookieHighScore == ""){this.cookieHighScore = 0}
 
             this.resetStats()
@@ -1081,10 +1077,10 @@ const app = Vue.createApp({
                 if (this.score > this.cookieHighScore){
                     this.newHighScore = true
                     this.cookieScore = this.score
-                    document.cookie = `highScore=${this.score}; max-age=${60*60*24*365}; sameSite=lax` 
+                    localStorage.setItem("highScore", `${this.score}`)
                 }
-                this.cookieScore = document.cookie.split("; ").find((row) => row.startsWith("score="))?.split("=")[1];
-                this.cookieHighScore = document.cookie.split("; ").find((row) => row.startsWith("highScore="))?.split("=")[1];
+                this.cookieScore = localStorage.getItem("lastScore")
+                this.cookieHighScore = localStorage.getItem("highScore")
             }
             else {}
         }
@@ -1096,20 +1092,19 @@ const app = Vue.createApp({
         window.addEventListener("beforeunload", (event) => {
             if (this.webSocket == null){}
             else this.webSocket.close()
-            document.cookie = `score=${this.score}; max-age=${60*60*24*365}; sameSite=lax` 
+            localStorage.setItem("lastScore", `${this.score}`)
             if (this.score > this.cookieHighScore){
                 this.newHighScore = true
-                document.cookie = `highScore=${this.score}; max-age=${60*60*24*365}; sameSite=lax` 
+                localStorage.setItem("highScore", `${this.score}`)
             }
         });
-        if (document.cookie == ""){
-            document.cookie = `score=0; max-age=${60*60*24*365}; sameSite=lax`; 
-            document.cookie = `highScore=0; max-age=${60*60*24*365}; sameSite=lax`; 
+        if (localStorage.getItem("lastScore") == null || localStorage.getItem("highScore") == null){
+            localStorage.setItem("lastScore", "0")
+            localStorage.setItem("highScore", "0")
         }
         else{
-            this.cookieScore = document.cookie.split("; ").find((row) => row.startsWith("score="))?.split("=")[1];
-            if (this.cookieScore == null){this.cookieScore = 0}
-            this.cookieHighScore = document.cookie.split("; ").find((row) => row.startsWith("highScore="))?.split("=")[1];
+            this.cookieScore = localStorage.getItem("lastScore")
+            this.cookieHighScore = localStorage.getItem("highScore")
             if (this.cookieHighScore == null || this.cookieHighScore == ""){this.cookieHighScore = 0}
         }
         // GSAP
@@ -1193,8 +1188,8 @@ const app = Vue.createApp({
                     margin: "0 0 2rem",
                     duration: .5
                 }, "<")
-                this.cookieScore = document.cookie.split("; ").find((row) => row.startsWith("score="))?.split("=")[1];
-                this.cookieHighScore = document.cookie.split("; ").find((row) => row.startsWith("highScore="))?.split("=")[1];
+                this.cookieScore = localStorage.getItem("lastScore")
+                this.cookieHighScore = localStorage.getItem("highScore")
             }
             $("html")[0].style.height = "100%"
         }
