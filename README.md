@@ -36,6 +36,7 @@ It's based on a game that my mother, _an English teacher with over 20 years of e
   - [Merriam-Webster Dictionary API](https://dictionaryapi.com/) (API for word validation)
  - [GitHub](https://github.com) (Version Control & Repository)
  - [Railway](https://railway.app) (Deployments from GitHub)
+ - [Umami](https://umami.is) (Website Analytics)
 
 - - -
 © 2024 Ondre Johnson. All Rights Reserved.
