@@ -10,7 +10,7 @@ let data
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
-            formAction: ["'self",
+            connectSrc: ["'self",
                 "https://api-gateway.umami.dev/api/send"
             ],
             scriptSrc: ["'self'", 
