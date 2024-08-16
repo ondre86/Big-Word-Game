@@ -18,6 +18,7 @@ app.use(helmet({
                 "https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js", 
                 "https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollToPlugin.min.js", 
                 "https://cloud.umami.is/script.js",
+                "'unsafe-inline'",
                 "'unsafe-eval'"],
         },
       },
