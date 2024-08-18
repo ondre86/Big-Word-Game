@@ -137,7 +137,7 @@ h1, h2, h3, h4
 
 .app-wrap
     max-width: 500px
-    min-width: 320px
+    min-width: 300px
     height: auto
     min-height: 90%
     @extend %flex-v, %center
@@ -201,10 +201,10 @@ h1, h2, h3, h4
         background-color: $yellowDark
 
 .quit
-    position: absolute
-    left: 50%
-    bottom: 1rem
-    transform: translate(-50%)
+    // position: absolute
+    // left: 50%
+    // bottom: 1rem
+    // transform: translate(-50%)
     height: fit-content
 
 .active
@@ -259,14 +259,14 @@ h1, h2, h3, h4
     align-items: initial
     
 .form
-    @extend %flex-h, %gap2 
+    @extend %flex-h, %gap1 
     width: fit-content
 
 input
-    @extend %border, %f1, %f1-l
+    @extend %f1, %f1-l
     width: 100%
     padding: 1rem
-    font-size: 3rem
+    font-size: 2rem
     transition: all .3s
 
     &:focus
@@ -282,6 +282,9 @@ input
     &:-ms-input-placeholder
         font-size: 3rem
                   
+#text-input
+    padding-right: 4rem
+    @extend %border       
 
 .letter-meta
     @extend %flex-v

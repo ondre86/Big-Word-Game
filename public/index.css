@@ -48,7 +48,7 @@ input {
   background-color: #dec20f;
 }
 
-.example, .card, input, .btn {
+.example, .card, #text-input, .btn {
   border: 3px solid black;
   border-top-left-radius: 17px 100px;
   border-top-right-radius: 13px 90px;
@@ -74,11 +74,11 @@ input {
   opacity: 0;
 }
 
-.lost-card, .letter-wrap, .gap1 {
+.lost-card, .letter-wrap, .form, .gap1 {
   gap: 1rem;
 }
 
-.tut-card, .form, .main, .gap2 {
+.tut-card, .main, .gap2 {
   gap: 2rem;
 }
 
@@ -140,7 +140,7 @@ h1, h2, h3, h4 {
 
 .app-wrap {
   max-width: 500px;
-  min-width: 320px;
+  min-width: 300px;
   height: auto;
   min-height: 90%;
   justify-content: flex-start;
@@ -185,10 +185,6 @@ h1, h2, h3, h4 {
 }
 
 .quit {
-  position: absolute;
-  left: 50%;
-  bottom: 1rem;
-  transform: translate(-50%);
   height: fit-content;
 }
 
@@ -256,7 +252,7 @@ h1, h2, h3, h4 {
 input {
   width: 100%;
   padding: 1rem;
-  font-size: 3rem;
+  font-size: 2rem;
   transition: all 0.3s;
 }
 input:focus {
@@ -274,6 +270,10 @@ input:-ms-input-placeholder {
 }
 input:-ms-input-placeholder {
   font-size: 3rem;
+}
+
+#text-input {
+  padding-right: 4rem;
 }
 
 .letter-wrap {

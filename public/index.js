@@ -27,7 +27,7 @@ const app = Vue.createApp({
             data: null,
             input: "",
             finalWord: '',
-            t: 10,
+            t: 15,
             wordCard:{
                 word: null,
                 type: null,
@@ -179,7 +179,7 @@ const app = Vue.createApp({
             }
             else {}
             this.$refs.input.focus()
-            this.t = 10
+            this.t = 15
             this.time = setInterval(this.timer, 1000)
         },
         mpStopTimer(){
@@ -191,12 +191,12 @@ const app = Vue.createApp({
             this.$refs.input.disabled = false
             this.paused = false
             this.$refs.input.focus()
-            this.t = 10
+            this.t = 15
             this.time = setInterval(this.timer, 1000)
         },
         stopTimerAndGame(){
             clearInterval(this.time)
-            this.t = 10
+            this.t = 15
             this.started = false
         },
         resetStats(){
@@ -1170,7 +1170,7 @@ const app = Vue.createApp({
                 margin: 0,
                 duration: .5
             })
-            if (this.t == 10){
+            if (this.t == 15){
                 setTimeout(() => {
                     this.$refs.input.focus()
                 }, 500);
