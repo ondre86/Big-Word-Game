@@ -145,10 +145,8 @@ h1, h2, h3, h4
     padding: .5rem 0 2rem
     transition: all .5s
 
-
 .meat
     @extend %flex-v, %center
-    // margin: 2rem 0
     gap: 2rem
 
 .logo-holster
@@ -201,10 +199,6 @@ h1, h2, h3, h4
         background-color: $yellowDark
 
 .quit
-    // position: absolute
-    // left: 50%
-    // bottom: 1rem
-    // transform: translate(-50%)
     height: fit-content
 
 .active
@@ -324,7 +318,6 @@ input
         background-color: rgba(0, 0, 0, 0)
         z-index: 100
 
-
 .wl
     padding: 1rem 1.25rem
     @extend %flex-h
@@ -358,12 +351,10 @@ li.tvc.card
     position: absolute
     top: -1.5rem
     left: -.5rem
-    // transform: translate(-50%)
 .back2
     position: absolute
     top: -1.5rem
     right: -.5rem
-    // transform: translate(50%)
 
 .example
     width: 100%
@@ -496,6 +487,9 @@ li.tvc.card
         &:focus
             outline: 9px solid $purple
             color: white
+
+    #text-input
+        border-color: white
 
     .wl-wrap
         &::before
