@@ -18,11 +18,7 @@ input, .timer, .btn, .font1 {
   font-family: "nanum";
 }
 
-input {
-  font-size: 3rem;
-}
-
-.timer, .font1 {
+input, .timer, .font1 {
   font-size: 2.5rem;
 }
 
@@ -252,7 +248,6 @@ h1, h2, h3, h4 {
 input {
   width: 100%;
   padding: 1rem;
-  font-size: 2rem;
   transition: all 0.3s;
 }
 input:focus {
@@ -273,7 +268,7 @@ input:-ms-input-placeholder {
 }
 
 #text-input {
-  padding-right: 4rem;
+  padding-right: 1rem;
 }
 
 .letter-wrap {

@@ -66,7 +66,7 @@
                         <h2 style="justify-content: center;" class="font1 flex">Rules</h2>
                         <ul style="align-items: flex-start; padding: 0; margin: 2rem 0; gap: 1.5rem; list-style-type: none;" class="vert">
                             <li class="tvc card">
-                                <span style="font-size: 1.75rem;">Play within 10 seconds</span>
+                                <span style="font-size: 1.75rem;">Play within 15 seconds</span>
                                 <span style="font-size: 1.25rem; margin-top: .25rem;">&#40;you can pause with the button or by scrolling past the input&#41;</span>
                             </li>
                             <li class="tvc card" style="font-size: 1.75rem;">Word must contain at least three &#40;3&#41; syllables</li>
@@ -162,7 +162,7 @@
                                 <h2 style="justify-content: center;" class="font1 flex">Rules</h2>
                                 <ul style="align-items: flex-start; padding: 0; margin: 0; gap: 1rem; list-style-type: none;"  class="vert">
                                     <li class="tvc card">
-                                        <span style="font-size: 1.75rem;">Play within 10 seconds</span>
+                                        <span style="font-size: 1.75rem;">Play within 15 seconds</span>
                                         <span style="font-size: 1.25rem;">no pausing!</span>
                                     </li>
                                     <li class="tvc card" style="font-size: 1.75rem;">Word must contain at least three &#40;3&#41; syllables</li>
@@ -232,7 +232,7 @@
                                 <h2 style="justify-content: center;" class="font1 flex">Rules</h2>
                                 <ul style="align-items: flex-start; padding: 0; margin: 0; gap: 1rem; list-style-type: none;"  class="vert">
                                     <li class="tvc card">
-                                        <span style="font-size: 1.75rem;">Play within 10 seconds</span>
+                                        <span style="font-size: 1.75rem;">Play within 15 seconds</span>
                                         <span style="font-size: 1.25rem;">no pausing!</span>
                                     </li>
                                     <li class="tvc card" style="font-size: 1.75rem;">Word must contain at least three &#40;3&#41; syllables</li>
@@ -302,7 +302,7 @@
                                 <h2 style="justify-content: center;" class="font1 flex">Rules</h2>
                                 <ul style="align-items: flex-start; padding: 0; margin: 0; gap: 1rem; list-style-type: none;"  class="vert">
                                     <li class="tvc card">
-                                        <span style="font-size: 1.75rem;">Play within 10 seconds</span>
+                                        <span style="font-size: 1.75rem;">Play within 15 seconds</span>
                                         <span style="font-size: 1.25rem;">no pausing!</span>
                                     </li>
                                     <li class="tvc card" style="font-size: 1.75rem;">Word must contain at least three &#40;3&#41; syllables</li>
@@ -355,8 +355,8 @@
                 </div>
                 <div class="main" v-show="started == true">
                     <form id="form" class="form" spellcheck="false" autocapitalize="off" autocomplete="off" action="" style="position: relative;">
-                        <input v-model="input" type="text" ref="input" id="text-input" title="Type your word here!" aria-label="Word Game Input">
-                        <input class="font2 btn" type="submit" value="go" id="post" style="position: absolute; right: 0; width: fit-content; height: 100%;" ref="post"></input>
+                        <input v-model="input" type="text" ref="input" id="text-input" title="Type your word here!" aria-label="Type your word here!">
+                        <input class="font2 btn" type="submit" value="go" id="post" style="width: fit-content;" ref="post"></input>
                     </form>
                     <div class="txt-card bottom-txt">
                         <div class="letter-meta gap1" style="align-items: flex-start;">
