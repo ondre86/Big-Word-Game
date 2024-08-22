@@ -1,5 +1,4 @@
 const { toRaw } = Vue
-const serverURL = '/'
 
 function $(elem){
     return document.querySelectorAll(elem)
@@ -188,6 +187,7 @@ const app = Vue.createApp({
             this.$refs.input.disabled = true
         },
         mpResetTimer(){
+            clearInterval(this.time)
             this.$refs.input.disabled = false
             this.paused = false
             this.$refs.input.focus()
@@ -268,7 +268,7 @@ const app = Vue.createApp({
                 if (this.t != 0){this.autoSent = false}
                 else {this.autoSent = true}
                 this.paused = true
-                fetch(serverURL, {
+                fetch("/", {
                     method: 'POST',
                     headers: {
                         "Content-Type": 'application/json'
@@ -860,6 +860,9 @@ const app = Vue.createApp({
                             if (this.classicModeOn){
                                 this.resetStats()
                                 this.mpClassicNewGame()
+                                if (rep.isYourTurn == true){
+                                    this.mpResetTimer()
+                                }
                             }
                             else {
                                 this.resetStats()
