@@ -734,13 +734,15 @@ app.ws('/', function(ws, req) {
                 for (c in lobbies){
                     if (lobbies[c].player1.socket == ws){
                         lobbies[c].player2.socket.send(JSON.stringify({
-                            opponentForfeit: true
+                            opponentForfeit: true,
+                            otherScore: lobbies[c].player1.totalScore
                         }))
                         lobbies[c].player2.socket.terminate()
                     }
                     if (lobbies[c].player2.socket == ws){
                         lobbies[c].player1.socket.send(JSON.stringify({
-                            opponentForfeit: true
+                            opponentForfeit: true,
+                            otherScore: lobbies[c].player2.totalScore
                         }))
                         lobbies[c].player1.socket.terminate()
                     }

@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html lang="en" style="overflow: hidden; height: 100%">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f5f5f5" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#212121" />
-    <meta name="description" content="Test your vocabulary skills in this competitive word game by typing words that contain three or more syllables! Kids and adults can play solo or with friends!">
+    <meta name="description" content="Show off your vocabulary skills in this competitive word game by typing words that contain three or more syllables! Kids and adults can play solo or with friends!">
     <meta name="author" content="Ondre Johnson">
     <meta property="og:title" content="The Big Word Game">
     <meta property="og:type" content="website">
     <meta property="og:image" content="img/logo(day).webp">
     <meta property="og:url" content="https://thebigwordgame.com">
-    <meta property="og:description" content="Test your vocabulary skills in this competitive word game by typing words that contain three or more syllables! Kids and adults can play solo or with friends!">
-    <title>The Big Word Game: A Fun Way To Test Your Vocabulary!</title>
+    <meta property="og:description" content="Show off your vocabulary skills in this competitive word game by typing words that contain three or more syllables! Kids and adults can play solo or with friends!">
+    <title>The Big Word Game: Test Your Vocabulary!</title>
     <link rel="canonical" href="https://thebigwordgame.com">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
@@ -28,16 +28,21 @@
     <script defer src="https://cloud.umami.is/script.js" data-website-id="678801f6-b826-4887-9e95-1de149947467"></script>
 </head>
 <body>
-    <header class="logo-holster" style="height: 100%; display: flex; justify-content: center; align-items: center;">
+    <header class="logo-holster">
         <a id="logo" href="/" tabindex="-1">
-            <picture style="display: flex; justify-content: center; align-items: center;">
+            <picture>
                 <source media="(prefers-color-scheme:dark)" srcset="img/logo(night).webp">
                 <img class="logo" src="img/logo(day).webp" alt="The Big Word Game" aria-label="The Big Word Game">
             </picture>
         </a>
     </header>
-    <noscript style="display: flex; justify-content: center;"><div class="card">Please enable JavaScript to play</div></noscript>
-    <main id="app" style="height: 0%; display: none;">
+    <noscript>
+        <section class="card tut-card" style="margin: auto;">
+            <h1 class="tvc font1">Sorry!</h1>
+            <span class="tvc">Please enable Javascript to play.</span>
+        </section>
+    </noscript>
+    <main id="app" style="display: none;">
         <div class="app-wrap" ref="appWrap">
             <section id="soloTutorial" v-show="tutorialOn == true" class="card tut-card vert">
                 <button @click="tutorialToggle" class="back btn font2">hide rules</button>
@@ -54,7 +59,7 @@
                             </div>
                         </div>
                         <div class="vert gap1" style="width: 100%;">
-                            <h3 class="tvc font1" style="font-size: 1.5rem; margin-bottom: .5rem;">examples:<br></h3>
+                            <span class="tvc font1" style="font-size: 1.5rem; margin-bottom: .5rem;">examples:<br></span>
                             <div class="vert example">
                                 <span class="tvc vert" style="padding: 0 0 .5rem;"><span style="width: 100%; font-size: 2.25rem;">an <span style="font-size: 1.5rem;">*</span> gry </span>2 syllables = 0 points &nbsp;❌<br></span>
                                 <span class="tvc vert middle-example" style="width: 100%; padding: 1rem 0; margin: .5rem 0;"><span style="font-size: 2.25rem;">as <span style="font-size: 1.5rem;">*</span> tro <span style="font-size: 1.5rem;">*</span> naut</span>3 syllables = 3 points &nbsp;✅<br></span>
@@ -149,7 +154,7 @@
                                 </span>
                             </div>
                             <div class="vert gap1" style="width: 100%; margin-top: 1rem;">
-                                <h3 class="tvc font1" style="font-size: 1.5rem; margin-bottom: .5rem;">examples:<br></h3>
+                                <span class="tvc font1" style="font-size: 1.5rem; margin-bottom: .5rem;">examples:<br></span>
                                 <div class="vert example">
                                     <span class="tvc vert" style="padding: 0 0 .5rem;"><span style="width: 100%; font-size: 2.25rem;">an <span style="font-size: 1.5rem;">*</span> gry </span>2 syllables &nbsp;❌<br>0 points</span>
                                     <span class="tvc vert middle-example" style="width: 100%; padding: 1rem 0; margin: .5rem 0;"><span style="font-size: 2.25rem;">as <span style="font-size: 1.5rem;">*</span> tro <span style="font-size: 1.5rem;">*</span> naut</span>3 syllables &nbsp;✅<br>3 points</span>
@@ -220,7 +225,7 @@
                                 </span>
                             </div>
                             <div class="vert gap1" style="width: 100%; margin-top: 1rem;">
-                                <h3 class="tvc font1" style="font-size: 1.5rem; margin-bottom: .5rem;">examples:<br></h3>
+                                <span class="tvc font1" style="font-size: 1.5rem; margin-bottom: .5rem;">examples:<br></span>
                                 <div class="vert example">
                                     <span class="tvc vert top-example" style="width: 100%; padding: 0 0 1rem; margin: 0 0 .5rem;"><span style="width: 100%; font-size: 2.25rem;">a <span style="font-size: 1.5rem;">*</span> po <span style="font-size: 1.5rem;">*</span> lo <span style="font-size: 1.5rem;">*</span> gy</span>time: 4.7 sec<br>0 points</span>
                                     <span class="tvc vert" style=" padding: .5rem 0;"><span style="width: 100%; font-size: 2.25rem;">as <span style="font-size: 1.5rem;">*</span> tro <span style="font-size: 1.5rem;">*</span> lo <span style="font-size: 1.5rem;">*</span> gy</span>time: 3.4 sec &nbsp;✅<br>4 points</span>
@@ -290,7 +295,7 @@
                                 </span>
                             </div>
                             <div class="vert gap1" style="width: 100%; margin-top: 1rem;">
-                                <h3 class="tvc font1" style="font-size: 1.5rem; margin-bottom: .5rem;">examples:<br></h3>
+                                <span class="tvc font1" style="font-size: 1.5rem; margin-bottom: .5rem;">examples:<br></span>
                                 <div class="vert example">
                                     <span class="tvc vert top-example" style="width: 100%; padding: 0 0 1rem; margin: 0 0 .5rem;"><span style="font-size: 2.25rem;">as <span style="font-size: 1.5rem;">*</span> tro <span style="font-size: 1.5rem;">*</span> naut</span>3 syllables<br>no points</span>
                                     <span class="tvc vert" style="padding: .5rem 0;"><span style="width: 100%; font-size: 2.25rem;">as <span style="font-size: 1.5rem;">*</span> tro <span style="font-size: 1.5rem;">*</span> lo <span style="font-size: 1.5rem;">*</span> gy</span>4 syllables &nbsp;✅<br>4 points</span>
@@ -364,7 +369,7 @@
                                 <span class="font2 tvc">starting letter: </span>
                                 <span class="font1 tvc">{{ currentLetter }}</span>
                             </div>
-                            <button class="quit btn font2" @click.prevent="quit()" v-show="!multiPlayer">
+                            <button class="quit btn font2" @click.prevent="quit(); closeWebSocket()">
                                 <span class="tvc">quit</span>
                             </button>
                             <div class="letter-wrap def-pop" v-show="vWordsList != null">
@@ -378,9 +383,6 @@
                             <button style="height: fit-content;" class="pause btn font2" :class="{ active: pausePress == true }" ref="pauseBtn" @click.prevent="pause()" v-show="!multiPlayer">
                                 <span v-if="paused && pausePress" class="tvc">resume</span>
                                 <span v-else class="tvc">pause</span>
-                            </button>
-                            <button class="pause btn font2" @click.prevent="closeWebSocket()" v-show="multiPlayer">
-                                <span class="tvc">quit</span>
                             </button>
                         </div>
                     </div>

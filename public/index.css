@@ -50,13 +50,14 @@ input, .timer, .font1 {
   border-top-right-radius: 13px 90px;
   border-bottom-left-radius: 110px 19px;
   border-bottom-right-radius: 120px 24px;
+  outline-offset: 0px;
 }
 
-.wl, .letter-wrap, .form, .txt-card, .timer-wrap, .gap2, .gap1, .flex, .logo-holster {
+.wl, .letter-wrap, .form, .txt-card, .timer-wrap, .gap2, .gap1, .flex {
   display: flex;
 }
 
-.word-card-wrap, .tut-card, .card, .wl-wrap, .letter-meta, .main, .vert, .meat, .app-wrap, #app, body {
+.word-card-wrap, .tut-card, .card, .wl-wrap, .letter-meta, .main, .vert, .logo-holster, .meat, .app-wrap, #app, noscript, body {
   display: flex;
   flex-direction: column;
 }
@@ -64,10 +65,6 @@ input, .timer, .font1 {
 .txt-card, .timer-wrap, .main, .vert, .center, .logo-holster, .meat, .app-wrap {
   justify-content: center;
   align-items: center;
-}
-
-#app {
-  opacity: 0;
 }
 
 .lost-card, .letter-wrap, .form, .gap1 {
@@ -95,6 +92,7 @@ html, body {
 html {
   height: 100%;
   min-height: 100%;
+  overflow-y: scroll;
 }
 
 body {
@@ -103,6 +101,7 @@ body {
   height: 100%;
   max-height: 100%;
   overflow-x: hidden;
+  overflow-y: scroll;
   transition: all 0.5s;
 }
 
@@ -123,14 +122,11 @@ h1, h2, h3, h4 {
   outline: 0px;
 }
 
-.overflow {
-  overflow-y: scroll;
-}
-
 #app {
+  opacity: 0;
   justify-content: flex-start;
   align-items: center;
-  height: 0%;
+  height: auto;
   transition: all 0.5s;
 }
 
@@ -149,16 +145,16 @@ h1, h2, h3, h4 {
 }
 
 .logo-holster {
-  height: 100%;
+  height: 90px;
   width: 100vw;
   margin: 0 0 2rem;
 }
 
 .logo {
-  width: 50%;
-  height: auto;
+  width: 120px;
+  height: 80px;
   padding-top: 10px;
-  margin: auto auto;
+  margin: 0;
 }
 
 .btn {
@@ -169,15 +165,19 @@ h1, h2, h3, h4 {
   -o-transition: all 0.3s ease-in-out;
   transition: all 0.3s ease-in-out;
 }
-.btn:active {
-  outline: 0px solid #000;
-}
 .btn:hover {
   cursor: pointer;
+}
+.btn:active {
+  outline: 0px solid #000;
+  background-color: #B79E01;
 }
 
 .pause:hover, .quit:hover {
   background-color: #dec20f;
+}
+.pause:active, .quit:active {
+  background-color: #B79E01;
 }
 
 .quit {
@@ -190,6 +190,9 @@ h1, h2, h3, h4 {
 }
 .active:hover {
   background-color: #dec20f;
+}
+.active:active {
+  background-color: #B79E01;
 }
 
 .btn-highlight {
@@ -416,6 +419,20 @@ li.tvc.card {
   padding: 1rem 1rem 1.5rem 1rem;
 }
 
+@media (pointer: coarse) {
+  .btn:hover {
+    background-color: #fddc02;
+  }
+  .btn:focus {
+    outline: 4.5px solid #B79E01;
+  }
+  .active:hover {
+    background-color: #dec20f;
+  }
+  .pause:hover {
+    background-color: #fddc02;
+  }
+}
 @media (max-width: 535px) {
   .app-wrap {
     max-width: 90%;
@@ -437,22 +454,22 @@ li.tvc.card {
     color: white;
     border-color: white;
   }
+  .btn:focus, .card:focus {
+    color: white;
+    background-color: #2e0e57;
+  }
+  .btn:active, .card:active {
+    color: white;
+    background-color: #2e0e57;
+  }
+  .btn:hover, .card:hover {
+    color: white;
+    background-color: #2e0e57;
+  }
   .example {
     border-color: white;
   }
   .card {
-    background-color: #2e0e57;
-  }
-  .btn:focus {
-    color: white;
-    background-color: #2e0e57;
-  }
-  .btn:active {
-    color: white;
-    background-color: #2e0e57;
-  }
-  .btn:hover {
-    color: white;
     background-color: #2e0e57;
   }
   .btn-highlight {
@@ -513,5 +530,28 @@ li.tvc.card {
   }
   .top-example {
     border-bottom: 3px solid white;
+  }
+}
+@media (prefers-color-scheme: dark) and (pointer: coarse) {
+  a:focus, .btn:focus {
+    outline: 4.5px solid #8875FF;
+  }
+  .btn:focus {
+    background-color: #5318a0;
+  }
+  .btn:hover {
+    background-color: #5318a0;
+  }
+  .active {
+    background-color: #2e0e57;
+  }
+  .active:focus {
+    background-color: #2e0e57;
+  }
+  .pause:hover, .quit:hover {
+    background-color: #2e0e57;
+  }
+  .pause:focus:not(.active), .quit:focus:not(.active) {
+    outline: 0px solid #8875FF;
   }
 }/*# sourceMappingURL=index.css.map */

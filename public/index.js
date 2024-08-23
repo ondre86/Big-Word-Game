@@ -268,7 +268,7 @@ const app = Vue.createApp({
                 if (this.t != 0){this.autoSent = false}
                 else {this.autoSent = true}
                 this.paused = true
-                fetch("/", {
+                fetch('/', {
                     method: 'POST',
                     headers: {
                         "Content-Type": 'application/json'
@@ -718,7 +718,9 @@ const app = Vue.createApp({
         replaceWordCard(event){
             this.finalWord = ''
             for (let e = 0; e < this.vWordsOBJList.length; e++){
+                this.$refs.wl.children[e].children[0].classList.remove("active")
                 if (event.target.innerHTML == this.vWordsOBJList[e][0]){
+                    event.target.classList.add("active")
                     this.wordCard.word = this.vWordsOBJList[e][0]
                     this.wordCard.type = this.vWordsOBJList[e][1]
                     this.wordCard.defs = this.vWordsOBJList[e][2]
@@ -878,6 +880,7 @@ const app = Vue.createApp({
                     this.mpLost = false
                     this.mpLostReason = "Opponent quit or disconnected"
                     this.mpScoreFinal(this.score)
+                    this.opponentScore = rep.otherScore
                 }
                 // DOM UPDATE & SCORE LOGIC
                 if (this.wordCard != null || this.wordCard != undefined){
@@ -1060,7 +1063,7 @@ const app = Vue.createApp({
             })
         },
         closeWebSocket(){
-            if (this.webSocket != null || this.webSocket != undefined){
+            if (this.webSocket != undefined || this.webSocket != null){
                 this.webSocket.close()
                 this.isWaiting = false
                 this.webSocket = null
@@ -1111,55 +1114,25 @@ const app = Vue.createApp({
             if (this.cookieHighScore == null || this.cookieHighScore == ""){this.cookieHighScore = 0}
         }
         // GSAP
-        document.addEventListener("DOMContentLoaded", ()=>{
-            gsap.registerPlugin(ScrollToPlugin)
-            introTL = gsap.timeline()
-            .to(".logo", {
-                height: "80px",
-                width: "120px",
-                duration: .75,
-                delay: .35,
-                margin: 0,
-                ease: "power3.inOut"
-            })
-            .to(".logo-holster", {
-                height: `90px`,
-                duration: 1,
-                ease: "power4.inOut"
-    
-            }, "<+=0.0125")
-            .to("#app", {
-                height: "auto",
-                duration: .15,
-                opacity: 1,
-                ease: "power4.inOut"
-    
-            }, "<")
-            .set("#app", {
-                display: "flex"
-            })
-            .fromTo(".card", {
-                opacity: 0
-            }, {
-                opacity: 1,
-                duration: .5,
-                ease: "power4.out"
-            }, "<+=.1")
-            .call(function(){
-                $("body")[0].classList.add("overflow")
-
-            })
+        gsap.registerPlugin(ScrollToPlugin)
+        introTL = gsap.timeline()
+        .set("#app", {
+            display: "flex"
+        })
+        .to("#app", {
+            opacity: 1,
+            duration: .125,
+            ease: "power4.out"
         })
         this.$refs.input.addEventListener("keydown", ()=>{
             this.$refs.input.style.outlineColor = wcoc
         })
         this.$refs.input.addEventListener("keydown", (e)=>{
             if (e.keyCode === 32){e.preventDefault();}
+            if ((e.metaKey || e.ctrlKey) && e.key == 'v'){e.preventDefault();}
         })
-        this.$refs.input.addEventListener("paste", (e)=>{
-            e.preventDefault()
-            return false
-        })
+        this.$refs.input.addEventListener("contextmenu",(e)=>e.preventDefault())
+        this.$refs.post.addEventListener("mousedown",(e)=>e.preventDefault())
     },
     updated: function log(){
         if (this.$refs.wl.children.length > 3){
@@ -1169,14 +1142,14 @@ const app = Vue.createApp({
             $("html")[0].style.height = "auto"
             $("html")[0].style.overflow = "scroll"
             gsap.to([".logo", ".logo-holster"], {
-                height: 0,
-                margin: 0,
+                height: "0px",
+                margin: "0px",
                 duration: .5
             })
             if (this.t == 15){
                 setTimeout(() => {
                     this.$refs.input.focus()
-                }, 500);
+                }, 250);
             }
         }
         else{
@@ -1194,7 +1167,6 @@ const app = Vue.createApp({
                 this.cookieScore = localStorage.getItem("lastScore")
                 this.cookieHighScore = localStorage.getItem("highScore")
             }
-            $("html")[0].style.height = "100%"
         }
     }
 }).mount('#app')

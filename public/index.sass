@@ -61,6 +61,7 @@ $dm-bgLight: #2c2c2c
     border-top-right-radius: 13px 90px
     border-bottom-left-radius: 110px 19px
     border-bottom-right-radius: 120px 24px
+    outline-offset: 0px
 
 %flex-h
     display: flex
@@ -98,6 +99,7 @@ html, body
 html
     height: 100%
     min-height: 100%
+    overflow-y: scroll
     
 body
     position: relative
@@ -105,10 +107,14 @@ body
     height: 100%
     max-height: 100%
     overflow-x: hidden
+    overflow-y: scroll
         
     @extend %flex-v
 
     transition: all .5s
+
+noscript
+    @extend %flex-v
 
 a   
     text-decoration: none
@@ -126,13 +132,12 @@ h1, h2, h3, h4
     &:active
         outline: 0px
 
-.overflow
-    overflow-y: scroll
 #app
-    @extend %flex-v, %hidden
+    @extend %flex-v
+    opacity: 0
     justify-content: flex-start
     align-items: center
-    height: 0%
+    height: auto
     transition: all .5s
 
 .app-wrap
@@ -150,16 +155,16 @@ h1, h2, h3, h4
     gap: 2rem
 
 .logo-holster
-    @extend %flex-h, %center
-    height: 100%
+    @extend %flex-v, %center
+    height: 90px
     width: 100vw
     margin: 0 0 2rem
 
 .logo
-    width: 50%
-    height: auto
+    width: 120px
+    height: 80px
     padding-top: 10px
-    margin: auto auto
+    margin: 0
 
 .font1
     @extend %f1, %f1-m
@@ -188,15 +193,19 @@ h1, h2, h3, h4
     -o-transition: all 0.3s ease-in-out
     transition: all 0.3s ease-in-out
 
-    &:active
-        outline: 0px solid #000
-
     &:hover
         cursor: pointer
+
+    &:active
+        outline: 0px solid #000
+        background-color: $yellowDark2
 
 .pause, .quit
     &:hover
         background-color: $yellowDark
+
+    &:active
+        background-color: $yellowDark2
 
 .quit
     height: fit-content
@@ -204,6 +213,9 @@ h1, h2, h3, h4
 .active
     &:hover
         background-color: $yellowDark
+
+    &:active
+        background-color: $yellowDark2
 
     background-color: $yellowDark
     outline: 4.5px solid #B79E01
@@ -415,6 +427,20 @@ li.tvc.card
     padding: 1rem 1rem 1.5rem 1rem
     @extend %gap1
 
+@media (pointer: coarse)
+    .btn
+        &:hover
+            background-color: $yellow
+        &:focus
+            outline: 4.5px solid $yellowDark2
+    .active
+        &:hover
+            background-color: $yellowDark
+    .pause
+        &:hover
+            background-color: $yellow
+
+
 
 @media (max-width: 535px)
     .app-wrap
@@ -436,12 +462,7 @@ li.tvc.card
         background-color: $dm-purple
         color: white
         border-color: white
-    .example
-        border-color: white
-    .card
-        background-color: $dm-purpleDark2
 
-    .btn
         &:focus
             color: white
             background-color: $dm-purpleDark2
@@ -451,6 +472,11 @@ li.tvc.card
         &:hover
             color: white
             background-color: $dm-purpleDark2
+
+    .example
+        border-color: white
+    .card
+        background-color: $dm-purpleDark2
 
     .btn-highlight
         outline: 9px solid $purple
@@ -510,3 +536,25 @@ li.tvc.card
 
     .top-example
         border-bottom: 3px solid white
+
+    @media (pointer: coarse)
+        %focus
+            &:focus
+                outline: 4.5px solid $purple
+        .btn
+            &:focus
+                background-color: $dm-purple
+            &:hover
+                background-color: $dm-purple
+
+        .active
+            background-color: $dm-purpleDark2
+
+            &:focus
+                background-color: $dm-purpleDark2
+
+        .pause, .quit
+            &:hover
+                background-color: $dm-purpleDark2
+            &:focus:not(.active)
+                outline: 0px solid $purple
