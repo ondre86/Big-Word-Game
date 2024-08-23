@@ -453,9 +453,9 @@ const app = Vue.createApp({
                             scrollTo: {y: 0, x: (this.$refs.wl.children[f].offsetLeft - (this.$refs.wl.clientWidth / 2) + (this.$refs.wl.children[f].clientWidth / 2)), autokill: true},
                             duration: .5
                         })
-                        this.$refs.wl.children[f].children[0].classList.toggle("btn-highlight")
+                        this.$refs.wl.children[f].children[0].classList.add("active")
                         setTimeout(() => {
-                            this.$refs.wl.children[f].children[0].classList.toggle("btn-highlight2")
+                            this.$refs.wl.children[f].children[0].classList.remove("active")
                         }, 2500);
                     }
                 }
@@ -474,8 +474,10 @@ const app = Vue.createApp({
                     this.wordCard.defs = data[0].shortdef
                 }
             }
-            if(this.wordCard.defs != null){
-                this.vWordsOBJList.push(Object.values(toRaw(this.wordCard)))  
+            if (!this.multiPlayer){
+                if(this.wordCard.defs != null){
+                    this.vWordsOBJList.push(Object.values(toRaw(this.wordCard)))  
+                }
             }
         },
         syllableCountCustom(input, data){
@@ -717,13 +719,13 @@ const app = Vue.createApp({
         },
         replaceWordCard(event){
             this.finalWord = ''
-            for (let e = 0; e < this.vWordsOBJList.length; e++){
-                this.$refs.wl.children[e].children[0].classList.remove("active")
-                if (event.target.innerHTML == this.vWordsOBJList[e][0]){
+            for (let e = 0; e < this.$refs.wl.children.length; e++){
+                this.$refs.wl.children[e].childNodes[0].classList.remove("active")
+                if (event.target.innerHTML == toRaw(this.vWordsOBJList[e][0])){
                     event.target.classList.add("active")
-                    this.wordCard.word = this.vWordsOBJList[e][0]
-                    this.wordCard.type = this.vWordsOBJList[e][1]
-                    this.wordCard.defs = this.vWordsOBJList[e][2]
+                    this.wordCard.word = toRaw(this.vWordsOBJList[e][0])
+                    this.wordCard.type = toRaw(this.vWordsOBJList[e][1])
+                    this.wordCard.defs = toRaw(this.vWordsOBJList[e][2])
                 }
             }
             gsap.to(this.$refs.wl, {
