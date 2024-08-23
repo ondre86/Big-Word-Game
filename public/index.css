@@ -429,7 +429,13 @@ li.tvc.card {
   .active:hover {
     background-color: #dec20f;
   }
-  .pause:hover {
+  .active:focus {
+    background-color: #dec20f;
+  }
+  .pause:hover:not(.active) {
+    background-color: #fddc02;
+  }
+  .pause:focus:not(.active) {
     background-color: #fddc02;
   }
 }
@@ -533,25 +539,22 @@ li.tvc.card {
   }
 }
 @media (prefers-color-scheme: dark) and (pointer: coarse) {
-  a:focus, .btn:focus {
-    outline: 4.5px solid #8875FF;
-  }
-  .btn:focus {
-    background-color: #5318a0;
-  }
   .btn:hover {
     background-color: #5318a0;
   }
-  .active {
+  .btn:focus {
+    outline: 4.5px solid #8875FF;
+  }
+  .active:hover {
     background-color: #2e0e57;
   }
   .active:focus {
     background-color: #2e0e57;
   }
-  .pause:hover, .quit:hover {
-    background-color: #2e0e57;
+  .pause:hover:not(.active) {
+    background-color: #5318a0;
   }
-  .pause:focus:not(.active), .quit:focus:not(.active) {
-    outline: 0px solid #8875FF;
+  .pause:focus:not(.active) {
+    background-color: #5318a0;
   }
 }/*# sourceMappingURL=index.css.map */

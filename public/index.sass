@@ -436,8 +436,12 @@ li.tvc.card
     .active
         &:hover
             background-color: $yellowDark
+        &:focus
+            background-color: $yellowDark
     .pause
-        &:hover
+        &:hover:not(.active)
+            background-color: $yellow
+        &:focus:not(.active)
             background-color: $yellow
 
 
@@ -538,23 +542,21 @@ li.tvc.card
         border-bottom: 3px solid white
 
     @media (pointer: coarse)
-        %focus
+        // %focus
+        //     &:focus
+        //         outline: 4.5px solid $purple
+        .btn
+            &:hover
+                background-color: $dm-purple
             &:focus
                 outline: 4.5px solid $purple
-        .btn
-            &:focus
-                background-color: $dm-purple
-            &:hover
-                background-color: $dm-purple
-
         .active
-            background-color: $dm-purpleDark2
-
-            &:focus
-                background-color: $dm-purpleDark2
-
-        .pause, .quit
             &:hover
                 background-color: $dm-purpleDark2
+            &:focus
+                background-color: $dm-purpleDark2
+        .pause
+            &:hover:not(.active)
+                background-color: $dm-purple
             &:focus:not(.active)
-                outline: 0px solid $purple
+                background-color: $dm-purple
