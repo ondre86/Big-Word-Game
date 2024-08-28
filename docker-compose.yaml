@@ -1,0 +1,27 @@
+version: '3.1'
+
+services:
+  db:
+    image: postgres
+    container_name: bwg-database
+    volumes:
+      - bwg-data:/var/lib/postgresql/data
+      - ./startup:/docker-entrypoint-initdb.d
+    env_file:
+      - src/.env
+    ports:
+      - "5433:5433"
+  server:
+    image: node:latest
+    entrypoint: "npm run start"
+    container_name: bwg-server
+    env_file:
+      - src/.env
+    working_dir: /src
+    volumes:
+      - ./src:/src
+    ports:
+      - "8383:8383"
+
+volumes:
+  bwg-data:
