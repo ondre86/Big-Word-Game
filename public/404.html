@@ -5,32 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f5f5f5" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#212121" />
-    <meta name="description" content="A game designed to test players' knowledge of big words">
-    <meta name="keywords" content="big,word,game,syllables,english,spelling,dictionary,learning,play">
+    <meta name="description" content="Sharpen your vocabulary skills against the clock or against your friends in this easy-to-play word game made for kids and adults alike.">
     <meta name="author" content="Ondre Johnson">
+    <meta property="og:title" content="The Big Word Game">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="img/logo(day).webp">
+    <meta property="og:url" content="https://thebigwordgame.com">
+    <meta property="og:description" content="Sharpen your vocabulary skills against the clock or against your friends in this easy-to-play word game made for kids and adults alike.">
     <title>The Big Word Game</title>
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
     <link rel="manifest" href="site.webmanifest">
-    <link rel="preload" href="fonts/FreckleFace-Regular.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="fonts/NanumPenScript-Regular.woff2" as="font" type="font/woff2" crossorigin>
     <link href="index.css" rel="stylesheet"></script>
+    <link rel="preload" href="fonts/FreckleFace-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="fonts/NanumPen.woff2" as="font" type="font/woff2" crossorigin>
 </head>
 <body class="flex" style="flex-direction: column; justify-content: flex-start; height: 100vh;">
-    <div class="logo-holster" style="height: 110px; display: flex; justify-content: center; align-items: center; position: fixed;">
-        <a href="/">
-            <picture style="display: flex; justify-content: center; align-items: center; height: 110px; width: auto;">
+    <header class="logo-holster" style="height: 100%; display: flex; justify-content: center; align-items: center; height: fit-content;">
+        <a id="logo" href="/" tabindex="-1">
+            <picture style="display: flex; justify-content: center; align-items: center;">
                 <source media="(prefers-color-scheme:dark)" srcset="img/logo(night).webp">
-                <img style="height: 110px; width: auto;" class="logo" src="img/logo(day).webp" alt="The Big Word Game">
+                <img class="logo" src="img/logo(day).webp" alt="The Big Word Game" aria-label="The Big Word Game" style="height: 80px; width: 120px" >
             </picture>
         </a>
-    </div>
-    <div class="card tut-card" style="margin: auto;">
-        <span class="tvc">Sorry!<br><br>The page you requested does not exist.</span>
-        <button class="btn"><a class="tvc" href="/">Play The Big Word Game</a></button>
-    </div>
-    <a class="card btn credit" style="display: flex; position: fixed; left:50%; bottom: 0; transform: translate(-50%); margin: 2rem auto" v-show="!started && !lost && !tutorialOn" href="https://ondre.org"><span class="font2">created by ondre</span></a>
-
+    </header>
+    <section class="card tut-card" style="margin: auto;">
+        <h1 class="tvc font1">Sorry!</h1>
+        <span class="tvc">The page you requested does not exist.</span>
+        <a class="tvc btn" href="/">Play Now</a>
+    </section>
+    <footer>
+        <a class="card btn credit font2" style="display: flex; left:50%; bottom: 0; margin: 2rem auto; width: fit-content;" v-show="!started && !lost && !tutorialOn" href="https://ondre.org" target="_blank">created by ondre</a>
+    </footer>
 </body>
 </html>

@@ -1,12 +1,16 @@
 $bg: #f5f5f5
 $yellow: #fddc02
+$yellowLight: #FEEB72
 $yellowDark: #dec20f
+$yellowDark2: #B79E01
 $green: #169B00
 $red: #CA0505
 $purple: #8875FF
-$dm-purple: #471686
-$dm-purpleDark: #1F0C48
+$dm-purple: #5318a0
+$dm-purpleDark: #3c1889
+$dm-purpleDark2: #2e0e57
 $dm-bg: #212121
+$dm-bgLight: #2c2c2c
 
 @font-face 
     font-family: 'freckle'
@@ -16,7 +20,7 @@ $dm-bg: #212121
 
 @font-face 
     font-family: 'nanum'
-    src: url("/fonts/NanumPenScript-Regular.woff2")
+    src: url("/fonts/NanumPen.woff2")
     font-weight: 600
     font-style: normal
 
@@ -42,7 +46,7 @@ $dm-bg: #212121
     background-color: $yellow
 %focus
     &:focus
-        outline: 9px solid $purple
+        outline: 9px solid $yellowDark2
         color: black
 %active
     &:active
@@ -57,6 +61,7 @@ $dm-bg: #212121
     border-top-right-radius: 13px 90px
     border-bottom-left-radius: 110px 19px
     border-bottom-right-radius: 120px 24px
+    outline-offset: 0px
 
 %flex-h
     display: flex
@@ -80,6 +85,12 @@ $dm-bg: #212121
 %gap2
     gap: 2rem
 
+*
+    -ms-overflow-style: none
+    scrollbar-width: none
+    &::-webkit-scrollbar
+        display: none  
+
 html, body
     margin: 0
     padding: 0 
@@ -88,10 +99,7 @@ html, body
 html
     height: 100%
     min-height: 100%
-    -ms-overflow-style: none
-    scrollbar-width: none
-    &::-webkit-scrollbar
-        display: none
+    overflow-y: scroll
     
 body
     position: relative
@@ -99,55 +107,64 @@ body
     height: 100%
     max-height: 100%
     overflow-x: hidden
-    -ms-overflow-style: none
-    scrollbar-width: none
-
-    &::-webkit-scrollbar
-        display: none
+    overflow-y: scroll
+        
     @extend %flex-v
 
     transition: all .5s
 
+noscript
+    @extend %flex-v
+
 a   
     text-decoration: none
     color: black
+
+    @extend %focus
     
-.overflow
-    overflow-y: scroll
+h1, h2, h3, h4
+    margin: 0
+    padding: 0
+
+#logo
+    &:focus
+        outline: none
+    &:active
+        outline: 0px
+
 #app
-    @extend %flex-v, %hidden
+    @extend %flex-v
+    opacity: 0
     justify-content: flex-start
     align-items: center
-    height: 0%
+    height: auto
     transition: all .5s
 
 .app-wrap
     max-width: 500px
-    min-width: 320px
+    min-width: 300px
     height: auto
     min-height: 90%
     @extend %flex-v, %center
     justify-content: flex-start
-    padding: 2rem 0
+    padding: .5rem 0 2rem
     transition: all .5s
-
 
 .meat
     @extend %flex-v, %center
-    // margin: 2rem 0
     gap: 2rem
 
 .logo-holster
-    @extend %flex-h, %center
-    height: 100%
+    @extend %flex-v, %center
+    height: 90px
     width: 100vw
-
+    margin: 0 0 2rem
 
 .logo
-    width: 50%
-    height: auto
+    width: 120px
+    height: 80px
     padding-top: 10px
-    margin: auto auto
+    margin: 0
 
 .font1
     @extend %f1, %f1-m
@@ -159,8 +176,6 @@ a
     @extend %flex-h
 .vert
     @extend %flex-v, %center
-.tc
-    text-align: center
 .gap1
     @extend %flex-h, %gap1
 .gap2
@@ -173,17 +188,56 @@ a
     color: black
     text-decoration: none
 
-    transition: all .3s
-
-    &:active
-        outline: 0px solid #000
+    -webkit-transition: all 0.3s ease-in-out
+    -moz-transition: all 0.3s ease-in-out
+    -o-transition: all 0.3s ease-in-out
+    transition: all 0.3s ease-in-out
 
     &:hover
         cursor: pointer
 
+    &:active
+        outline: 0px solid #000
+        background-color: $yellowDark2
+
+.pause, .quit
+    &:hover
+        background-color: $yellowDark
+
+    &:active
+        background-color: $yellowDark2
+
+.quit
+    height: fit-content
+
 .active
+    &:hover
+        background-color: $yellowDark
+
+    &:active
+        background-color: $yellowDark2
+
     background-color: $yellowDark
-    outline: 4.5px solid $purple
+    outline: 4.5px solid #B79E01
+
+.btn-highlight
+    outline: 9px solid $yellowDark2
+    transition: all 0.3s ease-in-out
+
+.btn-highlight2
+    outline: 0px solid $yellowDark2
+    transition: all 0.3s ease-in-out
+
+.waitingMsg
+    position: absolute
+    left: 50%
+    top: 50%
+    transform: translate(-50%, -50%)
+
+#credit
+    background-color: $yellow
+    &:hover
+        background-color: $yellowDark
 
 .intro  
     justify-self: center
@@ -195,13 +249,11 @@ a
     @extend %flex-h, %center
     height: fit-content
     gap: .5rem
-    min-width: 120px
+    min-width: 105px
     justify-content: space-between
-    // align-items: flex-start
-
 
 .timer
-    @extend %f1, %f1-l
+    @extend %f1, %f1-m
 
 .txt-card
     @extend %f2, %f2-m, %flex-h, %center
@@ -209,17 +261,35 @@ a
     width: 100%
 
 .bottom-txt
+    position: relative
     align-items: initial
     
 .form
-    @extend %flex-h, %gap2 
+    @extend %flex-h, %gap1 
     width: fit-content
 
 input
-    @extend %border, %focus, %f1, %f1-l
+    @extend %f1, %f1-m
     width: 100%
     padding: 1rem
     transition: all .3s
+
+    &:focus
+        outline: 9px solid $yellow
+        color: black
+
+    &::placeholder
+        font-size: 3rem
+    &::-moz-placeholder
+        font-size: 3rem
+    &:-ms-input-placeholder
+        font-size: 3rem
+    &:-ms-input-placeholder
+        font-size: 3rem
+                  
+#text-input
+    padding-right: 1rem
+    @extend %border       
 
 .letter-meta
     @extend %flex-v
@@ -259,7 +329,6 @@ input
         background-color: rgba(0, 0, 0, 0)
         z-index: 100
 
-
 .wl
     padding: 1rem 1.25rem
     @extend %flex-h
@@ -277,12 +346,26 @@ input
 .middle-example
     border-top: 3px solid black
     border-bottom: 3px solid black
+.top-example
+    border-bottom: 3px solid black
 
 .card
-    max-width: 300px
-    background-color: $yellow
+    max-width: 320px
+    background-color: $yellowLight
     @extend %f2, %f2-m, %flex-v, %border, %btn
     transition: all .3s
+
+li.tvc.card
+    padding: 1.5rem
+
+.back
+    position: absolute
+    top: -1.5rem
+    left: -.5rem
+.back2
+    position: absolute
+    top: -1.5rem
+    right: -.5rem
 
 .example
     width: 100%
@@ -292,39 +375,86 @@ input
 .tut-card
     @extend %flex-v, %gap2
     padding: 2rem
+    position: relative
 
     .btn
         transition: all .3s
 
-.word-card
-    margin: 2rem 0
-    padding: 1rem 1rem 1.5rem 1rem
-    transition: box-shadow .5s
+.word-card-wrap
+    @extend %flex-v
+    margin: .5rem 0 0 0
+    position: relative
+    height: 40vh
+    min-width: 300px
 
-    &:hover
-        box-shadow: 0px 3px 6px 2px #8f8f8f
+    &::before
+        content: ""
+        position: absolute
+        top: 0
+        left: 0
+        width: 100%
+        height: 8%
+        background-image: linear-gradient(0deg, rgba(0, 0, 0, 0), $bg)
+        background-color: rgba(0, 0, 0, 0)
+        z-index: 100
+
+    &::after
+        content: ""
+        position: absolute
+        bottom: -2px
+        left: 0
+        width: 100%
+        height: 8%
+        background-image: linear-gradient(0deg,  $bg, rgba(0, 0, 0, 0))
+        background-color: rgba(0, 0, 0, 0)
+        z-index: 100
+
+.word-card-scroller
+    padding: 10% 3%
+    overflow-y: scroll
+    overflow-x: hidden
+    -ms-overflow-style: none
+    scrollbar-width: none
+    &::-webkit-scrollbar
+        display: none
+
+.word-card
+    padding: 1rem 1rem 1.5rem 1rem
+    transition: all .5s
+
         
 .lost-card
-    overflow: hidden
     padding: 1rem 1rem 1.5rem 1rem
-
     @extend %gap1
 
-
-
-kbd
-    @extend %border
-
-@media (max-width:500px)
-    .app-wrap
-        max-width: 90%
-    #post
-        display: none
+@media (pointer: coarse)
     .btn
         &:hover
             background-color: $yellow
+        &:focus
+            outline: 4.5px solid $yellowDark2
+    .active
+        &:hover
+            background-color: $yellowDark
+        &:focus
+            background-color: $yellowDark
+    .pause
+        &:hover:not(.active)
+            background-color: $yellow
+        &:focus:not(.active)
+            background-color: $yellow
 
-@media (prefers-color-scheme:dark)
+
+
+@media (max-width: 535px)
+    .app-wrap
+        max-width: 90%
+
+@media (prefers-color-scheme: dark)
+    %focus
+        &:focus
+            outline: 9px solid $purple
+
     html, body
         background-color: $dm-bg
         color: white
@@ -332,27 +462,63 @@ kbd
     a
         color: white
         
-    .btn, .card, .example
+    .btn, .card
         background-color: $dm-purple
         color: white
         border-color: white
 
-    .btn
         &:focus
             color: white
-            background-color: $dm-purpleDark
+            background-color: $dm-purpleDark2
         &:active
             color: white
-            background-color: $dm-purpleDark
+            background-color: $dm-purpleDark2
         &:hover
             color: white
-            background-color: $dm-purpleDark
+            background-color: $dm-purpleDark2
+
+    .example
+        border-color: white
+    .card
+        background-color: $dm-purpleDark2
+
+    .btn-highlight
+        outline: 9px solid $purple
+        transition: all 0.3s ease-in-out
+
+    .btn-highlight2
+        outline: 0px solid $purple
+        transition: all 0.3s ease-in-out
+
+    .pause, .quit
+        &:hover
+            background-color: $dm-purpleDark2
 
     .active
-        background-color: $dm-purpleDark
+        &:hover
+            background-color: $dm-purpleDark2
+
+        background-color: $dm-purpleDark2
+        outline: 4.5px solid $purple
+
+    #credit
+        background-color: $dm-purple
+        &:hover
+            background-color: $dm-purpleDark2
+        &:focus
+            background-color: $dm-purpleDark2
 
     input
-        border-color: $dm-purpleDark
+        background-color: $dm-bgLight
+        color: white
+        border-color: white
+        caret-color: white
+        &:focus
+            outline: 9px solid $purple
+            color: white
+
+    #text-input
+        border-color: white
 
     .wl-wrap
         &::before
@@ -361,6 +527,36 @@ kbd
         &::after
             background-image: linear-gradient(270deg,  $dm-bg, rgba(0, 0, 0, 0))
 
+    .word-card-wrap
+        &::before
+            background-image: linear-gradient(0deg, rgba(0, 0, 0, 0), $dm-bg)
+
+        &::after
+            background-image: linear-gradient(0deg,  $dm-bg, rgba(0, 0, 0, 0))
+
     .middle-example
         border-top: 3px solid white
         border-bottom: 3px solid white
+
+    .top-example
+        border-bottom: 3px solid white
+
+    @media (pointer: coarse)
+        // %focus
+        //     &:focus
+        //         outline: 4.5px solid $purple
+        .btn
+            &:hover
+                background-color: $dm-purple
+            &:focus
+                outline: 4.5px solid $purple
+        .active
+            &:hover
+                background-color: $dm-purpleDark2
+            &:focus
+                background-color: $dm-purpleDark2
+        .pause
+            &:hover:not(.active)
+                background-color: $dm-purple
+            &:focus:not(.active)
+                background-color: $dm-purple
