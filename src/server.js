@@ -4,8 +4,9 @@
 require('dotenv').config()
 const GameInstance = require('./game/index.js')
 const env = require('./env/index.js')
-const fs = require('node:fs')
+const fs = require('node:fs/promises')
 const http = require('node:http')
+var consts = require('constants');
 
 
 const LOBBY_IDENTIFIER = 0
@@ -39,18 +40,23 @@ class Lobby {
         try{
             const data = await this.db.query("SELECT id FROM lobby LIMIT 1")
             this.id = data.rows[0].id
-            await this.db.query("DELETE FROM gameRoom WHERE NOW() >= expiresAt")
-            await this.db.query("DELETE FROM playerSessionToken WHERE NOW() >= expiresAt")
-
+            console.log(`Begin sync for lobby #${this.id}`)
+            const gameRoomsDeleted = await this.db.query("DELETE FROM gameRoom WHERE NOW() >= expiresAt")
+            const playerSessionTokensDeleted = await this.db.query("DELETE FROM playerSessionToken WHERE NOW() >= expiresAt")
+            console.log(`Clean up expired entities`)
+            console.log(`gameRoom(s)=${gameRoomsDeleted.rowCount} and playerSessionToken(s)=${playerSessionTokensDeleted.rowCount}.`)
             const players = await this.db.query("SELECT id, username, password FROM player")
+            console.log(`Players registered=${players.rowCount}`)
             this.players = []
             for(const row of players.rows){
                 const p = new Player(row.id, row.username, row.password)
+                console.log(`Caching Player(${p.id}, ${p.username})`)
                 this.players.push(p)
                 this.playersByUsername[p.username] = p
                 this.playersById[p.id] = p
             }
             const gameRooms = await this.db.query("SELECT id, ownerPlayerId, shortName, selectedGameId, password, players, playersReady, createdAt, expiresAt FROM gameRoom")
+            console.log(`Select active GameRoom(s)=${gameRooms.rowCount}`)
             this.gameRooms = []
             this.gameRoomsByShortName = {}
             this.gameRoomsById = {}
@@ -62,8 +68,10 @@ class Lobby {
                 g.playersReady = JSON.parse(row.playersready)
                 g.createdAt = row.createdat
                 g.closesAt = row.expiresat
+                console.log(`Caching GameRoom(${g.id}, ${g.gameRoomOwnerPlayerId}, ${g.shortName}, ${g.players})`)
                 for(const p of g.players) {
                     g.playersById[p.id] = p
+                    console.log(`GameRoom Player(s)(${p.id},${p.username})`)
                 }
                 this.gameRooms.push(g)
                 this.gameRoomsByShortName[g.shortName] = g
@@ -80,6 +88,9 @@ class Lobby {
             throw e
         }
         return
+    }
+    ToJson() {
+        
     }
     static PathConnect = "/secure/connect"
     async Connect(playerid, socket){
@@ -122,7 +133,7 @@ class Lobby {
                 const token = this.playersByUsername[username].Encode() /* To-do plz encrpyt */
                 await this.db.query("DELETE FROM playerSessionToken WHERE playerId = $1", [this.playersByUsername[username].id])
                 await this.db.query("INSERT INTO playerSessionToken (token, playerId, createdAt, expiresAt) VALUES ($1, $2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + (20 * interval '1 minute'))", [token, this.playersByUsername[username].id])
-                console.log(`Player ${username} has received token valid for 20 minutes`)
+                console.log(`Player #${this.playersByUsername[username].id}, ${username} has received token valid for 20 minutes`)
                 return token
             } catch (e) {
                 throw e
@@ -259,6 +270,7 @@ class Lobby {
     }
     static PathSelectGame = "/secure/select-game"
     async SelectGame(gameroomid, gameidx) {
+        console.log("Select Game", gameroomid, gameidx)
         if(this.gameRoomsById[gameroomid] == undefined) {
             throw ERR_LOBBY_NOT_FOUND
         }
@@ -393,10 +405,10 @@ class Player {
         return JSON.stringify({ "id": this.id, "username": this.username, "password": safe ? this.password : "" })
     }
     Encode(){
-        return Buffer.from(this.String(), 'ascii').toString('base64')
+        return Buffer.from(this.String(), 'utf8').toString('base64')
     }
     Decode(playerinfo){
-        let info = JSON.parse(Buffer.from(playerinfo, 'base64').toString('ascii'))
+        let info = JSON.parse(Buffer.from(playerinfo, 'base64').toString('utf8'))
         this.id = info.id
         this.username = info.username
         this.password = info.password
@@ -530,6 +542,7 @@ if (env.SERVER) {
     require('express-ws')(server)
     server.use(express.static('public'))
     server.use(express.json())
+    server.use(express.text())
     server.use(helmet())
     server.disable('x-powered-by')
     
@@ -573,7 +586,7 @@ if (env.SERVER) {
             res.status(200).send()
             return
         } catch (e) {
-            res.status(400).write(e.toString())
+            res.status(400).send(e.toString())
             return
         }
     })
@@ -595,14 +608,16 @@ if (env.SERVER) {
             const token = req.get("Authorization")
             if(token==""){
                 res.set('WWW-Authenticate','Bearer')
-                res.status(401).write(ERR_LOBBY_UNAUTHORIZED)
+                res.status(401).send(ERR_LOBBY_UNAUTHORIZED)
                 return
             }
             const p = await lobby.FindPlayerByAuthToken(token)
-            res.status(200).write("Welcome", p.username, "!")
+            res.set('Content-Type', 'application/json')
+            res.status(200).send(p.String(true))
             return
         } catch (e) {
-            res.status(400).write(e.toString())
+            console.log(e)
+            res.status(400).send(e.toString())
             return
         }
     })
@@ -611,7 +626,7 @@ if (env.SERVER) {
         const token = req.get("Authorization")
         if(token==""){
             res.set('WWW-Authenticate','Bearer')
-            res.status(401).write(ERR_LOBBY_UNAUTHORIZED)
+            res.status(401).send(ERR_LOBBY_UNAUTHORIZED)
         }
         const { shortName, password } = req.body
         
@@ -620,7 +635,7 @@ if (env.SERVER) {
             const g = await lobby.NewGameRoom(p.id, shortName, password)
             await lobby.JoinGameRoom(p.id, g.id, password)
         } catch (e) {
-            res.status(400).write(e.toString())
+            res.status(400).send(e.toString())
             return
         }
         res.status(200).send()
@@ -629,9 +644,9 @@ if (env.SERVER) {
 
     server.post(Lobby.PathJoinGameRoom, async (req, res) => {
         const token = req.get("Authorization")
-        if(token=""){
+        if(token==""){
             res.set("WWW-Authenticate", "Bearer")
-            res.status(401).write(ERR_GAMEROOM_UNAUTHORIZED)
+            res.status(401).send(ERR_GAMEROOM_UNAUTHORIZED)
         }
         const { id, password } = req.body
         try {
@@ -650,9 +665,9 @@ if (env.SERVER) {
     
     server.post(Lobby.PathMakeGameRoomOwner, (req, res) => {
         const token = req.get("Authorization")
-        if(token=""){
+        if(token==""){
             res.set("WWW-Authenticate", "Bearer")
-            res.status(401).write(ERR_GAMEROOM_UNAUTHORIZED)
+            res.status(401).send(ERR_GAMEROOM_UNAUTHORIZED)
         }
         try {
             const p = lobby.FindPlayerByAuthToken(token)
@@ -669,23 +684,23 @@ if (env.SERVER) {
     
     server.post(Lobby.PathSelectGame, async (req, res) => {
         const token = req.get("Authorization")
-        if(token=""){
+        if(token==""){
             res.set("WWW-Authenticate", "Bearer")
-            res.status(401).write(ERR_GAMEROOM_UNAUTHORIZED)
+            res.status(401).send(ERR_GAMEROOM_UNAUTHORIZED)
         }
         const { /*gameRoom*/id, gameidx } = req.body
         try {
             const p = await lobby.FindPlayerByAuthToken(token)
             if(!lobby.gameRooms[id]) {
-                res.status(404).write(ERR_GAMEROOM_NOT_FOUND)
+                res.status(404).send(ERR_GAMEROOM_NOT_FOUND)
                 return
             }
             if(lobby.ownerplayerid != p.id) {
-                res.status(401).write(ERR_GAMEROOM_FORBIDDEN)
+                res.status(401).send(ERR_GAMEROOM_FORBIDDEN)
                 return
             }
             if(lobby.gameRooms[id].games.length <= gameidx){
-                res.status(404).write(ERR_GAMEROOM_NOT_FOUND)
+                res.status(404).send(ERR_GAMEROOM_NOT_FOUND)
                 return
             }
             for(const i in lobby.gameRooms[id].games) {
@@ -705,9 +720,9 @@ if (env.SERVER) {
 
     server.post(Lobby.PathPlayerReady, async (req, res) => {
         const token = req.get("Authorization")
-        if(token=""){
+        if(token==""){
             res.set("WWW-Authenticate", "Bearer")
-            res.status(401).write(ERR_GAMEROOM_UNAUTHORIZED)
+            res.status(401).send(ERR_GAMEROOM_UNAUTHORIZED)
         }
         const { ready } = req.body
         try {
@@ -725,21 +740,21 @@ if (env.SERVER) {
         return
     })
 
-    server.post(Lobby.PathListGameRooms, (req, res) => {
+    server.get(Lobby.PathListGameRooms, (req, res) => {
         const token = req.get("Authorization")
-        if(token=""){
+        if(token==""){
             res.set('WWW-Authenticate', 'Bearer')
-            res.status(401).write(ERR_LOBBY_UNAUTHORIZED)
+            res.status(401).send(ERR_LOBBY_UNAUTHORIZED)
         }
-        
+        res.set('Content-Type', 'application/json')
         res.status(200).send(JSON.stringify(lobby.ListGameRooms()))
     })
 
     server.post(Lobby.PathStartGame, async (req, res) => {
         const token = req.get("Authorization")
-        if(token=""){
+        if(token==""){
             res.set("WWW-Authenticate", "Bearer")
-            res.status(401).write(ERR_GAMEROOM_UNAUTHORIZED)
+            res.status(401).send(ERR_GAMEROOM_UNAUTHORIZED)
         }
         try {
             const p = await lobby.FindPlayerByAuthToken(token)
@@ -802,20 +817,20 @@ if (env.SERVER) {
     // instantiate the lobby with the database connection
     const lobby = new Lobby(pool)
 
-    // lets get the lobby instance up to date before we start the server
-    lobby
-        .Sync()
-        .then(() => {
-            // start the server on env.PORT
-            server.listen(env.PORT, () => {
-                console.log("lobby server started")
-            })
-        })
-
     // Lets sync the lobby regularly
     setInterval(async () => {
         await lobby.Sync()
-    }, 3 /*seconds*/ * 1000)
+    }, 15 /*seconds*/ * 1000)
+
+    // lets get the lobby instance up to date before we start the server
+    promised = lobby.Sync()
+    promised.then((res, reject) => {
+        // start the server on env.PORT
+        server.listen(env.PORT, () => {
+            console.log("lobby server started")
+        })
+    })
+
 }
 
 const CMD_AUTH_FILE = "_session.bwg" /*maybe an encrypted file?*/
@@ -823,55 +838,59 @@ const CMD_AUTH_FILE = "_session.bwg" /*maybe an encrypted file?*/
 const ERR_REQUESTER_PATH_REQUIRED = "path required"
 // The idea behind our cli client to to behave on feature parity with the front-end, so we want to utilize the same http api.
 
-async function cliLobbyRequester(path="", payload="", method="POST", contentType="application/json"){
-    return new Promise((resolve, reject) => {
+async function cliLobbyRequester(path="", payload=undefined, method="GET", contentType="text/plain"){
+    return new Promise(async (resolve, reject) => {
         if (path == "") {
             reject(ERR_REQUESTER_PATH_REQUIRED)
         }
-        const token = fs.readFileSync(CMD_AUTH_FILE, { encoding: 'utf8' })
+        let headers = {
+            'Content-Type': contentType,
+        }
+        if (payload != undefined){
+            headers['Content-Length'] = Buffer.byteLength(payload)
+        }
         if (path.startsWith("/secure/")) {
+            let file;
+            let token;
+            try {
+                file = await fs.open(CMD_AUTH_FILE, 'r', consts.O_RDONLY)
+                token = await file.readFile('utf8')
+            } catch (e) {
+                throw e
+            } finally {
+                await file?.close()
+            }
             if(token=="") {
                 reject(ERR_LOBBY_UNAUTHORIZED)
             }
+            headers["Authorization"] = token
         }
-        console.log(path, payload, method, contentType)
-        let statusCode = undefined
-        let data = ""
-        let headers = ""
         const req = http.request({
             hostname: env.HOST,
             path: path,
             method: method,
             port: env.PORT,
-            headers: {
-                'Authorization': `${token}`,
-                'Content-Type': contentType,
-                // 'Content-Length': Buffer.byteLength(payload),
-            },
+            headers: headers,
         }, (res) => {
-            statusCode = res.statusCode
-            headers = res.headers
-            if (contentType.startsWith('text') || statusCode != 200) {
-                res.setEncoding('utf8')
-            }
+            let data = '';
+            let statusCode = res.statusCode
+            let headers = res.headers
+            res.setEncoding('utf8')
             res.on('data', (chunk) => {
-                if (statusCode != 200) {
-                    resolve({ data: chunk, headers, statusCode})
-                    return
+                data += chunk
+            })
+            res.on('close', () => {
+                if (res.headers['content-type'] && res.headers['content-type'].startsWith('application/json')){
+                    data = JSON.parse(data)
                 }
-                if (contentType == "application/json") {
-                    resolve({ data: JSON.stringify(chunk), headers, statusCode})
-                    return
-                }
-                resolve({ data: chunk, headers, statusCode })
-                return
+                resolve({ data, headers, statusCode})
             })
         })
         req.on('error', (e) => {
             reject(e)
             return
         })
-        if (payload) {
+        if (payload != undefined) {
             req.write(payload)
         }
         req.end()
@@ -897,12 +916,22 @@ async function _getWS() {
 let _p = undefined
 async function _getPlayer() {
     if (_p == undefined) {
-        const token = fs.readFileSync(CMD_AUTH_FILE, { encoding: 'utf-8' })
+        let file;
+        let token;
+        try {
+            file = await fs.open(CMD_AUTH_FILE, 'r', consts.O_RDONLY)
+            token = await file.readFile('utf8')
+        } catch (e) {
+            throw e
+        } finally {
+            await file?.close()
+        }
+        // token = Buffer.from(token, 'base64').toString('utf8') 
         if(token==""){
             throw ERR_LOBBY_UNAUTHORIZED
         }
-        const {data: p} = await cliLobbyRequester(Lobby.PathWhoAmI, "", "GET", "text/plain")
-        _p = JSON.parse(p)
+        const p = await cliLobbyRequester(Lobby.PathWhoAmI, "", "GET", "application/json")
+        _p = p.data
     }
     return _p
 }
@@ -911,9 +940,9 @@ let _g = undefined
 async function _getGameRooms() {
     if (_g == undefined) {
         const g = await cliLobbyRequester(Lobby.PathListGameRooms, "", "GET")
-        _g = JSON.parse(g)
+        _g = g.data
     }
-    return _p
+    return _g
 }
 
 const clear = require('clear');
@@ -982,7 +1011,7 @@ if (env.CLI) {
             })
             const data = JSON.stringify({username, password})
             try {
-                await cliLobbyRequester(Lobby.PathRegister, data)
+                await cliLobbyRequester(Lobby.PathRegister, data, "POST", "application/json")
                 process.exit(0)
             } catch (e) {
                 console.log(e.toString())
@@ -1000,19 +1029,26 @@ if (env.CLI) {
                 hideEchoBack: true,
             })
             const payload = JSON.stringify({username, password})
+            let file;
             try {
-                const { data: token } = await cliLobbyRequester(Lobby.PathLogin, payload)
-                fs.writeFileSync(CMD_AUTH_FILE, token)
-                const { statusCode, data  } = await cliLobbyRequester(Lobby.PathWhoAmI, "", "GET", "text/plain")
-                if (statusCode != 200) {
-                    throw new Error(data)
+                res = await cliLobbyRequester(Lobby.PathLogin, payload, "POST", "application/json")
+                if (res.statusCode != 200) {
+                    throw new Error(res.data)
                 }
-                const p = JSON.parse(data)
-                console.log(`Welcome ${p.username}!`)
-                process.exit(0)
+                file = await fs.open(CMD_AUTH_FILE, consts.O_CREAT | consts.O_RDWR, consts.S_IRWXU)
+                await file.chown(process.getuid(), process.getgid())
+                await file.write(res.data, 0, 'utf8')
+                
+                res = await cliLobbyRequester(Lobby.PathWhoAmI, "", "GET", "text/plain")
+                if (res.statusCode != 200) {
+                    throw new Error(res.data)
+                }
+                console.log(`Welcome Player #${res.data.id} ${res.data.username}!`)
             } catch (e) {
                 console.log(e)
-                process.exit(1)
+            } finally {
+                await file?.close()
+                process.exit(0)
             }
 
         }
@@ -1027,8 +1063,7 @@ if (env.CLI) {
                 if (statusCode != 200) {
                     throw new Error(data)
                 }
-                const p = JSON.parse(data)
-                console.log("Welcome", p.username, "!")
+                console.log("Welcome", data.username, "!")
                 process.exit(0)
             } catch (e) {
                 console.log(e.toString())
@@ -1042,15 +1077,14 @@ if (env.CLI) {
         desc: 'create a new game room within lobby',
         handler: async (argv) => {
             try {
-                const p = _getPlayer()
                 const g = await cliLobbyRequester(Lobby.PathNewGameRoom, JSON.stringify({ 
                     shortName: argv.shortName, 
                     password: argv.password
-                }))
+                }), "POST", "application/json")
                 await cliLobbyRequester(Lobby.PathJoinGameRoom, JSON.stringify({
                     id: g.id, 
                     password: argv.password
-                }))
+                }), "POST", "application/json")
                 console.log(`Welcome to gameroom #${g.id}, ${g.shortName}!`)
                 process.exit(0)
             } catch (e) {
@@ -1100,8 +1134,8 @@ if (env.CLI) {
         desc: 'if game owner, selects the game to play in this room',
         handler: async () => {
             try {
-                const p = _getPlayer()
-                const gameRooms = _getGameRooms()
+                const p = await _getPlayer()
+                const gameRooms = await _getGameRooms()
                 const gr = gameRooms.find((g) => { return g.gameRoomOwnerPlayerId == p.id })
                 if(gr == undefined) {
                     console.log(ERR_GAMEROOM_NOT_FOUND)
@@ -1122,7 +1156,7 @@ if (env.CLI) {
                         await cliLobbyRequester(Lobby.PathSelectGame, JSON.stringify({ 
                             id: gr.id, 
                             gameidx: gameidx
-                        }))
+                        }), "POST", "application/json")
                     }
                 }
                 process.exit(0)
