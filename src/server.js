@@ -7,6 +7,7 @@ const env = require('./env/index.js')
 const fs = require('node:fs/promises')
 const http = require('node:http')
 var consts = require('constants');
+const WebSocket = require('ws');
 
 
 const LOBBY_IDENTIFIER = 0
@@ -37,6 +38,7 @@ class Lobby {
         this.socketByPlayerId = {};
     }
     async Sync(){
+        console.log('sync')
         try{
             const data = await this.db.query("SELECT id FROM lobby LIMIT 1")
             this.id = data.rows[0].id
@@ -81,9 +83,8 @@ class Lobby {
                 }
             }
             
-            for (const s of Object.values(this.socketByPlayerId)) {
-                s.send(`${LOBBY_IDENTIFIER}${this.id}`)
-            }
+            Object.values(this.socketByPlayerId)
+                .forEach((socket) => socket?.send(`${LOBBY_IDENTIFIER}${this.id}`))
         } catch (e) {
             throw e
         }
@@ -97,11 +98,10 @@ class Lobby {
         if (this.players[playerid] == undefined) {
             throw ERR_PLAYER_NOT_FOUND
         }
+        socket?.send(`${USER_IDENTIFIER}${JSON.stringify(this.players[playerid].String(true))}`)
         this.socketByPlayerId[playerid] = socket
-        this.socketByPlayerId[playerid].send(`${USER_IDENTIFIER}${JSON.stringify(this.socketByPlayerId[playerid].String(true))}`)
-        for(const s of Object.values(this.socketByPlayerId)){
-            s.send(`${ANNOUNCEMENT}Welcome ${this.players[playerid].username}!`)
-        }
+        Object.values(this.socketByPlayerId)
+            .forEach((socket) => socket?.send(`${ANNOUNCEMENT}Welcome ${this.players[playerid].username}!`))
     }
     static PathRegister = "/open/register"
     async Register(username, password) {
@@ -147,8 +147,12 @@ class Lobby {
         if(this.gameRoomsByShortName[shortName] != undefined){
             throw ERR_LOBBY_SHORTNAME_EXISTS
         }
+        if(this.playersByGameRoomId[playerid] != undefined) {
+            throw ERR_PLAYER_IN_GAMEROOM
+        }
         let idx = this.gameRooms.length
         const g = new GameRoom(idx, playerid, shortName, password)
+        this.socketByPlayerId[g.gameRoomOwnerPlayerId]?.send(`${CURRENT_ACTION_ITEM}${Lobby.PathJoinGameRoom}`)
         try {
             const gr = await this.db.query("SELECT * FROM gameRoom WHERE shortName = $1", [shortName])
             if (gr.rows.length > 0){
@@ -207,16 +211,15 @@ class Lobby {
         await this.db.query("UPDATE gameRoom SET players = $1 WHERE id = $2", [JSON.stringify(g.players), g.id])
         console.log(`Player ${this.playersById[playerid].username} has joined the gameroom`)
         if (this.socketByPlayerId[playerid]) {
-            this.socketByPlayerId[playerid].send(`${GAME_ROOM_IDENTIFIER}${g.id}`)
+            this.socketByPlayerId[playerid]?.send(`${GAME_ROOM_IDENTIFIER}${g.id}`)
 
             if(g.gameRoomOwnerPlayerId == playerid && g.selectedGameId == undefined) {
-                this.socketByPlayerId[playerid].send(`${CURRENT_ACTION_ITEM}${Lobby.PathSelectGame}`)
+                this.socketByPlayerId[playerid]?.send(`${CURRENT_ACTION_ITEM}${Lobby.PathSelectGame}`)
             }
         }
 
-        for(const s of Object.keys(g.socketByPlayerId)) {
-            s.send(`${ANNOUNCEMENTS}Player ${player.username} has joined the gameroom`)
-        }
+        Object.values(g.socketByPlayerId)
+            .forEach((socket) => { socket.send(`${ANNOUNCEMENTS}Player ${this.playersById[playerid].username} has joined the gameroom`)})
     }
     static ExitGameRoom = "/secure/exit-game-room"
     async ExitGameRoom(gameroomid, playerid) {
@@ -245,12 +248,11 @@ class Lobby {
         console.log(`Player ${this.playersById[playerid].username} owns gameroom ${this.gameRooms[gameroomid].shortName}`)
         if (this.socketByPlayerId[playerid]) {
             if(g.gameRoomOwnerPlayerId == playerid && g.selectedGameId == undefined) {
-                this.socketByPlayerId[playerid].send(`${CURRENT_ACTION_ITEM}${Lobby.PathSelectGame}`)
+                this.socketByPlayerId[playerid]?.send(`${CURRENT_ACTION_ITEM}${Lobby.PathSelectGame}`)
             }
         }   
-        for(const s of Object.values(this.gameRooms[gameroomid].socketByPlayerId)) {
-            s.send(`${ANNOUNCEMENTS}Player ${p.username} is game room owner`)
-        }
+        Object.values(this.gameRooms[gameroomid].socketByPlayerId)
+            .forEach((socket) => { socket?.send(`${ANNOUNCEMENTS}Player ${p.username} is game room owner`) })
     }
     static PathPlayerReady = "/secure/player-ready"
     async PlayerReady(gameroomid, playerid, isReady) {
@@ -262,11 +264,11 @@ class Lobby {
         await gr.PlayerReady(playerid, isReady)
         console.log(`Player ${p.username} is ${ready?``:`not`} ready in gameroom ${gr.shortName}`)
         if (playerid == gr.gameRoomOwnerPlayerId && gr.socketByPlayerId[playerid]) {
-            gr.socketByPlayerId[playerid].send(`${CURRENT_ACTION_ITEM}${Lobby.PathStartGame}`)
+            gr.socketByPlayerId[playerid]?.send(`${CURRENT_ACTION_ITEM}${Lobby.PathStartGame}`)
         }
-        for(const s of Object.values(gr.socketByPlayerId)) {
-            s.send(`${ANNOUNCEMENTS}Player ${p.username} is ${ready?``:`not`} ready`)
-        }
+        Object.values(gr.socketByPlayerId)
+            .forEach((socket) => { socket?.send(`${ANNOUNCEMENTS}Player ${p.username} is ${ready?``:`not`} ready`)})
+
     }
     static PathSelectGame = "/secure/select-game"
     async SelectGame(gameroomid, gameidx) {
@@ -285,11 +287,12 @@ class Lobby {
             .WithMaxPlayers(gr.GAME_MAX_PLAYERS)
             .WithPlayers()
         console.log(`Game ${game.GAME_NAME} selected in gameroom ${this.gameRooms[gameroomid].shortName}`)
-        for(const s of Object.values(gr.socketByPlayerId)) {
-            s.send(`${CURRENT_ACTION_ITEM}${Lobby.PathPlayerReady}`)
-            s.send(`${GAME_INFORMATION}${gr.EmitGameStats()}`)
-            s.send(`${ANNOUNCEMENTS}Game ${game.GAME_NAME} selected`)
-        }
+        Object.values(gr.socketByPlayerId)
+            .forEach(function(socket) {
+                socket?.send(`${CURRENT_ACTION_ITEM}${Lobby.PathPlayerReady}`)
+                socket?.send(`${GAME_INFORMATION}${gr.EmitGameStats()}`)
+                socket?.send(`${ANNOUNCEMENTS}Game ${game.GAME_NAME} selected`)
+            })
         gr.playerReady = {}
         this.gameRooms[gr.id] = gr
         this.gameRoomsById[gr.id] = gr
@@ -308,18 +311,19 @@ class Lobby {
         if (gr.players.length != gr.playersReady.length) {
             for(const p of gr.players) {
                 if (!gr.playerReady[p.id]) {
-                    gr.socketByPlayerId[p.id].send(`${CURRENT_ACTION_ITEM}${Lobby.PathPlayerReady}`)
+                    gr.socketByPlayerId[p.id]?.send(`${CURRENT_ACTION_ITEM}${Lobby.PathPlayerReady}`)
                 }
-                gr.socketByPlayerId[p.id].send(`${ANNOUNCEMENTS}Game ${game.GAME_NAME} is starting when all players are ready!`)
+                gr.socketByPlayerId[p.id]?.send(`${ANNOUNCEMENTS}Game ${game.GAME_NAME} is starting when all players are ready!`)
             }
         }
         await gr.AwaitAllLoaded()
         console.log(`Game starting in gameroom ${gr.shortName}`)
         game = gr.games[gr.selectedGameId]
-        for(const s of Object.values(gr.socketByPlayerId)) {
-            s.send(`${GAME_INFORMATION}${gr.EmitGameStats()}`)
-            s.send(`${ANNOUNCEMENTS}Game ${game.GAME_NAME} started`)
-        }
+        Object.values(gr.socketByPlayerId)
+            .forEach(function(socket) {
+                socket?.send(`${GAME_INFORMATION}${gr.EmitGameStats()}`)
+                socket?.send(`${ANNOUNCEMENTS}Game ${game.GAME_NAME} started`)
+            })
         await gr.Start()
     }
 }
@@ -616,7 +620,6 @@ if (env.SERVER) {
             res.status(200).send(p.String(true))
             return
         } catch (e) {
-            console.log(e)
             res.status(400).send(e.toString())
             return
         }
@@ -627,13 +630,13 @@ if (env.SERVER) {
         if(token==""){
             res.set('WWW-Authenticate','Bearer')
             res.status(401).send(ERR_LOBBY_UNAUTHORIZED)
+            return
         }
         const { shortName, password } = req.body
         
         try {
             const p = await lobby.FindPlayerByAuthToken(token)
-            const g = await lobby.NewGameRoom(p.id, shortName, password)
-            await lobby.JoinGameRoom(p.id, g.id, password)
+            await lobby.NewGameRoom(p.id, shortName, password)
         } catch (e) {
             res.status(400).send(e.toString())
             return
@@ -647,12 +650,14 @@ if (env.SERVER) {
         if(token==""){
             res.set("WWW-Authenticate", "Bearer")
             res.status(401).send(ERR_GAMEROOM_UNAUTHORIZED)
+            return
         }
         const { id, password } = req.body
         try {
             const p = await lobby.FindPlayerByAuthToken(token)
             if(!lobby.gameRooms[id]) {
                 res.status(404).send(ERR_GAMEROOM_NOT_FOUND)
+                return
             }
             await lobby.JoinGameRoom(p.id, id, password) 
         } catch (e) {
@@ -668,6 +673,7 @@ if (env.SERVER) {
         if(token==""){
             res.set("WWW-Authenticate", "Bearer")
             res.status(401).send(ERR_GAMEROOM_UNAUTHORIZED)
+            return
         }
         try {
             const p = lobby.FindPlayerByAuthToken(token)
@@ -677,6 +683,7 @@ if (env.SERVER) {
             lobby.MakeGameRoomOwner(id, p.id)
         } catch (e) {
             res.status(400).send(e)
+            return
         }
         res.status(200)
         return
@@ -687,6 +694,7 @@ if (env.SERVER) {
         if(token==""){
             res.set("WWW-Authenticate", "Bearer")
             res.status(401).send(ERR_GAMEROOM_UNAUTHORIZED)
+            return
         }
         const { /*gameRoom*/id, gameidx } = req.body
         try {
@@ -723,6 +731,7 @@ if (env.SERVER) {
         if(token==""){
             res.set("WWW-Authenticate", "Bearer")
             res.status(401).send(ERR_GAMEROOM_UNAUTHORIZED)
+            return
         }
         const { ready } = req.body
         try {
@@ -745,9 +754,11 @@ if (env.SERVER) {
         if(token==""){
             res.set('WWW-Authenticate', 'Bearer')
             res.status(401).send(ERR_LOBBY_UNAUTHORIZED)
+            return
         }
         res.set('Content-Type', 'application/json')
         res.status(200).send(JSON.stringify(lobby.ListGameRooms()))
+        return
     })
 
     server.post(Lobby.PathStartGame, async (req, res) => {
@@ -755,6 +766,7 @@ if (env.SERVER) {
         if(token==""){
             res.set("WWW-Authenticate", "Bearer")
             res.status(401).send(ERR_GAMEROOM_UNAUTHORIZED)
+            return
         }
         try {
             const p = await lobby.FindPlayerByAuthToken(token)
@@ -775,13 +787,20 @@ if (env.SERVER) {
     })
 
     server.ws(Lobby.PathConnect, async (ws, req) => {
-        try {
-            await lobby.Connect(p.id, ws)
-        } catch (e) {
-            res.status(400).send(e)
+        const token = req.get("Authorization")
+        if(token==""){
+            res.set("WWW-Authenticate", "Bearer")
+            res.status(401).send(ERR_GAMEROOM_UNAUTHORIZED)
             return
         }
-        res.status(200)
+        try {
+            const p = await _getPlayer()
+            await lobby.Connect(p.id, ws)
+        } catch (e) {
+            ws.send(e.toString())
+            return
+        }
+        ws.send("OK")
         return
     })
     
@@ -803,10 +822,12 @@ if (env.SERVER) {
       
         // default to plain-text. send()
         res.type('txt').send('Not found');
+        return
     })
       
     server.use((err, req, res, next) => {
         res.status(500).send(err.stack)
+        return
     })
 
     // After defining classes lets start up our lobby instance on this server.
@@ -883,7 +904,11 @@ async function cliLobbyRequester(path="", payload=undefined, method="GET", conte
                 if (res.headers['content-type'] && res.headers['content-type'].startsWith('application/json')){
                     data = JSON.parse(data)
                 }
-                resolve({ data, headers, statusCode})
+                if (statusCode == 200) {
+                    resolve({ data, headers, statusCode})
+                } else {
+                    reject(data)
+                }
             })
         })
         req.on('error', (e) => {
@@ -903,9 +928,15 @@ let _ws = undefined
 async function _getWS() {
     if (_ws == undefined) {
         try {
-            ws = new WebSocket(`wss://${env.HOST}:${env.PORT}`)
-            await cliLobbyRequester(Lobby.Connect)
-            _ws = ws
+            const url = `ws://${env.HOST}:${env.PORT}${Lobby.PathConnect}`
+            _ws = new WebSocket(url)
+            _ws.on('error', (e) => console.log(`Error=${e}`))
+            _ws.on('open', function open() {
+                _ws.send("OK")
+            })
+            _ws.on('message', function message(m) {
+                console.log(`Message=${m}`)
+            })
         } catch (e) {
             throw e
         }
@@ -930,7 +961,7 @@ async function _getPlayer() {
         if(token==""){
             throw ERR_LOBBY_UNAUTHORIZED
         }
-        const p = await cliLobbyRequester(Lobby.PathWhoAmI, "", "GET", "application/json")
+        const p = await cliLobbyRequester(Lobby.PathWhoAmI, "", "GET")
         _p = p.data
     }
     return _p
@@ -1061,12 +1092,13 @@ if (env.CLI) {
             try {
                 const { statusCode, data } = await cliLobbyRequester(Lobby.PathWhoAmI, "", "GET", "text/plain")
                 if (statusCode != 200) {
+                    console.log(data)
                     throw new Error(data)
                 }
                 console.log("Welcome", data.username, "!")
                 process.exit(0)
             } catch (e) {
-                console.log(e.toString())
+                console.log(e)
                 process.exit(1)
             }
         }
@@ -1077,18 +1109,15 @@ if (env.CLI) {
         desc: 'create a new game room within lobby',
         handler: async (argv) => {
             try {
+                ws = await _getWS()
                 const g = await cliLobbyRequester(Lobby.PathNewGameRoom, JSON.stringify({ 
                     shortName: argv.shortName, 
-                    password: argv.password
-                }), "POST", "application/json")
-                await cliLobbyRequester(Lobby.PathJoinGameRoom, JSON.stringify({
-                    id: g.id, 
                     password: argv.password
                 }), "POST", "application/json")
                 console.log(`Welcome to gameroom #${g.id}, ${g.shortName}!`)
                 process.exit(0)
             } catch (e) {
-                console.log(e.toString())
+                console.log(e)
                 process.exit(1)
             }
         }
@@ -1115,12 +1144,12 @@ if (env.CLI) {
         handler: async (argv) => {
             try {
                 const p = _getPlayer()
+                const ws = _getWS()
                 await cliLobbyRequester(Lobby.PathJoinGameRoom, JSON.stringify({
                     id: argv.id,
                     password: argv.password
                 }))
                 console.log(`Welcome to gameroom# ${argc.id}, ${p.username}!`)
-                const ws = _getWS()
                 await decorateGameRoom(ws)
             } catch (e) {
                 console.log(e.toString())
