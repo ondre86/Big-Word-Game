@@ -107,7 +107,14 @@ const app = Vue.createApp({
             }
         },
         twoPlayer(){
-            if(this.multiPlayer && !this.lost){this.multiPlayer = false}
+            if(this.multiPlayer && !this.lost){
+                this.multiPlayer = false
+                navigator.sendBeacon("/", JSON.stringify({
+                    username: this.mpUsername,
+                    partyLeaderUsername: this.partyLeaderUsername ? this.partyLeaderUsername : null,
+                    request: "leave"
+                }))
+            }
             else {
                 this.multiPlayer = true
                 if (localStorage.username){
