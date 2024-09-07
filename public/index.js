@@ -111,14 +111,11 @@ const app = Vue.createApp({
             else {
                 this.multiPlayer = true
                 if (localStorage.username){
-                    if (!this.hasUsername) {
-                        this.usernameInput = localStorage.username
-                        this.$refs.userInput.value = localStorage.username
-        
-                        this.setUsername()
-                    }
+                    this.usernameInput = localStorage.username
+                    this.$refs.userInput.value = localStorage.username
                     this.hasUsername = true
                 }
+                this.setUsername()
             }
 
             if(this.introOff){this.introOff = false}
@@ -180,6 +177,7 @@ const app = Vue.createApp({
                 case 'leader':
                     this.wantsToCreateParty = true
                     this.chosenMatchmakingMode = true
+                    console.log(this.wantsToCreateParty)
                     fetch('/', {
                         method: 'POST',
                         headers: {
