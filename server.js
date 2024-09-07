@@ -59,7 +59,8 @@ app.ws('/', function(ws, req) {
     })
 
     ws.on('close', function (msg) {
-        removeSocketAndDeleteLobby(ws)  
+        removeSocket(ws)  
+        removeLobby(ws)  
     })
 })
 
@@ -251,14 +252,15 @@ class PlayedWord {
 
 // FUNCTIONS
 // handling messages
-function removeSocketAndDeleteLobby(ws){
+function removeSocket(ws){
     for (s in sockets){
         if (sockets[s].socket == ws){
             if (lookingForMatch) {clearInterval(lookingForMatch)}
         }
     }
     sockets = sockets.filter(s => s.socket !== ws)
-    
+}
+function removeLobby(ws) {
     try {
         for (c in lobbies){
             if (lobbies[c].player1.socket == ws){
@@ -768,10 +770,7 @@ function checkStrikeOutAndBroadcast() {
             otherScore: lobbies[l].player1.totalScore,
             reason: "Opponent struck out"
         }))
-        lobbies[l].player1.socket.close()
-        lobbies[l].player2.socket.close()
-        partyLeaders.delete(lobbies[l].player1.username)
-        removePairs(lobbies[l].player1.username)
+        removeFromOnlineAfterGame()
     }
     else if (lobbies[l].player1.strikes == 3 && lobbies[l].player2.strikes == 3){
         if (lobbies[l].player1.totalScore > lobbies[l].player2.totalScore){
@@ -816,10 +815,7 @@ function checkStrikeOutAndBroadcast() {
                 reason: "You both struck out, but your score was higher!"
             }))
         }
-        lobbies[l].player1.socket.close()
-        lobbies[l].player2.socket.close()
-        partyLeaders.delete(lobbies[l].player1.username)
-        removePairs(lobbies[l].player1.username)
+        removeFromOnlineAfterGame()
     }
     else if ((lobbies[l].player2.strikes == 3 && lobbies[l].player1.strikes != 3)) {
         lobbies[l].player2.socket.send(JSON.stringify({
@@ -834,10 +830,7 @@ function checkStrikeOutAndBroadcast() {
             otherScore: lobbies[l].player2.totalScore,
             reason: "Opponent struck out"
         }))
-        lobbies[l].player1.socket.close()
-        lobbies[l].player2.socket.close()
-        partyLeaders.delete(lobbies[l].player1.username)
-        removePairs(lobbies[l].player1.username)
+        removeFromOnlineAfterGame()
     }
 }
 function checkRoundEndAndBroadcast() {
@@ -884,13 +877,30 @@ function checkRoundEndAndBroadcast() {
                 reason: "Round ended"
             }))
         }
-        removePairs(lobbies[l].player1.username)
-        partyLeaders.delete(lobbies[l].player1.username)
+        removeFromOnlineAfterGame()
     }
 }
 function flipTurns() {
     if (lobbies[l].player1Turn){lobbies[l].player1Turn = false}
     else if (!lobbies[l].player1Turn){lobbies[l].player1Turn = true}
+}
+function removeFromOnlineAfterGame() {
+    removePairs(lobbies[l].player1.username)
+    partyLeaders.delete(lobbies[l].player1.username)
+    for (player in registeredOnlinePlayers){
+        if (lobbies[l].player1.username == registeredOnlinePlayers[player].username){
+            registeredOnlinePlayers.splice(player, 1)
+        }
+        else if (lobbies[l].player2.username == registeredOnlinePlayers[player].username){
+            registeredOnlinePlayers.splice(player, 1)
+        }
+    }
+    registeredOnlineUsernames.delete(lobbies[l].player1.username)
+    registeredOnlineUsernames.delete(lobbies[l].player2.username)
+    lobbies = lobbies.filter(l => (l.player1.socket !== ws))
+    lobbies = lobbies.filter(l => (l.player2.socket !== ws))
+    lobbies[l].player1.socket.close()
+    lobbies[l].player2.socket.close()
 }
 
 
