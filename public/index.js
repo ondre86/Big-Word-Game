@@ -178,8 +178,8 @@ const app = Vue.createApp({
                     this.chosenMatchmakingMode = true
                     break
                 case 'leader':
-                    this.chosenMatchmakingMode = true
                     this.wantsToCreateParty = true
+                    this.chosenMatchmakingMode = true
                     fetch('/', {
                         method: 'POST',
                         headers: {
