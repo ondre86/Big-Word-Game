@@ -187,16 +187,16 @@
                 <section id="choose-game-mode" class="vert gap2" v-show="hasUsername && chosenMatchmakingMode && !joiningParty && !mpClassicTut && !mpSpeedTut && !mpBattleTut">
                     <button class="btn-abs-l light-btn font2" @click.prevent="chosenMatchmakingMode = false; deleteParty(); scrollToTop();" v-if="isPartyLeader">end party</button>
                     <button class="btn-abs-l light-btn font2" @click.prevent="chosenMatchmakingMode = false; scrollToTop();" v-else>back</button>
-                    <div class="vert gap-5" v-if="!wantsToCreateParty">
+                    <div class="vert gap-5" v-show="!wantsToCreateParty">
                         <h1 class="font1 fz2">Choose Mode</h1>
                         <span class="font2 txt-center">Play against others globally!</span>
                     </div>
-                    <div class="vert gap-5" v-else>
+                    <div class="vert gap-5" v-show="wantsToCreateParty">
                         <h1 class="font1 fz2">Party Leader</h1>
                         <span class="font2 txt-center" v-if="partyMemberUsername !== ' '">In party: {{ partyMemberUsername }}</span>
                         <span class="font2 txt-center" v-else>Party empty</span>
                     </div>
-                    <div class="vert gap1 full-width" v-if="!wantsToCreateParty || (isPartyLeader && partyMemberUsername !== ' ')">
+                    <div class="vert gap1 full-width" v-show="!wantsToCreateParty || (isPartyLeader && partyMemberUsername !== ' ')">
                         <button class="btn" @click.prevent="classicTutToggle(); scrollToTop();">Classic</button>
                         <button class="btn" @click.prevent="speedTutToggle(); scrollToTop();">Speed</button>
                         <button class="btn" @click.prevent="battleTutToggle(); scrollToTop();">Battle</button>
