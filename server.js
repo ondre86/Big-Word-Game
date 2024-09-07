@@ -2,13 +2,13 @@ const express = require('express')
 const app = express()
 const expressWS = require('express-ws')(app)
 const helmet = require('helmet')
-const { rateLimit } = require('express-rate-limit')
-const limiter = rateLimit({
-	windowMs: 1 * 60 * 1000,
-	limit: 45, // Limit each IP to 45 POST requests per minute (45 words per minute)
-	standardHeaders: true, 
-	legacyHeaders: false
-})
+// const { rateLimit } = require('express-rate-limit')
+// const limiter = rateLimit({
+// 	windowMs: 1 * 60 * 1000,
+// 	limit: 45, // Limit each IP to 45 POST requests per minute (45 words per minute)
+// 	standardHeaders: true, 
+// 	legacyHeaders: false
+// })
 const syl = require('syllabificate')
 const profanity = require('@2toad/profanity')
 const pf = new profanity.Profanity({wholeWord: false})
@@ -16,8 +16,8 @@ const letterArray = "abcdefghijklmnopqrstuvwxyz".split("")
 const port = 8383
 
 // EXPRESS SERVER
-app.use(limiter)
-app.set('trust proxy', 1 /* number of proxies between user and server */)
+// app.use(limiter)
+// app.set('trust proxy', 1)
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
@@ -36,7 +36,7 @@ app.use(helmet({
 app.disable('x-powered-by')
 app.use(express.static('public')).use(express.json()).use(express.text())
 
-app.post('/', limiter, async (req, res)=>{
+app.post('/', async (req, res)=>{
     // FAIL
     if (!req.body){ 
         return res.status(400).send({ status: 'failed' }) 
@@ -59,8 +59,8 @@ app.ws('/', function(ws, req) {
     })
 
     ws.on('close', function (msg) {
-        removeSocket(ws)  
         removeLobby(ws)  
+        removeSocket(ws)  
     })
 })
 
@@ -262,43 +262,38 @@ function removeSocket(ws){
 }
 function removeLobby(ws) {
     try {
-        for (c in lobbies){
-            if (lobbies[c].player1.socket == ws){
-                lobbies[c].player2.socket.send(JSON.stringify({
+        for (l in lobbies){
+            if (lobbies[l].player1.socket == ws){
+                lobbies[l].player2.socket.send(JSON.stringify({
                     opponentForfeit: true,
                     reason: "Opponent quit or disconnected",
-                    otherScore: lobbies[c].player1.totalScore
+                    otherScore: lobbies[l].player1.totalScore
                 }))
-                lobbies[c].player2.socket.terminate()
             }
-            if (lobbies[c].player2.socket == ws){
-                lobbies[c].player1.socket.send(JSON.stringify({
+            if (lobbies[l].player2.socket == ws){
+                lobbies[l].player1.socket.send(JSON.stringify({
                     opponentForfeit: true,
                     reason: "Opponent quit or disconnected",
-                    otherScore: lobbies[c].player2.totalScore
+                    otherScore: lobbies[l].player2.totalScore
                 }))
-                lobbies[c].player1.socket.terminate()
             }
+            removeFromOnlineAfterGame(ws)
         } 
-        lobbies = lobbies.filter(l => (l.player1.socket !== ws)) 
-
     } catch (error) {
-        for (c in lobbies){
-            if (lobbies[c].player1.socket == ws){
-                lobbies[c].player2.socket.send(JSON.stringify({
+        for (l in lobbies){
+            if (lobbies[l].player1.socket == ws){
+                lobbies[l].player2.socket.send(JSON.stringify({
                     opponentForfeit: true,
                     reason: "Opponent quit or disconnected",
                 }))
-                lobbies[c].player2.socket.terminate()
             }
-            if (lobbies[c].player2.socket == ws){
-                lobbies[c].player1.socket.send(JSON.stringify({
+            if (lobbies[l].player2.socket == ws){
+                lobbies[l].player1.socket.send(JSON.stringify({
                     opponentForfeit: true,
                     reason: "Opponent quit or disconnected",
                 }))
-                lobbies[c].player1.socket.terminate()
             }
-        lobbies = lobbies.filter(l => (l.player2.socket !== ws)) 
+            removeFromOnlineAfterGame(ws)
         }
     }
 }
@@ -331,6 +326,24 @@ function removePairs(username) {
             parties.splice(pair, 1)
         }
     }
+}
+function removeFromOnlineAfterGame(ws) {
+    removePairs(lobbies[l].player1.username)
+    partyLeaders.delete(lobbies[l].player1.username)
+    for (player in registeredOnlinePlayers){
+        if (lobbies[l].player1.username == registeredOnlinePlayers[player].username){
+            registeredOnlinePlayers.splice(player, 1)
+        }
+        else if (lobbies[l].player2.username == registeredOnlinePlayers[player].username){
+            registeredOnlinePlayers.splice(player, 1)
+        }
+    }
+    registeredOnlineUsernames.delete(lobbies[l].player1.username)
+    registeredOnlineUsernames.delete(lobbies[l].player2.username)
+    lobbies[l].player1.socket.close()
+    lobbies[l].player2.socket.close()
+    lobbies = lobbies.filter(l => (l.player1.socket !== ws))
+    lobbies = lobbies.filter(l => (l.player2.socket !== ws))
 }
 async function directPostMessages(req, res) {
     directDictionaryMessages(req, res)
@@ -883,24 +896,6 @@ function checkRoundEndAndBroadcast() {
 function flipTurns() {
     if (lobbies[l].player1Turn){lobbies[l].player1Turn = false}
     else if (!lobbies[l].player1Turn){lobbies[l].player1Turn = true}
-}
-function removeFromOnlineAfterGame() {
-    removePairs(lobbies[l].player1.username)
-    partyLeaders.delete(lobbies[l].player1.username)
-    for (player in registeredOnlinePlayers){
-        if (lobbies[l].player1.username == registeredOnlinePlayers[player].username){
-            registeredOnlinePlayers.splice(player, 1)
-        }
-        else if (lobbies[l].player2.username == registeredOnlinePlayers[player].username){
-            registeredOnlinePlayers.splice(player, 1)
-        }
-    }
-    registeredOnlineUsernames.delete(lobbies[l].player1.username)
-    registeredOnlineUsernames.delete(lobbies[l].player2.username)
-    lobbies = lobbies.filter(l => (l.player1.socket !== ws))
-    lobbies = lobbies.filter(l => (l.player2.socket !== ws))
-    lobbies[l].player1.socket.close()
-    lobbies[l].player2.socket.close()
 }
 
 
