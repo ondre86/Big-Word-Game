@@ -148,7 +148,7 @@
                     <button class="btn light-btn font2" @click="tutorialToggle(); scrollToTop();">hide rules</button>
                 </div>
             </section>
-            <section id="multiplayer-path" class="tut-card" v-show="!started && !tutorialOn && !lost && multiPlayer && !isWaiting && !joiningParty && !(isPartyLeader && countingDown)">
+            <section id="multiplayer-path" class="tut-card" v-show="!started && !tutorialOn && !lost && multiPlayer && !isWaiting && !(isPartyLeader && countingDown)">
                 <section id="username-section" class="vert gap2" v-show="(!hasUsername || joiningParty) && !inParty">
                     <div>
                         <button class="btn-abs-l light-btn font2" @click.prevent="twoPlayer(); scrollToTop();" v-if="!joiningParty && !changingUsername">back</button>
@@ -184,7 +184,7 @@
                         <button class="btn" @click.prevent="chooseMatchmakingMode('leader'); scrollToTop();">Create Party</button>
                     </div>
                 </section>
-                <section id="choose-game-mode" class="vert gap2" v-show="hasUsername && chosenMatchmakingMode && !mpClassicTut && !mpSpeedTut && !mpBattleTut">
+                <section id="choose-game-mode" class="vert gap2" v-show="hasUsername && chosenMatchmakingMode && !joiningParty && !mpClassicTut && !mpSpeedTut && !mpBattleTut">
                     <button class="btn-abs-l light-btn font2" @click.prevent="chosenMatchmakingMode = false; deleteParty(); scrollToTop();" v-if="isPartyLeader">end party</button>
                     <button class="btn-abs-l light-btn font2" @click.prevent="chosenMatchmakingMode = false; scrollToTop();" v-else>back</button>
                     <div class="vert gap-5" v-if="!wantsToCreateParty">
