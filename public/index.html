@@ -42,7 +42,7 @@
     <main id="app" hidden>
         <div id="app-wrap">
             <section id="interactive" class="tut-card" v-show="!started && !tutorialOn && !introOff">
-                <button class="btn-abs-r font2 light-btn" @click="tutorialToggle();">show rules</button>
+                <button class="btn-abs-r font2 light-btn" @click="tutorialToggle();">show<br>rules</button>
                 <div class="vert gap2" v-if="!multiPlayer">
                     <h1 class="font1 fz2" v-if="!lost">Let's Play!</h1>
                     <h1 class="font1 fz2" v-else>Game Over</h1>
@@ -167,7 +167,7 @@
                 </section>
                 <section id="party-or-random" class="vert gap2" v-show="hasUsername && !chosenMatchmakingMode && !joiningParty">
                     <button class="btn-abs-l light-btn font2" @click.prevent=" twoPlayer(); scrollToTop();">back</button>
-                    <button id="change-username" class="btn-abs-r font2 light-btn" @click="hasUsername = false; changingUsername = true">change name</button>
+                    <button id="change-username" class="btn-abs-r font2 light-btn" @click="hasUsername = false; changingUsername = true">change<br>name</button>
                     <div class="vert gap-5">
                         <h1 class="font1 fz2 txt-center">Play Online</h1>
                         <div class="vert gap-5">
@@ -204,7 +204,7 @@
                 </section>
                 <section id="classic-mode" class="vert gap2" v-show="mpClassicTut">
                     <button class="btn-abs-l light-btn font2" @click.prevent="mpClassicTut=false; mpCTisHidden=true;" v-show="!isWaiting">back</button>
-                    <button class="btn-abs-r light-btn font2" @click="mpCTHide" v-if="mpCTisHidden" v-show="!isWaiting">show rules</button>
+                    <button class="btn-abs-r light-btn font2" @click="mpCTHide" v-if="mpCTisHidden" v-show="!isWaiting">show<br>rules</button>
                     <div class="vert gap-5">
                         <h1 class="font1 fz2">Classic Mode</h1>
                         <span class="font2 txt-center" v-if="!countingDown">Take turns playing big words!</span>
@@ -283,7 +283,7 @@
                 </section>
                 <section id="speed-mode" class="vert gap2" v-show="mpSpeedTut">
                     <button class="btn-abs-l light-btn font2" @click.prevent="mpSpeedTut=false; mpSTisHidden=true;" v-show="!isWaiting">back</button>
-                    <button class="btn-abs-r light-btn font2" @click="mpSTHide" v-if="mpSTisHidden" v-show="!isWaiting">show rules</button>
+                    <button class="btn-abs-r light-btn font2" @click="mpSTHide" v-if="mpSTisHidden" v-show="!isWaiting">show<br>rules</button>
                     <div class="vert gap-5">
                         <h1 class="font1 fz2">Speed Mode</h1>
                         <span class="font2 txt-center">Race to play your word first!</span>
@@ -357,7 +357,7 @@
                 </section>
                 <section id="battle-mode" class="vert gap2" v-show="mpBattleTut">
                     <button class="btn-abs-l light-btn font2" @click.prevent="mpBattleTut=false; mpWTisHidden=true;" v-show="!isWaiting">back</button>
-                    <button class="btn-abs-r light-btn font2" @click="mpWTHide" v-if="mpWTisHidden" v-show="!isWaiting">show rules</button>
+                    <button class="btn-abs-r light-btn font2" @click="mpWTHide" v-if="mpWTisHidden" v-show="!isWaiting">show<br>rules</button>
                     <div class="vert gap-5">
                         <h1 class="font1 fz2">Battle Mode</h1>
                         <span class="font2 txt-center">Play the word with the most syllables!</span>
