@@ -1,15 +1,6 @@
 const { toRaw } = Vue
-
 function $(elem){
     return document.querySelectorAll(elem)
-}
-
-wordsList = new Set()
-mpWordCard = null
-let wcoc = "#fddc02"
-const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-if (mediaQuery.matches) {
-    wcoc = "#8875FF"
 }
 
 const app = Vue.createApp({
@@ -22,9 +13,10 @@ const app = Vue.createApp({
             startBtn: null,
             tutBtn: null,
             lost: null,
-            tutorialOn: true,
+            tutorialOn: false,
+            introOff: false,
             data: null,
-            input: "",
+            input: '',
             finalWord: '',
             t: 15,
             wordCard:{
@@ -34,9 +26,10 @@ const app = Vue.createApp({
                 syllablesOther: null,
                 syllablesCustom: null,
             },
+            wordCardOutlineColor: "#B79E01",
             foundClosest: false,
             closest: null, 
-            alpha: "abcdefghijklmnopqrstuvwxyz".split(""),
+            alpha: "abcdefghijklmnopqrstuvwxyz".split(''),
             alphaX: 0,
             currentLetter: '',
             isRandomOrder: false,
@@ -48,7 +41,7 @@ const app = Vue.createApp({
             newHighScore: null,
             strikes: 0,
             wordPlayed: false,
-            vWordsList: null,
+            wordsList: new Set(),
             vWordsScrolled: [],
             vWordsOBJList: [],
             customScore:tpScore = null,
@@ -58,22 +51,41 @@ const app = Vue.createApp({
 
             wordMsg: '',
 
-            mode: "",
-            order: "",
+            mode: '',
+            modeDescriptor: '',
+            order: 'default',
             classicModeOn: false,
+
+            hasUsername: false,
+            usernameInput: '',
+            mpUsername: '',
+            usernameError: null,
+            changingUsername: null,
+            mpUserTimestamp: null,
+
+            chosenMatchmakingMode: false,
+            joiningParty: false,
+            partyLeaderUsername: '',
+            inParty: false,
+            isPartyLeader: false,
+            partyMemberUsername: ' ',
 
             multiPlayer: false, 
             mpClassicTut: false,
             mpSpeedTut: false,
-            mpWarTut: false,
+            mpBattleTut: false,
             mpCTisHidden: true,
             mpSTisHidden: true,
             mpWTisHidden: true,
 
             webSocket: null,
             isWaiting: false,
+            waitingDots: null,
+            inGameWaitingMsg: null,
             countingDown: false,
-            countdown: 3,
+            countdown: 5,
+            mpCountdownToGameStart: null,
+            opponentName: '',
 
             mpLost: null,
             mpTie: null,
@@ -84,8 +96,226 @@ const app = Vue.createApp({
         }
     },
     methods: {
+        // PATH BRANCHING & TUTORIALS
+        tutorialToggle(){
+            if(this.tutorialOn){
+                this.tutorialOn = false
+            }
+            else{
+                this.tutorialOn = true
+            }
+        },
+        twoPlayer(){
+            if(this.multiPlayer && !this.lost){this.multiPlayer = false}
+            else {
+                this.multiPlayer = true
+                if (localStorage.username){
+                    if (!this.hasUsername) {
+                        this.usernameInput = localStorage.username
+                        this.$refs.userInput.value = localStorage.username
+        
+                        this.setUsername()
+                    }
+                    this.hasUsername = true
+                }
+            }
+
+            if(this.introOff){this.introOff = false}
+            else {this.introOff = true}
+        },
+        chooseMatchmakingMode(type){
+            switch (type) {
+                case 'random':
+                    this.chosenMatchmakingMode = true
+                    break
+                case 'leader':
+                    this.chosenMatchmakingMode = true
+                    fetch('/', {
+                        method: 'POST',
+                        headers: {
+                            "Content-Type": 'application/json'
+                        },
+                        body: JSON.stringify({
+                            username: this.mpUsername,
+                            partyRequest: "create"
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(res => res.createdNewParty ? this.isPartyLeader = res.createdNewParty : this.isPartyLeader = false)
+                    .then(() => {
+                        if (this.isPartyLeader){
+                            this.startWebSocket()
+                        }
+                        else {
+                            this.usernameErrorMSG("Party could not be created.")
+                        }
+                    })
+                    break
+                case 'member':
+                    this.joiningParty = true
+                    break
+            }
+        },
+        mpCTHide(){
+            if (!this.mpCTisHidden){this.mpCTisHidden = true}
+            else{this.mpCTisHidden = false}
+        },
+        mpSTHide(){
+            if (!this.mpSTisHidden){this.mpSTisHidden = true}
+            else{this.mpSTisHidden = false}
+        },
+        mpWTHide(){
+            if (!this.mpWTisHidden){this.mpWTisHidden = true}
+            else{this.mpWTisHidden = false}
+        },
+        classicTutToggle(){
+            if (!this.mpClassicTut){this.mpClassicTut = true}
+            else{this.mpClassicTut = false}
+        },
+        speedTutToggle(){
+            if (!this.mpSpeedTut){this.mpSpeedTut = true}
+            else{this.mpSpeedTut = false}
+        },
+        battleTutToggle(){
+            if (!this.mpBattleTut){this.mpBattleTut = true}
+            else{this.mpBattleTut = false}
+        },
+        backToHome(){
+            this.mpClassicTut = false
+            this.classicModeOn = false
+            this.mpSpeedTut = false
+            this.mpBattleTut = false
+            this.multiPlayer = false
+            this.chosenMatchmakingMode = false
+            this.joiningParty = false
+            this.lost = false
+            this.introOff = false
+            this.scrollToTop()
+        },
+        mpBackToHome(otherScore, reason){
+            this.mpClassicTut = false
+            this.classicModeOn = false
+            this.mpSpeedTut = false
+            this.mpBattleTut = false
+            this.introOff = false
+            this.chosenMatchmakingMode = false
+            this.mode = ''
+            this.opponentScore = otherScore
+            this.mpLostReason = reason
+            this.scrollToTop()
+        },
+
+        // STARTING A GAME
+        newGame() {
+            this.tutorialOn = false
+            this.started = true
+            if (this.isRandomOrder){}
+            else{this.alphaX = 0}
+            this.currentLetter = this.alpha[this.alphaX]
+            this.resetTimer()
+        },
+        mpClassicNewGame(){
+            this.started = true
+            if (this.isRandomOrder){}
+            else{this.alphaX = 0}
+            this.currentLetter = this.alpha[this.alphaX]
+        },
+        shrinkHeader(){
+            gsap.to(["#logo"], {
+                height: "0px",
+                margin: "0px",
+                padding: "0px",
+                duration: .5
+            })
+            gsap.to("header", {
+                margin: "0px auto",
+                height: "0px",
+                duration: .5
+            }, "<")
+        },
+        expandHeader(){
+            gsap.to(["#logo"], {
+                height: "60px",
+                duration: .5
+            })
+            gsap.to("header", {
+                margin: "0.5rem auto 1rem",
+                height: "67px",
+                duration: .5
+            }, "<")
+        },
+
+        // RESETS
+        quit(){
+            this.started = false
+            this.tutorialOn = false
+            this.backToHome()
+            this.expandHeader()
+
+            if (this.webSocket){
+                this.terminateWS()
+            }
+
+            if (this.score > this.cookieHighScore){
+                this.newHighScore = true
+                this.cookieScore = this.score
+                localStorage.setItem("highScore", `${this.score}`)
+            }
+            
+            this.cookieScore = localStorage.lastScore ? localStorage.lastScore : 0
+            this.cookieHighScore = localStorage.highScore || this.cookieHighScore !== '' ? localStorage.highScore : 0
+
+            this.resetStats()
+        },
+        resetStats(){
+            this.paused = false
+            this.lost = null
+            this.currentLetter = ''
+            this.finalWord = ''
+            this.input = ''
+            this.randomCounter = 0
+            this.wordsList.clear()
+            this.vWordsScrolled = []
+            this.vWordsOBJList = []
+            this.score = 0
+            this.newHighScore = false
+            this.strikes = 0
+            this.wordPlayed = false
+            this.customScore, this.tpScore = null
+            this.wordCard.word = null
+            this.wordCard.type = null
+            this.wordCard.defs = null
+            this.wordCard.syllablesOther = null
+            this.wordCard.syllablesCustom = null
+            this.foundClosest = false,
+            this.closest = null
+            this.$refs.input.style.outlineColor = this.wordCardOutlineColor
+            clearInterval(this.time)
+            this.time = null
+
+            this.chosenMatchmakingMode = false,
+            this.mpLost = null
+            this.mpTie = null
+            this.mpLostReason = null
+            this.mpFinalScore = null
+            this.autoSent = false
+        },
+        resetPlaceholder(){
+            clearInterval(this.inGameWaitingMsg)
+            this.$refs.input.style.textAlign = "left"
+            this.$refs.input.placeholder = ''
+        },
+        resetWaiting(){
+            this.isWaiting = false
+            clearInterval(this.waitingDots)
+            if($("#waiting-text")[0]){
+                $("#waiting-text")[0].textContent = 'finding an opponent'
+            }
+        },
+
+        // TIMER & PAUSING
         isInViewport() {
-            const rect = this.$refs.input.getBoundingClientRect();
+            const rect = this.$refs.input.getBoundingClientRect()
             if (
                 rect.top >= -30 &&
                 rect.left >= 0 &&
@@ -95,8 +325,7 @@ const app = Vue.createApp({
                 {
                     this.pauseScroll = false
 
-                    if (this.pausePress == true){
-                    }
+                    if (this.pausePress){}
                     else{
                         this.paused = false
                     }
@@ -111,15 +340,11 @@ const app = Vue.createApp({
                 else return true
             }
         },
-        setData(item){
-            this.data = item
-            this.wordCard.syllablesOther = item.tps
-        },
         pause(){
-            if (this.pausePress == false){
+            if (!this.pausePress){
                 this.pausePress = true
 
-                if (this.paused == true){
+                if (this.paused){
                     this.$refs.input.disabled = true
                 }
                 else{
@@ -130,7 +355,7 @@ const app = Vue.createApp({
             else {
                 this.pausePress = false
                 
-                if (this.pauseScroll == true){
+                if (this.pauseScroll){
                     this.$refs.input.disabled = false
                 }
                 else{
@@ -141,7 +366,7 @@ const app = Vue.createApp({
             }
         },
         timer(){
-            if (this.isInViewport() == true && this.paused == false && this.started == true){            
+            if (this.isInViewport() && !this.paused && this.started){            
                 if (this.t > 0){
                     this.t--
                     this.$refs.input.disabled = false
@@ -172,7 +397,7 @@ const app = Vue.createApp({
             clearInterval(this.time)
             this.paused = false
             this.pausePress = false
-            if (this.started == true){
+            if (this.started){
                 this.$refs.input.disabled = false
                 this.$refs.input.focus()
             }
@@ -194,71 +419,27 @@ const app = Vue.createApp({
             this.t = 15
             this.time = setInterval(this.timer, 1000)
         },
+        mpRefreshTimer(){
+            if (this.classicModeOn){}
+            else {
+                this.mpStopTimer()
+                this.mpResetTimer()
+            }
+        },
         stopTimerAndGame(){
             clearInterval(this.time)
             this.t = 15
             this.started = false
+            this.introOff = false
         },
-        resetStats(){
-            this.paused = false
-            this.lost = null
-            this.currentLetter = ''
-            this.finalWord = ''
-            this.randomCounter = 0
-            wordsList.clear()
-            this.vWordsList = null
-            this.vWordsScrolled = []
-            this.vWordsOBJList = []
-            this.score = 0
-            this.newHighScore = false
-            this.strikes = 0
-            this.wordPlayed = false
-            this.customScore, this.tpScore = null
-            this.wordCard.word = null
-            this.wordCard.type = null
-            this.wordCard.defs = null
-            this.wordCard.syllablesOther = null
-            this.wordCard.syllablesCustom = null
-            this.foundClosest = false,
-            this.closest = null
-            this.$refs.input.style.outlineColor = wcoc
-            clearInterval(this.time)
-            this.time = null
 
-            this.mpLost = null
-            this.mpTie = null
-            this.mpLostReason = null
-            this.mpFinalScore = null
-            this.autoSent = false
-        },
-        newGame() {
-            this.tutorialOn = false
-            this.started = true
-            if (this.isRandomOrder == true){}
-            else{this.alphaX = 0}
-            this.currentLetter = this.alpha[this.alphaX]
-            this.resetTimer()
-        },
-        mpClassicNewGame(){
-            this.tutorialOn = false
-            this.started = true
-            if (this.isRandomOrder == true){}
-            else{this.alphaX = 0}
-            this.currentLetter = this.alpha[this.alphaX]
-        },
-        tutorialToggle(){
-            if(this.tutorialOn == true){
-                this.tutorialOn = false
-            }
-            else{
-                this.tutorialOn = true
-            }
-        },
+        // GAME & WORD LOGIC
         async callServerDictionary(event){
+            this.scrollToTop()
             if (event){event.preventDefault()}
-            if ((this.input == "" || this.input == null || this.input.replace(/[^A-Za-z]/g, '').length == 0) && this.t > 0){return}
+            if ((this.input == '' || !this.input || this.input.replace(/[^A-Za-z]/g, '').length == 0) && this.t > 0){return}
             if ((event != undefined || event != null) && this.t <= 1){}
-            else if ((this.input == "" || this.input == null) && this.t == 0){ 
+            else if ((this.input == '' || !this.input) && this.t == 0){ 
                 this.autoSent = false
                 this.strike() 
                 this.foundClosest = false
@@ -274,10 +455,10 @@ const app = Vue.createApp({
                         "Content-Type": 'application/json'
                     },
                     body: JSON.stringify({
-                        input: this.input.replace(/[^A-Za-z]/g, ''),
+                        input: this.input.replace(/[^A-Za-z]/g, '')
                     })
                 })
-                .then((response) => response.json())
+                .then((rep) => rep.json())
                 .then((success) => {
                     this.input = this.input.replace(/[^A-Za-z]/g, '').toLowerCase()
                     if (this.input.replace(/[^A-Za-z]/g, '').length == 0){
@@ -300,27 +481,28 @@ const app = Vue.createApp({
                     }
                     else {
                         this.mpStopTimer()
-                        this.$refs.input.style.textAlign = "center"
-                        this.$refs.input.placeholder = "waiting..."
+                        this.t = 15
+                        if (this.multiPlayer && !this.classicModeOn){this.animateWaitingMsg()}
                     }
                 })
                 .catch(error => {
                     alert("Sorry, there was a problem communicating with our server.")
                 })
             }
-        },     
+        },   
+        setData(item){
+            this.data = item
+            this.wordCard.syllablesOther = item.tps
+        },  
         enterWord(){
             this.tries++
-            gsap.to(window, {
-                scrollTo: {y: this.$refs.appWrap.offsetTop, autokill: true},
-                duration: .5
-            })
             try{
                 if (this.input == ''){}
-                else if (this.data.data[0] == undefined || toRaw(this.data.data[0].hwi) == undefined){
-                    if (typeof toRaw(this.data.data[0]) != null){
+                else if (!this.data.data[0] || !toRaw(this.data.data[0].hwi)){
+                    if (toRaw(this.data.data[0]) && toRaw(this.data.data[0]) !== ''){
                         this.foundClosest = true
                         this.closest = toRaw(this.data.data[0])
+                        this.finalWord = this.closest
                     }
                     else {this.foundClosest = false}
                     this.strike()
@@ -353,7 +535,7 @@ const app = Vue.createApp({
                         this.syllableCountCustom(this.input, toRaw(this.data.data))
                         this.wordCardUpdate(this.input, toRaw(this.data.data))
                         if(this.syllableLengthCheck()){
-                            if (this.webSocket != null){
+                            if (this.webSocket){
                                 if (this.wordPlayed && this.tpScore){
                                     this.webSocket.send(JSON.stringify({
                                         score: this.wordCard.syllablesOther,
@@ -377,7 +559,7 @@ const app = Vue.createApp({
                                 this.scoreKeeper()
                                 this.nextLetter()
                                 this.$refs.input.style.outlineColor = "green"
-                                this.scroll()
+                                this.scrollWordCardList()
                             }
                         }
                         else{
@@ -395,8 +577,14 @@ const app = Vue.createApp({
         strike(){
             this.strikes++
             this.$refs.input.style.outlineColor = "red"
-            this.cycleWordMessage(0)
-            if (this.webSocket != null){
+            if (!this.classicModeOn){
+                this.cycleWordMessage(0)
+            }
+            else{
+                this.cycleWordMessageClassic(0)
+            }
+             
+            if (this.webSocket){
                 this.webSocket.send(JSON.stringify({
                     score: 0,
                     time: Date.now(),
@@ -407,11 +595,10 @@ const app = Vue.createApp({
             }
             if (this.strikes == 3){
                 this.finalWord = this.$refs.input.value
-                this.lost = true
+
                 this.wordCard.word = null
                 this.wordCard.type = null
                 this.wordCard.defs = null
-                this.stopTimerAndGame()
                 localStorage.setItem("lastScore", `${this.score}`)
                 if (this.score > this.cookieHighScore){
                     this.newHighScore = true
@@ -420,8 +607,10 @@ const app = Vue.createApp({
                 else{
                     this.newHighScore = false
                 }
-                if (this.webSocket!=null){
-                    this.mpLost = true
+                if (this.webSocket){}
+                else {
+                    this.lost = true
+                    this.stopTimerAndGame()
                 }
             }
             else{
@@ -443,10 +632,10 @@ const app = Vue.createApp({
         },
         isCurrentLetter(){
             this.currentLetter = this.alpha[this.alphaX]
-            return this.input.split("")[0].toLowerCase() == this.alpha[this.alphaX].toLowerCase()
+            return this.input.split('')[0].toLowerCase() == this.alpha[this.alphaX].toLowerCase()
         },
         hasBeenUsed(){
-            if (wordsList.has(this.input) || wordsList.has(this.input.charAt(0).toUpperCase() + this.input.slice(1))){
+            if (this.wordsList.has(this.input) || this.wordsList.has(this.input.charAt(0).toUpperCase() + this.input.slice(1))){
                 for (let f = 0; f < this.$refs.wl.children.length; f++){
                     if (this.$refs.wl.children[f].innerHTML.includes(this.input) || this.$refs.wl.children[f].innerHTML.includes(this.input.charAt(0).toUpperCase() + this.input.slice(1))){
                         gsap.to(this.$refs.wl, {
@@ -456,7 +645,7 @@ const app = Vue.createApp({
                         this.$refs.wl.children[f].children[0].classList.add("active")
                         setTimeout(() => {
                             this.$refs.wl.children[f].children[0].classList.remove("active")
-                        }, 2500);
+                        }, 2500)
                     }
                 }
                 return true
@@ -466,20 +655,6 @@ const app = Vue.createApp({
         notLongEnough(){
             this.strike()
         }, 
-        wordCardUpdate(input, data){
-            for (let i = 0; i < data[0].meta.stems.length; i++){
-                if (input == data[0].meta.stems[i].toLowerCase()){
-                    this.wordCard.word = data[0].meta.stems[i]
-                    this.wordCard.type = data[0].fl
-                    this.wordCard.defs = data[0].shortdef
-                }
-            }
-            if (!this.multiPlayer){
-                if(this.wordCard.defs != null){
-                    this.vWordsOBJList.push(Object.values(toRaw(this.wordCard)))  
-                }
-            }
-        },
         syllableCountCustom(input, data){
             let stemSyllableArray = []
             for (let i = 0; i < data[0].meta.stems.length; i++){
@@ -493,7 +668,7 @@ const app = Vue.createApp({
                             }
                         }
                         for (let v in stemSyllableArray){
-                            if (stemSyllableArray[v].join("") == input){
+                            if (stemSyllableArray[v].join('') == input){
                                     this.wordCard.syllablesCustom = stemSyllableArray[v].length
                             }
                         }
@@ -501,7 +676,7 @@ const app = Vue.createApp({
                     else if (data[0].uros != undefined){
                         for (let g in data[0].uros){
                             stemSyllableArray.push(data[0].uros[g].ure.split("*"))
-                            if (stemSyllableArray[g].join("") == input){
+                            if (stemSyllableArray[g].join('') == input){
                                 this.wordCard.syllablesCustom = stemSyllableArray[g].length
                             }
                         }
@@ -512,12 +687,11 @@ const app = Vue.createApp({
         syllableLengthCheck(){
             // FAIL
             if (toRaw(this.wordCard.syllablesCustom) < 3 && toRaw(this.wordCard.syllablesOther) < 3){
-                this.cycleWordMessage(this.wordCard.syllablesOther)
                 return this.wordPlayed = false
             }
             // SUCCESS
             // CUSTOM CHECK NULL CASE & THIRD PARTY SUCCEED
-            else if(toRaw(this.wordCard.syllablesCustom) == null && toRaw(this.wordCard.syllablesOther) != null && toRaw(this.wordCard.syllablesOther) >= 3){
+            else if(toRaw(!this.wordCard.syllablesCustom) && toRaw(this.wordCard.syllablesOther) && toRaw(this.wordCard.syllablesOther) >= 3){
                 this.wordListUpdate()
                 this.tpScore = true
                 return this.wordPlayed = true
@@ -557,59 +731,101 @@ const app = Vue.createApp({
                 this.tpScore = true
                 return this.wordPlayed = true
             }
-        },       
+        }, 
+
+        // DOM UPDATES AND WORD INFO
+        wordCardUpdate(input, data){
+            for (let i = 0; i < data[0].meta.stems.length; i++){
+                if (input == data[0].meta.stems[i].toLowerCase()){
+                    this.wordCard.word = data[0].meta.stems[i]
+                    this.wordCard.type = data[0].fl
+                    this.wordCard.defs = data[0].shortdef
+                }
+            }
+            if (!this.multiPlayer){
+                if(this.wordCard.defs != null){
+                    this.vWordsOBJList.push(Object.values(toRaw(this.wordCard)))  
+                }
+            }
+        },
+        mpWordCardUpdate(word){
+            if (word && word.word){toRaw(this.wordCard).word = word.word}
+            if (word && word.type){toRaw(this.wordCard).type = word.type}
+            if (word && word.defs){toRaw(this.wordCard).defs = word.defs}
+            if (word && word.syllablesOther){toRaw(this.wordCard).syllablesOther = word.syllablesOther}
+            if (word && word.syllableCountCustom){toRaw(this.wordCard).syllablesCustom = word.syllablesCustom}
+        },
+        replaceWordCard(event){
+            this.finalWord = ''
+            for (let e = 0; e < this.$refs.wl.children.length; e++){
+                this.$refs.wl.children[e].childNodes[0].classList.remove("active")
+                if (event.target.innerHTML == toRaw(this.vWordsOBJList[e][0])){
+                    event.target.classList.add("active")
+                    this.wordCard.word = toRaw(this.vWordsOBJList[e][0])
+                    this.wordCard.type = toRaw(this.vWordsOBJList[e][1])
+                    this.wordCard.defs = toRaw(this.vWordsOBJList[e][2])
+                }
+            }
+            gsap.to(this.$refs.wl, {
+                scrollTo: {y: 0, x: (event.target.offsetLeft - (this.$refs.wl.clientWidth / 2) + (event.target.clientWidth / 2)), autokill: true},
+                duration: .5
+            })
+            gsap.to(this.$refs.wcScroller, {
+                scrollTo: 0,
+                duration: .5
+            })
+        },
         wordListUpdate(){
             if (!this.multiPlayer){
                 this.wordPlayed = true
-                wordsList.add(toRaw(this.wordCard.word))
-                this.vWordsList = wordsList  
+                this.wordsList.add(toRaw(this.wordCard.word))
             }
         },
         mpWordListUpdate(){
+            if (!this.$refs.wl.children[0]){
+                const first = document.createElement("li")
+                first.innerHTML = `<button class="btn font2"></button>`
+                first.addEventListener("click", ()=>{
+                    this.replaceWordCard()
+                })
+                first.addEventListener("keydown", (e)=>{
+                    if (e.keyCode === 32){
+                        this.replaceWordCard()
+                    }
+                    if (e.keyCode === 13){
+                        this.replaceWordCard()
+                    }
+                }) 
+            }
             this.wordPlayed = true
-            wordsList.add(toRaw(this.wordCard.word))
-            this.vWordsList = wordsList  
+            this.wordsList.add(toRaw(this.wordCard.word)) 
             if(this.wordCard.defs != null){
                 this.vWordsOBJList.push(Object.values(toRaw(this.wordCard)))  
             }
         },
         cycleWordMessage(m){
-            switch (m) {
-                case 0:
-                    this.wordMsg = 'oops!'
-                    break;
-                case 1:
-                    this.wordMsg = 'not quite...'
-                    break;
-                case 2:
-                    this.wordMsg = 'hmm...'
-                    break;
-                case 3:
-                    this.wordMsg = 'nice!'
-                    break;
-                case 4:
-                    this.wordMsg = 'great!!'
-                    break;
-                case 5:
-                    this.wordMsg = 'wonderful!!!'
-                    break;
+            if (!this.classicModeOn){
+                if (!m || m < 3){
+                    this.wordMsg = '❌'
+                }
+                else this.wordMsg = '✅'
             }
-            if (m >= 6) {
-                this.wordMsg = 'incredible!!!!'
-            }
+            
             this.animateWordMsg()
         },
-        mpWordMessage(mode){
-            switch (mode) {
-                case 'speed':
-                    this.wordMsg = 'too slow!'
-                    break;
-                case 'war':
-                    this.wordMsg = 'too small!'
-                    break;
-                case 'tie':
-                    this.wordMsg = 'tie!'
-                    break;
+        cycleWordMessageClassic(m){
+            if (this.classicModeOn){
+                if (!m || m < 3){
+                    this.wordMsg = '❌'
+                }
+                else this.wordMsg = '✅'
+            }
+            
+            this.animateWordMsg()
+        },
+        mpWordMsg(){
+            if (!this.classicModeOn){
+                this.wordMsg = '🔁'
             }
             this.animateWordMsg()
         },
@@ -629,15 +845,59 @@ const app = Vue.createApp({
                 duration: .5
             }, "<+=2")
         },
+        animateWaitingMsg(){
+            clearInterval(this.inGameWaitingMsg)
+            this.$refs.input.style.textAlign = "center"
+            let msg = 'waiting'
+            let dots = 0
+            this.$refs.input.placeholder = msg
+            this.inGameWaitingMsg = setInterval(()=>{
+                dots++
+                msg = msg.concat(".")
+                this.$refs.input.placeholder = msg
+                if (dots == 4){
+                    dots = 0
+                    msg = 'waiting'
+                    this.$refs.input.placeholder = msg
+                }
+            }, 1000)
+        },
+        emphasizeWordCard(){
+            wcOutline = gsap.timeline()
+            .to(this.$refs.wordCardDisplay, {
+                outline: `9px solid ${this.wordCardOutlineColor}`,
+                duration: .5
+            })
+            .to(this.$refs.wordCardDisplay, {
+                outline: `0px solid ${this.wordCardOutlineColor}`,
+                duration: .5
+            }, "<+=2")
+        },
+        emphasizeInput(isWinner, score = this.wordCard.syllablesOther){
+            if (isWinner){
+                this.$refs.input.style.outlineColor = "green"
+            }
+            else {
+                if (score != 0){
+                    this.$refs.input.style.outlineColor = this.wordCardOutlineColor
+                }
+            }
+        },
+
+        // SCORE
         scoreKeeper(){
             if (this.wordPlayed && this.tpScore){
-                this.cycleWordMessage(this.wordCard.syllablesOther)
+                if (!this.classicModeOn){
+                    this.cycleWordMessage(this.wordCard.syllablesOther)
+                }
                 this.score += this.wordCard.syllablesOther
                 this.cookieScore = this.score
                 localStorage.setItem("lastScore", `${this.score}`)
             }
             else if (this.wordPlayed && this.customScore){
-                this.cycleWordMessage(this.wordCard.syllablesCustom)
+                if (!this.classicModeOn){
+                    this.cycleWordMessage(this.wordCard.syllablesCustom)
+                }
                 this.score += this.wordCard.syllablesCustom
                 this.cookieScore = this.score
                 localStorage.setItem("lastScore", `${this.score}`)
@@ -656,8 +916,26 @@ const app = Vue.createApp({
                 localStorage.setItem("highScore", `${s}`)
             }
         },
+
+        // LETTER ORDER
+        randomOrder(boolean){
+            if (!boolean){{
+                this.isRandomOrder = false
+                this.order = "default"
+                this.alphaX = 0
+                this.currentLetter = this.alpha[this.alphaX]
+            }}
+            else{
+                this.isRandomOrder = true
+                this.order = "random"
+                if (!this.multiPlayer){
+                    this.alphaX = Math.floor(Math.random() * 26)
+                    this.currentLetter = this.alpha[this.alphaX]
+                }
+            }
+        },
         nextLetter() {
-            if (this.isRandomOrder == true){
+            if (this.isRandomOrder){
                 if (this.randomCounter == 26){
                     this.rounds++
                     this.randomCounter = 0
@@ -687,7 +965,7 @@ const app = Vue.createApp({
         },
         mpNextLetter(letter, index){
             this.alphaX = index
-            if (letter == null || letter == undefined){
+            if (!letter){
                 this.currentLetter = this.alpha[index]
             }
             else {this.currentLetter = letter}
@@ -695,9 +973,11 @@ const app = Vue.createApp({
             this.wordPlayed = false
             this.$refs.input.focus()
         },
-        scroll(){
+
+        // SCROLLING
+        scrollWordCardList(){
             setTimeout(() => {
-                if (this.$refs.wl.children[this.$refs.wl.children.length-1] == undefined){}
+                if (!this.$refs.wl.children[this.$refs.wl.children.length-1]){}
                 else {
                     this.vWordsScrolled.push(this.$refs.wl.children[this.$refs.wl.children.length-1].scrollWidth)
                     gsap.to(this.$refs.wl, {
@@ -705,470 +985,507 @@ const app = Vue.createApp({
                         duration: .5
                     })
                 }
-            }, 100);
-            gsap.fromTo(".def-pop", {
-                opacity: 0
-            }, {
-                opacity: 1,
-                duration: 1
+            }, 100)
+        },
+        scrollToTop(){
+            gsap.to("body", {
+                scrollTo: {y:0, x:0, autokill: true},
+                duration: .5,
+                ease: "power4.out"
             })
-            gsap.to(".def-pop", {
-                opacity: 0,
-                delay: 3
-            })
-        },
-        replaceWordCard(event){
-            this.finalWord = ''
-            for (let e = 0; e < this.$refs.wl.children.length; e++){
-                this.$refs.wl.children[e].childNodes[0].classList.remove("active")
-                if (event.target.innerHTML == toRaw(this.vWordsOBJList[e][0])){
-                    event.target.classList.add("active")
-                    this.wordCard.word = toRaw(this.vWordsOBJList[e][0])
-                    this.wordCard.type = toRaw(this.vWordsOBJList[e][1])
-                    this.wordCard.defs = toRaw(this.vWordsOBJList[e][2])
-                }
-            }
-            gsap.to(this.$refs.wl, {
-                scrollTo: {y: 0, x: (event.target.offsetLeft - (this.$refs.wl.clientWidth / 2) + (event.target.clientWidth / 2)), autokill: true},
-                duration: .5
-            })
-            gsap.to(this.$refs.wcScroller, {
-                scrollTo: 0,
-                duration: .5
-            })
-        },
-        randomOrder(event, boolean){
-            if (boolean == false){{
-                this.isRandomOrder = false
-                this.alphaX = 0
-                this.currentLetter = this.alpha[this.alphaX]
-            }}
-            else{
-                this.isRandomOrder = true
-                if (!this.multiPlayer){
-                    this.alphaX = Math.floor(Math.random() * 26)
-                    this.currentLetter = this.alpha[this.alphaX]
-                }
-            }
-        },
-        twoPlayer(){
-            if(this.multiPlayer == true){this.multiPlayer = false}
-            else {this.multiPlayer = true}
-        },
-        mpCTHide(){
-            if (this.mpCTisHidden == false){this.mpCTisHidden = true}
-            else{this.mpCTisHidden = false}
-        },
-        mpSTHide(){
-            if (this.mpSTisHidden == false){this.mpSTisHidden = true}
-            else{this.mpSTisHidden = false}
-        },
-        mpWTHide(){
-            if (this.mpWTisHidden == false){this.mpWTisHidden = true}
-            else{this.mpWTisHidden = false}
-        },
-        classicTutToggle(){
-            if (this.mpClassicTut == false){this.mpClassicTut = true}
-            else{this.mpClassicTut = false}
-        },
-        speedTutToggle(){
-            if (this.mpSpeedTut == false){this.mpSpeedTut = true}
-            else{this.mpSpeedTut = false}
-        },
-        warTutToggle(){
-            if (this.mpWarTut == false){this.mpWarTut = true}
-            else{this.mpWarTut = false}
-        },
-        backToMulti(){
-            this.mpClassicTut = false
-            this.classicModeOn = false
-            this.mpSpeedTut = false
-            this.mpWarTut = false
-            this.multiPlayer = true
-            this.lost = false
-        },
-        backToSolo(){
-            this.mpClassicTut = false
-            this.classicModeOn = false
-            this.mpSpeedTut = false
-            this.mpWarTut = false
-            this.multiPlayer = false
-            this.lost = false
-        },
-        quit(){
-            this.started = false
-            this.tutorialOn = false
-            this.backToSolo()
-
-            restart = gsap.timeline()
-            .to(".logo", {
-                height: "80px",
-                duration: .5
-            })
-            .to(".logo-holster", {
-                height: "90px",
-                margin: "0 0 2rem",
-                duration: .5
-            }, "<")
-
-            if (this.score > this.cookieHighScore){
-                this.newHighScore = true
-                this.cookieScore = this.score
-                localStorage.setItem("highScore", `${this.score}`)
-            }
-            this.cookieScore = localStorage.getItem("lastScore")
-            if (this.cookieScore == null){this.cookieScore = 0}
-            this.cookieHighScore = localStorage.getItem("highScore")
-            if (this.cookieHighScore == null || this.cookieHighScore == ""){this.cookieHighScore = 0}
-
-            this.resetStats()
-        },
-        startWebSocket(){
-            if (this.mpClassicTut){
-                this.mode = "classic"
-            }
-            else if (this.mpSpeedTut){
-                this.mode = "speed"
-            }
-            else if (this.mpWarTut){
-                this.mode = "war"
-            }
-            if(this.isRandomOrder){
-                this.order = "random"
-            }
-            else {this.order = "default"}
-            this.webSocket = new WebSocket(`wss://${window.location.hostname}:${window.location.port}`)
-            this.webSocket.addEventListener("open", (event) => {
-                this.webSocket.send(JSON.stringify({
-                    mode: this.mode,
-                    order: this.order
-                }))
-            })
-            this.webSocket.addEventListener("message", (event) => {
-                rep = JSON.parse(event.data)
-                if (rep.waiting == true){
-                    this.isWaiting = true
-                }
-                else if (rep.waiting == false && rep.inGame == true){
-                    if (rep.isClassic == true){
-                        this.classicModeOn = true
-                    }
-                    this.countingDown = true
-                    mpCountdown = setInterval(() => {
-                        this.countdown--
-                        if (this.countdown == 0){
-                            clearInterval(mpCountdown)
-                            this.countdown = 3
-                            this.countingDown = false
-
-                            if (this.classicModeOn){
-                                this.resetStats()
-                                this.mpClassicNewGame()
-                                if (rep.isYourTurn == true){
-                                    this.mpResetTimer()
-                                }
-                            }
-                            else {
-                                this.resetStats()
-                                this.newGame()
-                            }
-                            this.mpNextLetter(rep.letter, rep.letterIndex)
-                        }
-                    }, 1000);
-                }
-                if (rep.opponentForfeit == true){
-                    this.stopTimerAndGame()
-                    this.lost = true
-                    this.mpLost = false
-                    this.mpLostReason = "Opponent quit or disconnected"
-                    this.mpScoreFinal(this.score)
-                    this.opponentScore = rep.otherScore
-                }
-                // DOM UPDATE & SCORE LOGIC
-                if (this.wordCard != null || this.wordCard != undefined){
-                    this.$refs.input.style.textAlign = "left"
-                    this.$refs.input.placeholder = ""
-                    if (rep.winner == true){
-                        mpWordCard = rep.winningWord
-                        toRaw(this.wordCard).word = rep.winningWord.word
-                        toRaw(this.wordCard).type = rep.winningWord.type
-                        toRaw(this.wordCard).defs = rep.winningWord.defs
-                        toRaw(this.wordCard).syllablesOther = rep.winningWord.syllablesOther
-                        toRaw(this.wordCard).syllablesCustom = rep.winningWord.syllablesCustom
-                        if (this.$refs.wl.children[0] == undefined){
-                            const first = document.createElement("li")
-                            first.innerHTML = `<button class="btn font2"></button>`
-                            first.addEventListener("click", ()=>{
-                                this.replaceWordCard()
-                            })
-                            first.addEventListener("keydown", (e)=>{
-                                if (e.keyCode === 32){
-                                    this.replaceWordCard()
-                                }
-                                if (e.keyCode === 13){
-                                    this.replaceWordCard()
-                                }
-                            })
-                            wordsList.add(toRaw(this.wordCard.word))
-                            this.vWordsList = wordsList  
-                        }
-                        this.mpWordListUpdate()
-                        this.$forceUpdate();
-                        this.$refs.input.style.outlineColor = "green"
-                        gsap.to(this.$refs.wordCardDisplay, {
-                            outline: `0px solid ${wcoc}`,
-                            duration: .5
-                        })
-                        this.scoreKeeper()
-                        this.mpNextLetter(rep.letter, rep.letterIndex)
-                        this.scroll()
-                        if (this.classicModeOn){}
-                        else {
-                            this.mpStopTimer()
-                            this.mpResetTimer()
-                        }
-                    }
-                    else if (rep.winner == false){
-                        mpWordCard = rep.winningWord
-                        toRaw(this.wordCard).word = rep.winningWord.word
-                        toRaw(this.wordCard).type = rep.winningWord.type
-                        toRaw(this.wordCard).defs = rep.winningWord.defs
-                        toRaw(this.wordCard).syllablesOther = rep.winningWord.syllablesOther
-                        toRaw(this.wordCard).syllablesCustom = rep.winningWord.syllablesCustom
-                        if (this.$refs.wl.children[0] == undefined){
-                            const first = document.createElement("li")
-                            first.innerHTML = `<button class="btn font2"></button>`
-                            first.addEventListener("click", ()=>{
-                                this.replaceWordCard()
-                            })
-                            first.addEventListener("keydown", (e)=>{
-                                if (e.keyCode === 32){
-                                    this.replaceWordCard()
-                                }
-                                if (e.keyCode === 13){
-                                    this.replaceWordCard()
-                                }
-                            })
-                            wordsList.add(toRaw(this.wordCard.word))
-                            this.vWordsList = wordsList  
-                        }
-                        this.mpWordListUpdate()
-                        this.$forceUpdate()
-                        if (rep.score == 0){
-                            this.$refs.input.style.outlineColor = "red"
-                        }
-                        else {
-                            this.$refs.input.style.outlineColor = wcoc
-                        }
-                        wcOutline = gsap.timeline()
-                        .to(this.$refs.wordCardDisplay, {
-                            outline: `9px solid ${wcoc}`,
-                            duration: .5
-                        })
-                        .to(this.$refs.wordCardDisplay, {
-                            outline: `0px solid ${wcoc}`,
-                            duration: .5
-                        }, "<+=2")
-                        if (rep.score == 0 || this.classicModeOn){}
-                        else {
-                            if (this.wordPlayed == false){}
-                            else {this.mpWordMessage(this.mode)}
-                        }
-                        this.mpNextLetter(rep.letter, rep.letterIndex)
-                        try {
-                            this.scroll()  
-                        } catch (e) {}
-                        if (this.classicModeOn){}
-                        else {
-                            this.mpStopTimer()
-                            this.mpResetTimer()
-                        }
-                    }
-                    else if (rep.winner == "tie"){
-                        this.$forceUpdate()
-                        if (rep.score == 0){
-                            this.$refs.input.style.outlineColor = "red"
-                        }
-                        else {
-                            this.$refs.input.style.outlineColor = wcoc
-                        }
-                        if (rep.score == 0 || this.classicModeOn){}
-                        else {
-                            if (this.wordPlayed == false){}
-                            else {this.mpWordMessage('tie')}
-                        }
-                        this.mpNextLetter(rep.letter, rep.letterIndex)
-                        if (this.classicModeOn){}
-                        else {
-                            this.mpStopTimer()
-                            this.mpResetTimer()
-                        }
-                    }
-                    if (this.classicModeOn == true){
-                        if (rep.isYourTurn == false){
-                            this.mpStopTimer()
-                            this.$refs.input.style.textAlign = "center"
-                            this.$refs.input.placeholder = "waiting..."
-                        }
-                        if (rep.isYourTurn == true){
-                            this.mpResetTimer()
-                            this.$refs.input.style.textAlign = "left"
-                            this.$refs.input.placeholder = ""
-                        }
-                    }
-                }
-                // END GAME LOGIC
-                if (rep.lost == true){
-                    this.mpLost = true
-                    this.mpLostReason = rep.reason
-                    this.lost = true
-                    this.isWaiting = false
-                    this.mpScoreFinal(rep.totalScore)
-                    this.opponentScore = rep.otherScore
-                    this.stopTimerAndGame()
-                    this.webSocket.close()
-                    this.mpClassicTut, this.mpSpeedTut, this.mpWarTut = false
-                    this.classicModeOn = false
-                    this.mode = ""
-                }
-                else if (rep.won == true){
-                    this.mpLost = false
-                    this.mpLostReason = rep.reason
-                    this.lost = true
-                    this.isWaiting = false
-                    this.mpScoreFinal(rep.totalScore)
-                    this.opponentScore = rep.otherScore
-                    this.stopTimerAndGame()
-                    this.webSocket.close()
-                    this.mpClassicTut, this.mpSpeedTut, this.mpWarTut = false
-                    this.classicModeOn = false
-                    this.mode = ""
-                }
-                else if (rep.tie == true){
-                    this.mpLost = false
-                    this.mpTie = true
-                    this.mpLostReason = rep.reason
-                    this.lost = true
-                    this.isWaiting = false
-                    this.mpScoreFinal(rep.totalScore)
-                    this.opponentScore = rep.otherScore
-                    this.stopTimerAndGame()
-                    this.webSocket.close()
-                    this.mpClassicTut, this.mpSpeedTut, this.mpWarTut = false
-                    this.classicModeOn = false
-                    this.mode = ""
-                }
-            })
-            this.webSocket.addEventListener("close", (event) => {
-                this.isWaiting = false
-                this.webSocket = null
-            })
-        },
-        closeWebSocket(){
-            if (this.webSocket != undefined || this.webSocket != null){
-                this.webSocket.close()
-                this.isWaiting = false
-                this.webSocket = null
-                this.started = false
-                this.backToMulti()
-                this.resetStats()
-                restart = gsap.timeline()
-                .to(".logo", {
-                    height: "80px",
+            if (this.$refs.wcScroller){
+                gsap.to(this.$refs.wcScroller, {
+                    scrollTo: 0,
                     duration: .5
                 })
-                .to(".logo-holster", {
-                    height: "90px",
-                    margin: "0 0 2rem",
-                    duration: .5
-                }, "<")
-                if (this.score > this.cookieHighScore){
-                    this.newHighScore = true
-                    this.cookieScore = this.score
-                    localStorage.setItem("highScore", `${this.score}`)
-                }
-                this.cookieScore = localStorage.getItem("lastScore")
-                this.cookieHighScore = localStorage.getItem("highScore")
             }
-            else {}
-        }
+        },
+
+
+        // MP USERNAMES
+        setUsername(event){
+            if (event) {event.preventDefault()}
+
+            if (this.usernameInput == '' || !this.$refs.userInput.value){
+                this.usernameErrorMSG("Username cannot be blank.")
+            }
+            else {
+                this.mpUsername = this.usernameInput.replace(/[^a-zA-Z0-9]/g, '')
+                this.mpUserTimestamp = Date.now()
+                fetch('/', {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": 'application/json'
+                    },
+                    body: JSON.stringify({
+                        oldUsername: localStorage.username,
+                        oldJoinDate: localStorage.usernameDate,
+                        username: this.mpUsername,
+                        joinDate: this.mpUserTimestamp,
+                        request: "join"
+                    })
+                })
+                .then((rep) => rep.json())
+                .then((rep) => {
+                    if (!rep.registered){
+                        this.hasUsername = false
+                        if (!this.changingUsername){
+                            this.mpUsername = ''
+                        }   
+                        if (rep.profane){
+                            this.usernameErrorMSG("No profanity allowed.")
+                        }  
+                        else{
+                            this.usernameErrorMSG("Username taken.")
+                        }               
+                    }
+                    else {
+                        if (!this.hasUsername){
+                            localStorage.setItem("username", this.mpUsername)
+                            localStorage.setItem("usernameDate", this.mpUserTimestamp)
+                            this.hasUsername = true
+                        }
+                        this.$refs.userInput.value = ''
+                        this.usernameInput = ''
+                    }
+                })
+            }
+        },
+        usernameErrorMSG(error) {
+            if (this.usernameError){
+                this.usernameError.innerHTML = `${error} <br> Try again.`
+            }
+            else{
+                this.$refs.userInput.style.outlineColor = "red"
+                this.usernameError = document.createElement("span")
+                this.usernameError.classList.add("font-2", "txt-center")
+                this.usernameError.setAttribute("id", "username-error")
+                this.usernameError.innerHTML = `${error} <br> Try again.`
+            }
+
+            $("#username-section")[0].children[1].append(this.usernameError)
+        },
+        joinPartyByUsername(event){
+            if (event) {event.preventDefault()}
+
+            if (this.usernameInput == '' || !this.$refs.userInput.value){
+                this.usernameErrorMSG("Username cannot be blank.")
+            }
+            else {
+                this.partyLeaderUsername = this.usernameInput.replace(/[^a-zA-Z0-9]/g, '')
+                fetch('/', {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: this.mpUsername,
+                        partyLeaderUsername: this.partyLeaderUsername,
+                        partyRequest: "join"
+                    })
+                })
+                .then((rep) => rep.json())
+                .then((rep) => {
+                    if (!rep.joinedParty){
+                        if (rep.inactive) {
+                            this.usernameErrorMSG("User has no active party.")
+                        }
+                        if (rep.duplicate){
+                            this.usernameErrorMSG("Cannot join own party.")
+                        }
+                        if (rep.full){
+                            this.usernameErrorMSG("Party is full.")
+                        }    
+                    }
+                    else {
+                        this.inParty = true
+                        this.startWebSocket()
+                    }
+                })
+            }
+        },
+        deleteParty(){
+            this.webSocket.send(JSON.stringify({
+                username: this.mpUsername,
+                partyRequest: "delete"
+            }))
+            this.isPartyLeader = false
+            this.chosenMatchmakingMode = false
+            this.partyMemberUsername = ' '
+        },
+        leaveParty(){
+            this.webSocket.send(JSON.stringify({
+                username: this.mpUsername,
+                partyLeader: this.partyLeaderUsername,
+                partyRequest: "leave"
+            }))
+            this.inParty = false
+            this.joiningParty = false
+            this.isWaiting = false
+            this.chosenMatchmakingMode = false
+        },
+    
+        // MP WEBSOCKETS GAME LOGIC
+        startWebSocket(){
+            this.determineMode()
+
+            if (!this.webSocket){
+                this.webSocket = new WebSocket(`wss://${window.location.hostname}:${window.location.port}`)
+
+                // OPENING MESSAGE
+                this.webSocket.addEventListener("open", (event) => {
+                    if (this.inParty){
+                        this.webSocket.send(JSON.stringify({
+                            username: this.mpUsername,
+                            inParty: this.inParty,
+                            partyLeader: this.partyLeaderUsername
+                        }))
+                    }
+                    if (this.isPartyLeader){
+                        this.webSocket.send(JSON.stringify({
+                            username: this.mpUsername,
+                            isPartyLeader: this.isPartyLeader,
+                        }))
+                    }
+                    else {
+                        if (this.mode != ''){
+                            this.webSocket.send(JSON.stringify({
+                                mode: this.mode,
+                                order: this.order,
+                                username: this.mpUsername
+                            }))
+                        }
+                    }
+                })
+                // RECEIVE GAME EVENTS FROM SERVER
+                this.webSocket.addEventListener("message", (event) => {
+                    rep = JSON.parse(event.data)
+                    
+                    // WAITING FOR MATCH
+                    if (rep.waiting){
+                        this.isWaiting = true
+                        if (this.inParty){
+                            this.waitingDots = setInterval(() => {
+                                $("#waiting-text")[0].textContent += "."
+                                if ($("#waiting-text")[0].textContent == 'waiting for leader....'){
+                                    $("#waiting-text")[0].textContent = 'waiting for leader'
+                                }
+                            }, 1000)
+                        }
+                        else{
+                            this.waitingDots = setInterval(() => {
+                                $("#waiting-text")[0].textContent += "."
+                                if ($("#waiting-text")[0].textContent == 'finding an opponent....'){
+                                    $("#waiting-text")[0].textContent = 'finding an opponent'
+                                }
+                            }, 1000)
+                        }
+                    }
+                    if (rep.partyMemberUsername){
+                        this.partyMemberUsername = rep.partyMemberUsername
+                    }
+                    // PLACED IN GAME
+                    else if (!rep.waiting && rep.inGame){
+                        if (rep.isClassic){
+                            this.classicModeOn = true
+                        }
+                        this.determineMode(rep.mode)
+                        clearInterval(this.waitingDots)
+
+                        this.opponentName = rep.opponent
+                        this.countingDown = true
+                        this.mpCountdownToGameStart = setInterval(() => {
+                            this.countdown--
+                            if (this.countdown == 0){
+                                clearInterval(this.mpCountdownToGameStart)
+                                this.countdown = 5
+                                this.countingDown = false
+
+                                this.resetStats()
+
+                                if (this.classicModeOn){
+                                    this.mpClassicNewGame()
+                                    if (rep.isYourTurn){
+                                        this.mpResetTimer()
+                                        this.resetPlaceholder()
+                                        clearInterval(this.inGameWaitingMsg)
+                                    }
+                                    else{
+                                        this.mpStopTimer()
+                                        this.animateWaitingMsg()
+                                    }
+                                }
+                                else {
+                                    this.newGame()
+                                    this.resetPlaceholder()
+                                    clearInterval(this.inGameWaitingMsg)
+                                }
+                                this.isWaiting = false
+                                this.mpNextLetter(rep.letter, rep.letterIndex)
+                            }
+                        }, 1000)
+                    }
+
+                    // INPUT BEHAVIOR AND WAITING MESSAGE
+                    if (this.classicModeOn){
+                        if (!rep.isYourTurn){
+                            this.mpStopTimer()
+                            this.animateWaitingMsg()
+                        }
+                        else{
+                            this.mpResetTimer()
+                            this.resetPlaceholder()
+                            clearInterval(this.inGameWaitingMsg)
+                        }
+                    }
+                    else{
+                        this.resetPlaceholder()
+                        clearInterval(this.inGameWaitingMsg)
+                    }
+
+                    // PER LETTER LOGIC
+                    if (this.started){
+                        if (rep.winner == true){
+                            this.mpWordCardUpdate(rep.winningWord)
+                            if (rep.winningWord) { this.mpWordListUpdate() }
+                            this.mpWordMsg()
+                            if (this.classicModeOn && !rep.isYourTurn){
+                                this.cycleWordMessageClassic(rep.score)
+                            }
+                            this.$forceUpdate()
+                            this.emphasizeInput(true)
+                            this.emphasizeWordCard()
+                            this.scoreKeeper()
+                            this.mpNextLetter(rep.letter, rep.letterIndex)
+                            this.mpRefreshTimer()
+                            this.scrollWordCardList()
+                        }
+                        else if (!rep.winner){
+                            this.finalWord = ''
+                            this.mpWordCardUpdate(rep.winningWord)
+                            if (rep.winningWord) { this.mpWordListUpdate() }
+                            if (rep.score && rep.score !== 0 && this.classicModeOn && !rep.isYourTurn){
+                                this.cycleWordMessageClassic(rep.score)
+                            }
+                            if (rep.score !== 0 && !this.classicModeOn){
+                                this.mpWordMsg()
+                            }
+                            this.$forceUpdate()
+                            this.emphasizeInput(false, rep.score)
+                            this.emphasizeWordCard()
+                            this.mpNextLetter(rep.letter, rep.letterIndex)
+                            this.mpRefreshTimer()
+                            this.scrollWordCardList()
+                        }
+                        else if (rep.winner == 'tie'){
+                            if ((this.classicModeOn && !rep.isYourTurn) || (!this.classicModeOn && rep.score !== 0)){
+                                this.mpWordMsg()
+                            }
+                            this.$forceUpdate()
+                            this.emphasizeInput(false, rep.score)
+                            this.mpNextLetter(rep.letter, rep.letterIndex)
+                            this.mpRefreshTimer()
+                        }
+                    }
+
+                    // END GAME LOGIC
+                    if (rep.lost || rep.won || rep.tie || rep.opponentForfeit){
+                        this.lost = true
+                        this.mpBackToHome(rep.otherScore, rep.reason)
+                        this.mpScoreFinal(rep.totalScore)
+                        this.mpEndGame()
+
+                        if (rep.lost){
+                            this.mpLost = true
+                        }
+                        else if (rep.won){
+                            this.mpLost = false
+                        }
+                        else if (rep.tie){
+                            this.mpLost = false
+                            this.mpTie = true
+                        }
+                        if (rep.opponentForfeit){
+                            if (this.countingDown){
+                                clearInterval(this.mpCountdownToGameStart)
+                            }
+                            this.mpLost = false
+                        }
+                    }
+
+                })
+                // CLOSE SOCKET
+                this.webSocket.addEventListener("close", (event) => {
+                    this.terminateWS()
+                })
+            }
+            else{
+                this.webSocket.send(JSON.stringify({
+                    mode: this.mode,
+                    order: this.order,
+                    username: this.mpUsername
+                }))
+            }
+        },
+        determineMode(mode){
+            if (this.mpClassicTut || (mode && mode == "Classic")){
+                this.mode = "Classic"
+                this.modeDescriptor = "Take turns playing big words!"
+            }
+            else if (this.mpSpeedTut || (mode && mode == "Speed")){
+                this.mode = "Speed"
+                this.modeDescriptor = "Race to play your big word first!"
+            }
+            else if (this.mpBattleTut || (mode && mode == "Battle")){
+                this.mode = "Battle"
+                this.modeDescriptor = "Play the biggest word!"
+            }
+        },
+        mpEndGame() {
+            this.resetWaiting()
+            this.resetPlaceholder()
+            this.stopTimerAndGame()
+            if (!this.inParty || !this.isPartyLeader){this.webSocket.close()} 
+        },
+        softCloseWS(){
+            if (this.webSocket){
+                if (this.mpClassicTut){
+                    this.mpClassicTut = true
+                    this.mpSpeedTut = false
+                    this.mpBattleTut = false
+                }
+                if (this.mpSpeedTut){
+                    this.mpClassicTut = false
+                    this.mpSpeedTut = true
+                    this.mpBattleTut = false
+                }
+                if (this.mpBattleTut){
+                    this.mpClassicTut = false
+                    this.mpSpeedTut = false
+                    this.mpBattleTut = true
+                }
+
+                this.terminateWS()
+            }
+        },
+        terminateWS(){
+            this.started = false
+            this.resetWaiting()
+            this.resetPlaceholder()
+            clearInterval(this.mpCountdownToGameStart)
+            this.countingDown = false
+            this.countdown = 5
+            if (this.inParty){
+                this.leaveParty()
+            }
+            if (this.isPartyLeader){
+                this.deleteParty()
+            }
+            if(this.webSocket){
+                this.webSocket.close()
+                this.webSocket = null
+            }
+        },
+
     },
-    beforeCreate() {},
-    beforeMount() {},
     mounted: function initialize(){
-        $("#form")[0].addEventListener("submit", this.callServerDictionary)
+        // GSAP & SCROLL
+        gsap.registerPlugin(ScrollToPlugin)
+        this.scrollToTop()
+        $("#app")[0].style.display = "flex"
+
+        // GRAB SCORES FROM LOCALSTORAGE
+        if (!localStorage.lastScore || !localStorage.highScore){
+            localStorage.setItem("lastScore", "0")
+            localStorage.setItem("highScore", "0")
+        }
+        else{
+            this.cookieScore = localStorage.lastScore ? localStorage.lastScore : 0
+            this.cookieHighScore = localStorage.highScore || this.cookieHighScore !== '' ? localStorage.highScore : 0
+        }
+
+        // ADD EVENT LISTENERS
         window.addEventListener("beforeunload", (event) => {
-            if (this.webSocket == null){}
-            else this.webSocket.close()
+            // REMOVE USERNAME IN SERVER
+            if (this.hasUsername){
+                if (this.webSocket){
+                    this.webSocket.close()
+                }
+                navigator.sendBeacon("/", JSON.stringify({
+                    username: this.mpUsername,
+                    partyLeaderUsername: this.partyLeaderUsername ? this.partyLeaderUsername : null,
+                    request: "leave"
+                }))
+            }
+
+            // SET SCORE
             localStorage.setItem("lastScore", `${this.score}`)
             if (this.score > this.cookieHighScore){
                 this.newHighScore = true
                 localStorage.setItem("highScore", `${this.score}`)
             }
-        });
-        if (localStorage.getItem("lastScore") == null || localStorage.getItem("highScore") == null){
-            localStorage.setItem("lastScore", "0")
-            localStorage.setItem("highScore", "0")
-        }
-        else{
-            this.cookieScore = localStorage.getItem("lastScore")
-            this.cookieHighScore = localStorage.getItem("highScore")
-            if (this.cookieHighScore == null || this.cookieHighScore == ""){this.cookieHighScore = 0}
-        }
-        // GSAP
-        gsap.registerPlugin(ScrollToPlugin)
-        introTL = gsap.timeline()
-        .set("#app", {
-            display: "flex"
+
+            return undefined
         })
-        .to("#app", {
-            opacity: 1,
-            duration: .125,
-            ease: "power4.out"
-        })
-        this.$refs.input.addEventListener("keydown", ()=>{
-            this.$refs.input.style.outlineColor = wcoc
-        })
+
+        // main game form
+        $("#form")[0].addEventListener("submit", this.callServerDictionary)
         this.$refs.input.addEventListener("keydown", (e)=>{
-            if (e.keyCode === 32){e.preventDefault();}
-            if ((e.metaKey || e.ctrlKey) && e.key == 'v'){e.preventDefault();}
+            this.$refs.input.style.outlineColor = this.wordCardOutlineColor
+            if (e.keyCode === 32){e.preventDefault()}
+            if ((e.metaKey || e.ctrlKey) && e.key == 'v'){e.preventDefault()}
         })
         this.$refs.input.addEventListener("contextmenu",(e)=>e.preventDefault())
         this.$refs.post.addEventListener("mousedown",(e)=>e.preventDefault())
+
+
+        this.$refs.userInput.addEventListener("keydown", (e)=>{
+            this.$refs.userInput.style.outlineColor = this.wordCardOutlineColor
+            if (!e.key.match(/^[a-zA-Z0-9_]+$/)){e.preventDefault()}
+            if (this.usernameError){
+                $("#username-error")[0].remove(this.usernameError)
+                this.usernameError = null
+            }
+        })
+        this.$refs.userInput.addEventListener("paste", (e)=>{
+            setTimeout(() => {
+                this.$refs.userInput.value = this.$refs.userInput.value.replace(/[^a-zA-Z0-9]/g, '')
+            }, 1)
+        })
+        
+        // DARK MODE
+        this.wordCardOutlineColor = window.matchMedia('(prefers-color-scheme: dark)').matches ? "#8875FF" : "#B79E01"
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            this.wordCardOutlineColor = window.matchMedia('(prefers-color-scheme: dark)').matches ? "#8875FF" : "#fddc02"
+        })
     },
     updated: function log(){
-        if (this.$refs.wl.children.length > 3){
+        // CHANGE WORD LIST DISPLAY FOR SCROLLING FIX
+        if (this.$refs.wl.children.length >= 3){
             this.$refs.wl.style.justifyContent = "initial"
         }
+
+        // START & END GAME DESIGN BEHAVIOUR
         if (this.started){
-            $("html")[0].style.height = "auto"
-            $("html")[0].style.overflow = "scroll"
-            gsap.to([".logo", ".logo-holster"], {
-                height: "0px",
-                margin: "0px",
-                duration: .5
-            })
-            if (this.t == 15){
+            this.shrinkHeader()
+            if (this.t == 15 && !this.paused){
                 setTimeout(() => {
                     this.$refs.input.focus()
-                }, 250);
+                }, 250)
             }
         }
         else{
-            if (this.lost == true){
-                restart = gsap.timeline()
-                .to(".logo", {
-                    height: "80px",
-                    duration: .5
-                })
-                .to(".logo-holster", {
-                    height: "90px",
-                    margin: "0 0 2rem",
-                    duration: .5
-                }, "<")
-                this.cookieScore = localStorage.getItem("lastScore")
-                this.cookieHighScore = localStorage.getItem("highScore")
-            }
+            this.expandHeader()
+            this.cookieScore = localStorage.lastScore
+            this.cookieHighScore = localStorage.highScore
+        }
+
+        // MULTIPLAYER USERNAME FORM
+        if (this.joiningParty){
+            $("#username-form")[0].addEventListener("submit", this.joinPartyByUsername)
+        }
+        else {
+            $("#username-form")[0].addEventListener("submit", this.setUsername)
         }
     }
 }).mount('#app')

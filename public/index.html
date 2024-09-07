@@ -1,1 +1,537 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" media="(prefers-color-scheme: light)" content="#f5f5f5"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#212121"><meta name="description" content="Show off your vocabulary skills in this competitive word game by typing words that contain three or more syllables! Kids and adults can play solo or with friends!"><meta name="author" content="Ondre Johnson"><meta property="og:title" content="The Big Word Game"><meta property="og:type" content="website"><meta property="og:image" content="img/logo(day).webp"><meta property="og:url" content="https://thebigwordgame.com"><meta property="og:description" content="Show off your vocabulary skills in this competitive word game by typing words that contain three or more syllables! Kids and adults can play solo or with friends!"><title>The Big Word Game: Test Your Vocabulary!</title><link rel="canonical" href="https://thebigwordgame.com"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png"><link rel="manifest" href="site.webmanifest"><link href="index.css" rel="stylesheet"><link rel="preload" href="fonts/FreckleFace-Regular.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="fonts/NanumPen.woff2" as="font" type="font/woff2" crossorigin><script defer="defer" src="https://unpkg.com/vue@3.4.38/dist/vue.global.prod.js"></script><script defer="defer" src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script><script defer="defer" src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollToPlugin.min.js"></script><script defer="defer" src="index-min.js"></script><script defer="defer" src="https://cloud.umami.is/script.js" data-website-id="678801f6-b826-4887-9e95-1de149947467"></script></head><body><header class="logo-holster"><a id="logo" href="/" tabindex="-1"><picture><source media="(prefers-color-scheme:dark)" srcset="img/logo(night).webp"><img class="logo" src="img/logo(day).webp" alt="The Big Word Game" aria-label="The Big Word Game"></picture></a></header><noscript><section class="card tut-card" style="margin:auto"><h1 class="tvc font1">Sorry!</h1><span class="tvc">Please enable Javascript to play.</span></section></noscript><main id="app" style="display:none"><div class="app-wrap" ref="appWrap"><section id="soloTutorial" v-show="tutorialOn == true" class="card tut-card vert"><button @click="tutorialToggle" class="back btn font2">hide rules</button><div class="vert gap2"><div class="vert"><div class="vert gap1"><h1 style="justify-content:center" class="font1 flex">How to Play</h1><div class="vert"><span class="tvc">Enter a word that starts with the target letter and contains at least 3 syllables.<br><br>You gain points for each syllable detected in a correct word.<br><br>The target letter advances after each correct word played.<br><br>Play until you strike out.<br><br></span></div></div><div class="vert gap1" style="width:100%"><span class="tvc font1" style="font-size:1.5rem;margin-bottom:.5rem">examples:<br></span><div class="vert example"><span class="tvc vert" style="padding:0 0 .5rem"><span style="width:100%;font-size:2.25rem">an<span style="font-size:1.5rem">*</span>gry</span>2 syllables = 0 points &nbsp;❌<br></span><span class="tvc vert middle-example" style="width:100%;padding:1rem 0;margin:.5rem 0"><span style="font-size:2.25rem">as<span style="font-size:1.5rem">*</span>tro<span style="font-size:1.5rem">*</span>naut</span>3 syllables = 3 points &nbsp;✅<br></span><span class="tvc vert" style="padding:.5rem 0"><span style="width:100%;font-size:2.25rem">bal<span style="font-size:1.5rem">*</span>le<span style="font-size:1.5rem">*</span>ri<span style="font-size:1.5rem">*</span>na</span>4 syllables = 4 points &nbsp;✅<br></span></div></div></div><div class="vert"><h2 style="justify-content:center" class="font1 flex">Rules</h2><ul style="align-items:flex-start;padding:0;margin:2rem 0;gap:1.5rem;list-style-type:none" class="vert"><li class="tvc card"><span style="font-size:1.75rem">Play within 15 seconds</span><span style="font-size:1.25rem;margin-top:.25rem">&#40;you can pause with the button or by scrolling past the input&#41;</span></li><li class="tvc card" style="font-size:1.75rem">Word must contain at least three &#40;3&#41; syllables</li><li class="tvc card" style="font-size:1.75rem">Word must start with the correct letter<br></li><li class="tvc card" style="font-size:1.75rem">No offensive words</li><li class="tvc card" style="font-size:1.75rem"><span>No two-part words</span><span style="font-size:1.25rem;margin-top:.25rem">&#40;no hyphens or spaces&#41;</span></li><li class="tvc card" style="font-size:1.75rem">Cannot reuse words</li></ul><div class="vert gap1" style="margin:2rem 0"><span>Break a rule; get a strike.</span><span style="text-decoration:underline">Three strikes and you're out!</span></div></div></div><div class="vert gap1" style="width:100%"><button style="width:100%" class="btn" @click="tutorialToggle(); twoPlayer();" ref="startBtn2P">Play Online</button><button style="width:100%" class="btn" ref="tutBtn1" @click.prevent="tutorialToggle(); startTimer()">Play Solo</button><div class="vert" style="gap:.5rem"><span style="grid-column:1/2">Letter Order:</span><div class="flex gap1"><button :class="{ active: isRandomOrder == false }" @click="randomOrder($event, false)" class="btn font2 order-picker">A to Z</button><button :class="{ active: isRandomOrder == true }" @click="randomOrder($event, true)" class="btn font2 order-picker">Random</button></div></div></div><button style="width:fit-content;margin-top:1rem" class="btn font2" @click="tutorialToggle">Hide Rules</button></section><section id="introInteractive" v-show="!started && tutorialOn == false && (lost == null || lost == false) && multiPlayer == false" class="card tut-card" style="align-self:center"><button style="left:-2rem;top:-2rem" class="btn font2 back" ref="tutBtn2" @click.prevent="tutorialToggle()">show rules</button><h1 class="tvc font1">Let's Play!</h1><div class="vert gap1" style="margin-bottom:1rem"><h2 class="tvc font1" style="font-size:1.75rem">Last Score: {{ cookieScore }}</h2><h2 class="tvc font1" style="font-size:1.75rem">High Score: {{ cookieHighScore }}</h2></div><div class="vert gap1"><button style="width:100%" class="btn" @click="twoPlayer" ref="startBtn2P">Play Online</button><button style="width:100%" class="btn" @click="startTimer" ref="startBtn">Play Solo</button><div class="vert gap2"><div class="vert" style="gap:.5rem"><span style="grid-column:1/2">Letter Order:</span><div class="flex gap1"><button :class="{ active: isRandomOrder == false }" @click="randomOrder($event, false)" class="btn font2 order-picker">A to Z</button><button :class="{ active: isRandomOrder == true }" @click="randomOrder($event, true)" class="btn font2 order-picker">Random</button></div></div></div></div></section><section id="multiplayerPath" v-show="!started && tutorialOn == false && (lost == null || lost == false) && multiPlayer == true" class="card tut-card" style="align-self:center"><section class="vert gap2" v-show="!mpClassicTut && !mpSpeedTut && !mpWarTut"><div class="vert"><h1 class="tvc font1 flex">Choose Mode</h1><span class="font2 tvc">Play against others globally!</span></div><div class="vert gap1" style="width:100%"><button style="width:100%" class="btn" @click.prevent="classicTutToggle" ref="tutBtnMPClassic">Classic</button><button style="width:100%" class="btn" @click.prevent="speedTutToggle" ref="tutBtnMPSpeed">Speed</button><button style="width:100%" class="btn" @click.prevent="warTutToggle" ref="tutBtnMPWar">War</button></div><button class="btn font2" @click.prevent="twoPlayer">Go Back</button></section><section class="vert gap2" v-show="mpClassicTut == true"><button @click="mpCTHide" class="back btn font2" v-if="!mpCTisHidden">hide rules</button><button @click="mpCTHide" class="back btn font2" v-else>show rules</button><div class="vert"><h1 class="tvc font1 flex">Classic Mode</h1><span class="font2 tvc">Take turns playing big words!</span></div><div class="vert gap2" v-show="!mpCTisHidden"><div class="vert gap1"><div class="vert"><span class="tvc">Two players take turns entering a word that start with the target letter and contain at least three syllables.<br><br>You gain points for each syllable detected in a correct word.<br><br>The target letter advances after each correct word played.<br><br>Unlimited rounds.<br>Play until someone strikes out.</span></div><div class="vert gap1" style="width:100%;margin-top:1rem"><span class="tvc font1" style="font-size:1.5rem;margin-bottom:.5rem">examples:<br></span><div class="vert example"><span class="tvc vert" style="padding:0 0 .5rem"><span style="width:100%;font-size:2.25rem">an<span style="font-size:1.5rem">*</span>gry</span>2 syllables &nbsp;❌<br>0 points</span><span class="tvc vert middle-example" style="width:100%;padding:1rem 0;margin:.5rem 0"><span style="font-size:2.25rem">as<span style="font-size:1.5rem">*</span>tro<span style="font-size:1.5rem">*</span>naut</span>3 syllables &nbsp;✅<br>3 points</span><span class="tvc vert" style="padding:.5rem 0"><span style="width:100%;font-size:2.25rem">bal<span style="font-size:1.5rem">*</span>le<span style="font-size:1.5rem">*</span>ri<span style="font-size:1.5rem">*</span>na</span>4 syllables &nbsp;✅<br>4 points</span></div></div></div><div class="vert gap1"><div class="vert gap1"><h2 style="justify-content:center" class="font1 flex">Rules</h2><ul style="align-items:flex-start;padding:0;margin:0;gap:1rem;list-style-type:none" class="vert"><li class="tvc card"><span style="font-size:1.75rem">Play within 15 seconds</span><span style="font-size:1.25rem">no pausing!</span></li><li class="tvc card" style="font-size:1.75rem">Word must contain at least three &#40;3&#41; syllables</li><li class="tvc card" style="font-size:1.75rem">Word must start with the correct letter<br></li><li class="tvc card" style="font-size:1.75rem">No offensive words</li><li class="tvc card" style="font-size:1.75rem"><span>No two-part words</span><span style="font-size:1.25rem;margin-top:.25rem">&#40;no hyphens or spaces&#41;</span></li><li class="tvc card" style="font-size:1.75rem">Cannot reuse words</li></ul></div><div class="vert gap1" style="margin:2rem 0"><span>Break a rule; get a strike.</span><span style="text-decoration:underline">Three strikes and you're out!</span></div></div></div><div class="vert gap1" style="width:100%" v-show="countingDown"><span class="tvc font2">starting match in:</span><span class="tvc font1">{{ countdown }}</span></div><div class="vert gap1" style="width:100%" v-show="isWaiting && !inGame && !countingDown"><span class="tvc font2">waiting for match...</span><button style="width:100%" class="btn" @click.prevent="closeWebSocket">Cancel</button></div><div class="vert gap1" style="width:100%" v-show="!isWaiting && countingDown != true" @click="mpCTisHidden = true"><button style="width:100%" class="btn" @click.prevent="startWebSocket">Join Match</button><div class="vert" style="gap:.5rem"><span style="grid-column:1/2">Letter Order:</span><div class="flex gap1"><button :class="{ active: isRandomOrder == false }" @click="randomOrder($event, false)" class="btn font2 order-picker">A to Z</button><button :class="{ active: isRandomOrder == true }" @click="randomOrder($event, true)" class="btn font2 order-picker">Random</button></div></div></div><button v-show="!isWaiting" style="margin-top:1rem" class="btn font2" @click.prevent="classicTutToggle">Go Back</button></section><section class="vert gap2" v-show="mpSpeedTut == true"><button @click="mpSTHide" class="back btn font2" v-if="!mpSTisHidden">hide rules</button><button @click="mpSTHide" class="back btn font2" v-else>show rules</button><div class="vert"><h1 class="tvc font1 flex">Speed Mode</h1><span class="font2 tvc">Race to play your big word first!</span></div><div class="vert gap2" v-show="!mpSTisHidden"><div class="vert gap1"><div class="vert"><span class="tvc">Two players race to enter a word that starts with the target letter and contains at least three syllables.<br><br>Whoever is first, gets the points.<br><br>The target letter advances after a word has won.<br><br>You gain points for each syllable detected in a correct word.<br><br>One round (26 letters)<br>OR<br>until someone strikes out.</span></div><div class="vert gap1" style="width:100%;margin-top:1rem"><span class="tvc font1" style="font-size:1.5rem;margin-bottom:.5rem">examples:<br></span><div class="vert example"><span class="tvc vert top-example" style="width:100%;padding:0 0 1rem;margin:0 0 .5rem"><span style="width:100%;font-size:2.25rem">a<span style="font-size:1.5rem">*</span>po<span style="font-size:1.5rem">*</span>lo<span style="font-size:1.5rem">*</span>gy</span>time: 4.7 sec<br>0 points</span><span class="tvc vert" style="padding:.5rem 0"><span style="width:100%;font-size:2.25rem">as<span style="font-size:1.5rem">*</span>tro<span style="font-size:1.5rem">*</span>lo<span style="font-size:1.5rem">*</span>gy</span>time: 3.4 sec &nbsp;✅<br>4 points</span></div></div></div><div class="vert gap1"><div class="vert gap1"><h2 style="justify-content:center" class="font1 flex">Rules</h2><ul style="align-items:flex-start;padding:0;margin:0;gap:1rem;list-style-type:none" class="vert"><li class="tvc card"><span style="font-size:1.75rem">Play within 15 seconds</span><span style="font-size:1.25rem">no pausing!</span></li><li class="tvc card" style="font-size:1.75rem">Word must contain at least three &#40;3&#41; syllables</li><li class="tvc card" style="font-size:1.75rem">Word must start with the correct letter<br></li><li class="tvc card" style="font-size:1.75rem">No offensive words</li><li class="tvc card" style="font-size:1.75rem"><span>No two-part words</span><span style="font-size:1.25rem;margin-top:.25rem">&#40;no hyphens or spaces&#41;</span></li><li class="tvc card" style="font-size:1.75rem">Cannot reuse words</li></ul></div><div class="vert gap1" style="margin:2rem 0"><span>Break a rule; get a strike.</span><span style="text-decoration:underline">Three strikes and you're out!</span></div></div></div><div class="vert gap1" style="width:100%" v-show="countingDown"><span class="tvc font2">starting match in:</span><span class="tvc font1">{{ countdown }}</span></div><div class="vert gap1" style="width:100%" v-show="isWaiting && !inGame && !countingDown"><span class="tvc font2">waiting for match...</span><button style="width:100%" class="btn" @click.prevent="closeWebSocket">Cancel</button></div><div class="vert gap1" style="width:100%" v-show="!isWaiting && countingDown != true" @click="mpSTisHidden = true"><button style="width:100%" class="btn" @click.prevent="startWebSocket">Join Match</button><div class="vert" style="gap:.5rem"><span style="grid-column:1/2">Letter Order:</span><div class="flex gap1"><button :class="{ active: isRandomOrder == false }" @click="randomOrder($event, false)" class="btn font2 order-picker">A to Z</button><button :class="{ active: isRandomOrder == true }" @click="randomOrder($event, true)" class="btn font2 order-picker">Random</button></div></div></div><button v-show="!isWaiting" style="margin-top:1rem" class="btn font2" @click.prevent="speedTutToggle">Go Back</button></section><section class="vert gap2" v-show="mpWarTut == true"><button @click="mpWTHide" class="back btn font2" v-if="!mpWTisHidden">hide rules</button><button @click="mpWTHide" class="back btn font2" v-else>show rules</button><div class="vert"><h1 class="tvc font1 flex">War Mode</h1><span class="font2 tvc">Play the biggest word!</span></div><div class="vert gap2" v-show="!mpWTisHidden"><div class="vert gap1"><div class="vert"><span class="tvc">Two players battle to enter the word with the most syllables that starts with the target letter.<br><br>The highest syllable word wins.<br>If there is a tie, players repeat the same letter until one word is higher.<br><br>The target letter advances after a word has won.<br><br>You gain points for each syllable detected in the winning word.<br><br>One round (26 letters)<br>OR<br>until someone strikes out.</span></div><div class="vert gap1" style="width:100%;margin-top:1rem"><span class="tvc font1" style="font-size:1.5rem;margin-bottom:.5rem">examples:<br></span><div class="vert example"><span class="tvc vert top-example" style="width:100%;padding:0 0 1rem;margin:0 0 .5rem"><span style="font-size:2.25rem">as<span style="font-size:1.5rem">*</span>tro<span style="font-size:1.5rem">*</span>naut</span>3 syllables<br>no points</span><span class="tvc vert" style="padding:.5rem 0"><span style="width:100%;font-size:2.25rem">as<span style="font-size:1.5rem">*</span>tro<span style="font-size:1.5rem">*</span>lo<span style="font-size:1.5rem">*</span>gy</span>4 syllables &nbsp;✅<br>4 points</span></div></div></div><div class="vert gap1"><div class="vert gap1"><h2 style="justify-content:center" class="font1 flex">Rules</h2><ul style="align-items:flex-start;padding:0;margin:0;gap:1rem;list-style-type:none" class="vert"><li class="tvc card"><span style="font-size:1.75rem">Play within 15 seconds</span><span style="font-size:1.25rem">no pausing!</span></li><li class="tvc card" style="font-size:1.75rem">Word must contain at least three &#40;3&#41; syllables</li><li class="tvc card" style="font-size:1.75rem">Word must start with the correct letter<br></li><li class="tvc card" style="font-size:1.75rem">No offensive words</li><li class="tvc card" style="font-size:1.75rem"><span>No two-part words</span><span style="font-size:1.25rem;margin-top:.25rem">&#40;no hyphens or spaces&#41;</span></li><li class="tvc card" style="font-size:1.75rem">Cannot reuse words</li></ul></div><div class="vert gap1" style="margin:2rem 0"><span>Break a rule; get a strike.</span><span style="text-decoration:underline">Three strikes and you're out!</span></div></div></div><div class="vert gap1" style="width:100%" v-show="countingDown"><span class="tvc font2">starting match in:</span><span class="tvc font1">{{ countdown }}</span></div><div class="vert gap1" style="width:100%" v-show="isWaiting && !inGame && !countingDown"><span class="tvc font2">waiting for match...</span><button style="width:100%" class="btn" @click.prevent="closeWebSocket">Cancel</button></div><div class="vert gap1" style="width:100%" v-show="!isWaiting && countingDown != true" @click="mpWTisHidden = true"><button style="width:100%" class="btn" @click.prevent="startWebSocket">Join Match</button><div class="vert" style="gap:.5rem"><span style="grid-column:1/2">Letter Order:</span><div class="flex gap1"><button :class="{ active: isRandomOrder == false }" @click="randomOrder($event, false)" class="btn font2 order-picker">A to Z</button><button :class="{ active: isRandomOrder == true }" @click="randomOrder($event, true)" class="btn font2 order-picker">Random</button></div></div></div><button v-show="!isWaiting" style="margin-top:1rem" class="btn font2" @click.prevent="warTutToggle">Go Back</button></section></section><section id="coreGame" v-show="tutorialOn == false && started == true" class="meat" ref="meat"><div class="txt-card" v-show="started == true" style="align-items:flex-start"><div class="vert" style="align-items:flex-start"><span>score:<span class="font1">{{ score }}</span></span><span v-show="newHighScore == true" style="font-size:1.25rem" class="font2">new high score!</span></div><span ref="wordMsg" class="font2" style="font-size:1.25rem;padding-top:1rem">{{ wordMsg }}</span><span>strikes:<span class="font1">{{ strikes }}</span></span></div><div class="main" v-show="started == true"><form id="form" class="form" spellcheck="false" autocapitalize="off" autocomplete="off" action="" style="position:relative"><input v-model="input" type="text" ref="input" id="text-input" title="Type your word here!" aria-label="Type your word here!"> <input class="font2 btn" type="submit" value="go" id="post" style="width:fit-content" ref="post"></form><div class="txt-card bottom-txt"><div class="letter-meta gap1" style="align-items:flex-start"><div class="letter-wrap"><span class="font2 tvc">starting letter:</span><span class="font1 tvc">{{ currentLetter }}</span></div><button class="quit btn font2" @click.prevent="quit(); closeWebSocket()"><span class="tvc">quit</span></button><div class="letter-wrap def-pop" v-show="vWordsList != null"><span v-show="multiPlayer == false" style="font-size:1.25rem" class="font2 tvc">scroll for details</span></div></div><div class="flex gap1" style="flex-direction:column;padding-bottom:1rem"><div class="timer-wrap"><span class="font2 font">timer:</span><span class="timer">{{ t }}</span></div><button style="height:fit-content" class="pause btn font2" :class="{ active: pausePress == true }" ref="pauseBtn" @click.prevent="pause()" v-show="!multiPlayer"><span v-if="paused && pausePress" class="tvc">resume</span><span v-else class="tvc">pause</span></button></div></div></div></section><section id="gameOverInteractive" class="game-over card tut-card vert" style="align-self:center;margin:0 0 2rem" v-show="started == false && lost == true && tutorialOn == false"><button style="left:-2rem;top:-2rem" class="btn font2 back" ref="tutBtn2" @click.prevent="tutorialToggle()">show rules</button><h1 class="font1 tvc" v-if="!multiPlayer">Game Over</h1><div v-else><div class="vert gap1" v-if="mpLost"><h1 class="font1 tvc">You Lost!</h1><span class="font2 tvc">{{ mpLostReason }}</span></div><div class="vert gap1" v-else-if="!mpLost && mpTie"><h1 class="font1 tvc">You Tied!</h1><span class="font2 tvc">{{ mpLostReason }}</span></div><div class="vert gap1" v-else><h1 class="font1 tvc">You Won!</h1><span class="font2 tvc">{{ mpLostReason }}</span></div></div><div class="font1 vert gap1" style="width:100%;margin-bottom:1rem"><span v-show="newHighScore" style="font-size:1.25rem" class="tvc font2">new high score!</span><h2 style="font-size:1.75rem" class="tvc" v-if="multiPlayer == false">Score: {{ score }}</h2><h2 style="font-size:1.75rem" class="tvc" v-else>Your Score: {{ score }}</h2><h2 style="font-size:1.75rem" class="tvc" v-if="multiPlayer == false">High Score: {{ cookieHighScore }}</h2><h2 style="font-size:1.75rem" class="tvc" v-else>Their Score: {{ opponentScore }}</h2></div><div class="vert gap1" style="width:100%"><button style="width:100%" class="btn" @click="resetStats(); backToMulti();" ref="startBtn2P">Play Online</button><button style="width:100%" class="btn" @click="backToSolo(); startTimer();" ref="startBtn">Play Solo</button><span style="grid-column:1/2">Letter Order:</span><div class="vert gap2"><div class="flex gap1"><button :class="{ active: isRandomOrder == false }" @click="randomOrder($event, false)" class="btn font2 order-picker">A to Z</button><button :class="{ active: isRandomOrder == true }" @click="randomOrder($event, true)" class="btn font2 order-picker">Random</button></div></div></div></section><section id="wordList" class="wl-wrap" v-show="vWordsList != null && tutorialOn == false"><h2 class="font1 tvc">Words Used:</h2><span class="font2 tvc" style="font-size:1rem;margin-top:.25rem">scroll left & right &nbsp;//&nbsp; shift + wouse wheel &nbsp;↕</span><ul tabindex="-1" class="wl" ref="wl"><li v-for="w in vWordsList"><button @click.prevent="replaceWordCard" @enter.prevent="replaceWordCard" @space.prevent="replaceWordCard" class="btn font2">{{ w }}</button></li></ul></section><section class="word-card-wrap" v-show="wordCard.word != null && tutorialOn == false"><div class="word-card-scroller" ref="wcScroller"><div id="wordCard" class="card word-card gap1" v-show="started == true && wordCard.word != null && tutorialOn == false" style="padding:1rem 1rem 1.5rem" ref="wordCardDisplay"><h3 class="font1 tvc">{{ wordCard.word }}</h3><span class="tvc" v-show="foundClosest == true && wordCard.type == null">Did you mean: "{{ closest }}"?</span><h4 v-show="wordCard.type != null" class="tvc">{{ wordCard.type }}</h4><ul v-show="wordCard.defs != null" style="margin:0;padding-right:11.5px"><li v-for="def in wordCard.defs">{{ def }}</li></ul></div><div id="gameOverWordCard" class="card lost-card" v-show="started == false && lost == true && wordCard.word != null && tutorialOn == false" style="padding:1rem 1rem 1.5rem"><h3 v-show="(finalWord != '')" class="font1 tvc" style="word-break:break-all">"{{ finalWord }}"</h3><h3 class="font1 tvc">{{ wordCard.word }}</h3><h4 v-show="wordCard.type != null" class="tvc">{{ wordCard.type }}</h4><ul v-show="wordCard.defs != null" style="margin:0;padding-right:11.5px"><li v-for="def in wordCard.defs">{{ def }}</li></ul><span class="tvc" v-show="foundClosest == true && wordCard.type == null">Did you mean: "{{ closest }}"?</span></div></div></section><footer><a id="credit" class="card btn credit font2" style="opacity:0;display:flex;position:relative;bottom:0;margin:2rem auto;width:fit-content" v-show="!started && !lost && !tutorialOn" href="https://ondre.org" target="_blank" title="External link to creator's portfolio">created by ondre</a></footer></div></main></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f5f5f5" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#212121" />
+    <meta name="description" content="Show off your vocabulary skills in this competitive word game by typing words that contain three or more syllables! Kids and adults can play solo or with friends!">
+    <meta name="author" content="Ondre Johnson">
+    <meta property="og:title" content="The Big Word Game">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="img/logo(day).webp">
+    <meta property="og:url" content="https://thebigwordgame.com">
+    <meta property="og:description" content="Show off your vocabulary skills in this competitive word game by typing words that contain three or more syllables! Kids and adults can play solo or with friends!">
+    <title>The Big Word Game</title>
+    <link rel="canonical" href="https://thebigwordgame.com">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="site.webmanifest">
+    <link href="index.css" rel="stylesheet"></script>
+    <link rel="preload" href="fonts/FreckleFace-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="fonts/NanumPen.woff2" as="font" type="font/woff2" crossorigin>
+    <script defer src="https://unpkg.com/vue@3.4.38/dist/vue.global.prod.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollToPlugin.min.js"></script>
+    <script defer src="index-min.js"></script>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="678801f6-b826-4887-9e95-1de149947467"></script>
+</head>
+<body>
+    <header>
+        <a href="/" tabindex="-1">
+            <div id="logo" role="img" aria-label="The Big Word Game"></div>
+        </a>
+    </header>
+    <noscript>
+        <section class="tut-card">
+            <h1 class="font1">Sorry!</h1>
+            <span>Please enable Javascript to play.</span>
+        </section>
+    </noscript>
+    <main id="app" hidden>
+        <div id="app-wrap">
+            <section id="interactive" class="tut-card" v-show="!started && !tutorialOn && !introOff">
+                <button class="btn-abs-r font2 light-btn" @click="tutorialToggle();">show rules</button>
+                <div class="vert gap2" v-if="!multiPlayer">
+                    <h1 class="font1 fz2" v-if="!lost">Let's Play!</h1>
+                    <h1 class="font1 fz2" v-else>Game Over</h1>
+                    <div class="vert gap1">
+                        <h2 class="font1 fz1-75">Last Score: {{ cookieScore }}</h2>
+                        <h2 class="font1 fz1-75">High Score: {{ cookieHighScore }}</h2>
+                        <span class="font2 fz1" v-show="newHighScore">new high score!</span>
+                    </div>
+                </div>
+                <div class="vert gap2" v-else>
+                    <div class="vert gap-5">
+                        <h1 class="font1 fz2" v-if="lost && mpLost">You Lost!</h1>
+                        <h1 class="font1 fz2" v-else-if="lost && mpTie">You Tied!</h1>
+                        <h1 class="font1 fz2" v-else-if="lost && !mpLost && !mpTie">You Won!</h1>
+                        <span class="font2 txt-center" v-if="lost">{{ mpLostReason }}</span>
+                    </div>
+                    <div class="vert gap1">
+                        <h2 class="font1 fz1-75">Your Score: {{ score }}</h2>
+                        <h2 class="font1 fz1-75">{{ opponentName }}'s Score: {{ opponentScore }}</h2>
+                        <span class="font2 fz1" v-show="newHighScore">new high score!</span>
+                    </div>
+                </div>
+                <div class="vert gap1 full-width" v-if="!inParty">
+                    <button class="btn" @click="twoPlayer(); resetStats(); scrollToTop();">Play Online</button>
+                    <button class="btn" @click.prevent="startTimer(); backToHome();">Play Solo</button>
+                    <div class="vert gap-5">
+                        <span>Letter Order:</span>
+                        <div class="flex center gap1 letter-order">
+                            <button class="btn order-picker" :class="{ active: !isRandomOrder }" @click="randomOrder($event, false)">A to Z</button>
+                            <button class="btn order-picker" :class="{ active: isRandomOrder }" @click="randomOrder($event, true)">Random</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section id="solo-tutorial" class="tut-card" v-show="tutorialOn" >
+                <button class="btn-abs-l light-btn" @click="tutorialToggle(); scrollToTop();">back</button>
+                <div class="vert gap2">
+                    <div class="vert gap1">
+                        <h1 class="font1 fz2">How to Play</h1>
+                        <p class="gap1 txt-center">
+                            <span>Enter a word that starts with the target letter and contains at least 3 syllables.</span>
+                            <span>You gain points for each syllable detected in a correct word.</span>
+                            <span>The target letter advances once a correct word is played.</span>
+                            <span>Play until you strike out.</span>
+                        </p>
+                    </div>
+                    <div class="vert gap1">
+                        <span class="font1">examples:<br></span>
+                        <ul class="vert inner-card">
+                            <li class="inner-card-item">
+                                <span class="fz175">an<span>&nbsp;*&nbsp;</span>gry</span>
+                                <span>2 syllables = 0 points &nbsp;<span class="fz-75">❌</span></span>
+                            </li>
+                            <li class="inner-card-item">
+                                <span class="fz175">al <span>&nbsp;*&nbsp;</span> ler <span>&nbsp;*&nbsp;</span> gy</span>
+                                <span>3 syllables = 3 points &nbsp;<span class="fz-75">✅</span></span>
+                            </li>
+                            <li class="inner-card-item">
+                                <span class="fz175">bal <span>&nbsp;*&nbsp;</span> ler <span>&nbsp;*&nbsp;</span> in <span>&nbsp;*&nbsp;</span> a</span>
+                                <span>4 syllables = 4 points &nbsp;<span class="fz-75">✅</span></span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="vert gap1">
+                    <h2 class="font1 fz2">Rules</h2>
+                    <ul class="vert inner-card">
+                        <li class="inner-card-item">
+                            <span>Play within 15 seconds</span>
+                        </li>
+                        <li class="inner-card-item">
+                            <span>Word must contain at least three syllables</span>
+                        </li>
+                        <li class="inner-card-item">
+                            <span>Word must start with the correct letter</span>
+                        </li>
+                        <li class="inner-card-item">
+                            <span>No offensive words</span>
+                        </li>
+                        <li class="inner-card-item">
+                            <span>No reused words</span>
+                        </li>
+                        <li class="inner-card-item">
+                            <span>No two-part words</span>
+                            <span class="fz1">(no spaces or hyphens in the word)</span>
+                        </li>
+                    </ul>
+                    <div class="vert gap1 margin-v-1 txt-center">
+                        <span>Break a rule; get a strike.</span>
+                        <span class="underline">Three strikes and you're out!</span>
+                    </div>
+                </div>
+                <div class="vert gap1 full-width">
+                    <button class="btn" @click="tutorialToggle(); twoPlayer(); scrollToTop();">Play Online</button>
+                    <button class="btn" @click.prevent="tutorialToggle(); startTimer(); backToHome();">Play Solo</button>
+                    <div class="vert gap-5">
+                        <span>Letter Order:</span>
+                        <div class="flex center gap1 letter-order">
+                            <button class="btn order-picker" :class="{ active: !isRandomOrder }" @click="randomOrder($event, false)" >A to Z</button>
+                            <button class="btn order-picker" :class="{ active: isRandomOrder }" @click="randomOrder($event, true)">Random</button>
+                        </div>
+                    </div>
+                    <button class="btn light-btn font2" @click="tutorialToggle(); scrollToTop();">hide rules</button>
+                </div>
+            </section>
+            <section id="multiplayer-path" class="tut-card" v-show="!started && !tutorialOn && !lost && multiPlayer && !isWaiting && !(isPartyLeader && countingDown)">
+                <section id="username-section" class="vert gap2" v-show="(!hasUsername || joiningParty) && !inParty">
+                    <div>
+                        <button class="btn-abs-l light-btn font2" @click.prevent="twoPlayer(); scrollToTop();" v-if="!joiningParty && !changingUsername">back</button>
+                        <button class="btn-abs-l light-btn font2" @click.prevent="hasUsername = true; changingUsername = false; scrollToTop();" v-else-if="!joiningParty && changingUsername">cancel</button>
+                        <button class="btn-abs-l light-btn font2" @click.prevent="joiningParty = false; scrollToTop();" v-else>back</button>
+                    </div>
+                    <div class="vert gap1">
+                        <h1 class="font1 fz2 txt-center" v-if="!joiningParty">Choose Your Username</h1>
+                        <h1 class="font1 fz2 txt-center" v-else>Join Party by Username</h1>
+                    </div>
+                    <form id="username-form" class="form user-form" spellcheck="false" autocapitalize="off" autocomplete="off" action="">
+                        <input required v-model="usernameInput" type="text" ref="userInput" id="user-text" title="Type username here!" aria-label="Type your username here!"></input>
+                        <input class="font2 btn" type="submit" ref="userPost" id="user-post" title="Enter Multiplayer Zone" value="enter" @click.prevent="setUsername($event)" v-if="!joiningParty"></input>
+                        <input class="font2 btn" type="submit" ref="userPost" id="user-post" title="Join Party" value="join party" @click.prevent="joinPartyByUsername($event)" v-else></input>
+                    </form>
+                </section>
+                <section id="party-or-random" class="vert gap2" v-show="hasUsername && !chosenMatchmakingMode && !joiningParty">
+                    <button class="btn-abs-l light-btn font2" @click.prevent=" twoPlayer(); scrollToTop();">back</button>
+                    <button id="change-username" class="btn-abs-r font2 light-btn" @click="hasUsername = false; changingUsername = true">change name</button>
+                    <div class="vert gap-5">
+                        <h1 class="font1 fz2 txt-center">Play Online</h1>
+                        <div class="vert gap-5">
+                            <span class="font2 txt-center">username: {{ mpUsername }}</span>
+                        </div>
+                    </div>
+                    <div class="vert gap1 full-width">
+                        <h2 class="font1 txt-center">Random</h2>
+                        <button class="btn" @click.prevent="chooseMatchmakingMode('random'); scrollToTop();">Play Now</button>
+                    </div>
+                    <div class="vert gap1 full-width">
+                        <h2 class="font1 txt-center">Play with Friends</h2>
+                        <button class="btn" @click.prevent="chooseMatchmakingMode('member'); scrollToTop();">Join Party</button>
+                        <button class="btn" @click.prevent="chooseMatchmakingMode('leader'); scrollToTop();">Create Party</button>
+                    </div>
+                </section>
+                <section id="choose-game-mode" class="vert gap2" v-show="hasUsername && chosenMatchmakingMode && !mpClassicTut && !mpSpeedTut && !mpBattleTut">
+                    <button class="btn-abs-l light-btn font2" @click.prevent="chosenMatchmakingMode = false; deleteParty(); scrollToTop();" v-if="isPartyLeader">end party</button>
+                    <button class="btn-abs-l light-btn font2" @click.prevent="chosenMatchmakingMode = false; scrollToTop();" v-else>back</button>
+                    <div class="vert gap-5" v-if="!isPartyLeader">
+                        <h1 class="font1 fz2">Choose Mode</h1>
+                        <span class="font2 txt-center">Play against others globally!</span>
+                    </div>
+                    <div class="vert gap-5" v-else>
+                        <h1 class="font1 fz2">Party Leader</h1>
+                        <span class="font2 txt-center" v-if="partyMemberUsername !== ' '">In party: {{ partyMemberUsername }}</span>
+                        <span class="font2 txt-center" v-else>Party empty</span>
+                    </div>
+                    <div class="vert gap1 full-width" v-if="!isPartyLeader || (isPartyLeader && partyMemberUsername !== ' ')">
+                        <button class="btn" @click.prevent="classicTutToggle(); scrollToTop();">Classic</button>
+                        <button class="btn" @click.prevent="speedTutToggle(); scrollToTop();">Speed</button>
+                        <button class="btn" @click.prevent="battleTutToggle(); scrollToTop();">Battle</button>
+                    </div>
+                </section>
+                <section id="classic-mode" class="vert gap2" v-show="mpClassicTut">
+                    <button class="btn-abs-l light-btn font2" @click.prevent="mpClassicTut=false; mpCTisHidden=true;" v-show="!isWaiting">back</button>
+                    <button class="btn-abs-r light-btn font2" @click="mpCTHide" v-if="mpCTisHidden" v-show="!isWaiting">show rules</button>
+                    <div class="vert gap-5">
+                        <h1 class="font1 fz2">Classic Mode</h1>
+                        <span class="font2 txt-center" v-if="!countingDown">Take turns playing big words!</span>
+                        <span class="font2 txt-center" v-else>opponent: </span>
+                    </div>
+                    <div class="vert gap2" v-show="!mpCTisHidden">
+                        <button class="btn-abs-r light-btn font2 fz1" @click.prevent="mpCTHide(); scrollToTop();">hide rules</button>
+                        <div class="vert gap2">
+                            <div class="vert">
+                                <p class="gap1 txt-center">
+                                    <span>Two players take turns entering a word that starts with the target letter and contains at least 3 syllables.</span>
+                                    <span>You gain points for each syllable detected in a correct word.</span>
+                                    <span>The target letter advances once a correct word is played.</span>
+                                    <span>Play until someone strikes out.</span>
+                                </p>
+                            </div>
+                            <div class="vert gap1">
+                                <span class="font1">examples:<br></span>
+                                <ul class="vert inner-card">
+                                    <li class="inner-card-item">
+                                        <span class="fz175">an <span>&nbsp;*&nbsp;</span> gry</span>
+                                        <span>2 syllables = 0 points &nbsp;<span class="fz-75">❌</span></span>
+                                    </li>
+                                    <li class="inner-card-item">
+                                        <span class="fz175">al <span>&nbsp;*&nbsp;</span> ler <span>&nbsp;*&nbsp;</span> gy</span>
+                                        <span>3 syllables = 3 points &nbsp;<span class="fz-75">✅</span></span>
+                                    </li>
+                                    <li class="inner-card-item">
+                                        <span class="fz175">bal <span>&nbsp;*&nbsp;</span> ler <span>&nbsp;*&nbsp;</span> in <span>&nbsp;*&nbsp;</span> a</span>
+                                        <span>4 syllables = 4 points &nbsp;<span class="fz-75">✅</span></span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="vert gap1">
+                            <h2 class="font1 fz2">Rules</h2>
+                            <ul class="vert inner-card">
+                                <li class="inner-card-item">
+                                    <span>Play within 15 seconds</span>
+                                </li>
+                                <li class="inner-card-item">
+                                    <span>Word must contain at least three syllables</span>
+                                </li>
+                                <li class="inner-card-item">
+                                    <span>Word must start with the correct letter</span>
+                                </li>
+                                <li class="inner-card-item">
+                                    <span>No offensive words</span>
+                                </li>
+                                <li class="inner-card-item">
+                                    <span>No reused words</span>
+                                </li>
+                                <li class="inner-card-item">
+                                    <span>No two-part words</span>
+                                    <span class="fz1">(no spaces or hyphens in the word)</span>
+                                </li>
+                            </ul>
+                            <div class="vert gap1 margin-v-1 txt-center">
+                                <span>Break a rule; get a strike.</span>
+                                <span class="underline">Three strikes and you're out!</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vert gap1" v-show="!isWaiting && !countingDown">
+                        <button class="btn" @click.prevent="startWebSocket(); mpCTisHidden=true;" v-if="isPartyLeader">Start Match</button>
+                        <button class="btn" @click.prevent="startWebSocket(); mpCTisHidden=true;" v-else>Join Match</button>
+                        <div class="vert gap-5">
+                            <span>Letter Order:</span>
+                            <div class="flex center gap1 letter-order">
+                                <button class="btn order-picker" :class="{ active: !isRandomOrder }" @click.prevent="randomOrder(false)" >A to Z</button>
+                                <button class="btn order-picker" :class="{ active: isRandomOrder }" @click.prevent="randomOrder(true)">Random</button>
+                            </div>
+                        </div>
+                        <button class="btn font2 light-btn" @click="mpCTHide(); classicTutToggle(); scrollToTop();" v-if="!mpCTisHidden">go back</button>
+                    </div>
+                </section>
+                <section id="speed-mode" class="vert gap2" v-show="mpSpeedTut">
+                    <button class="btn-abs-l light-btn font2" @click.prevent="mpSpeedTut=false; mpSTisHidden=true;" v-show="!isWaiting">back</button>
+                    <button class="btn-abs-r light-btn font2" @click="mpSTHide" v-if="mpSTisHidden" v-show="!isWaiting">show rules</button>
+                    <div class="vert gap-5">
+                        <h1 class="font1 fz2">Speed Mode</h1>
+                        <span class="font2 txt-center">Race to play your word first!</span>
+                    </div>
+                    <div class="vert gap2" v-show="!mpSTisHidden">
+                        <button class="btn-abs-r light-btn font2 fz1" @click.prevent="mpSTHide(); scrollToTop();">hide rules</button>
+                        <div class="vert gap2">
+                            <div class="vert">
+                                <p class="gap1 txt-center">
+                                    <span>Two players race to be the first to enter a word that starts with the target letter and contains at least 3 syllables.</span>
+                                    <span>Whoever plays a correct word first wins, and gains points for each syllable detected.</span>
+                                    <span>The target letter advances once a winner for the current letter is decided.</span>
+                                    <span>Play for 26 letters <br>OR<br> until someone strikes out.</span>
+                                </p>
+                            </div>
+                            <div class="vert gap1">
+                                <span class="font1">example round:<br></span>
+                                <ul class="vert inner-card">
+                                    <li class="inner-card-item">
+                                        <span class="fz175">al <span>&nbsp;*&nbsp;</span> ler <span>&nbsp;*&nbsp;</span> gy</span>
+                                        <span>7 seconds = 0 points</span>
+                                    </li>
+                                    <li class="inner-card-item">
+                                        <span class="fz175">as <span>&nbsp;*&nbsp;</span> tro <span>&nbsp;*&nbsp;</span> naut</span>
+                                        <span>4 seconds = 3 points &nbsp;<span class="fz-75">✅</span></span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="vert gap1">
+                            <h2 class="font1 fz2">Rules</h2>
+                            <ul class="vert inner-card">
+                                <li class="inner-card-item">
+                                    <span>Play within 15 seconds</span>
+                                </li>
+                                <li class="inner-card-item">
+                                    <span>Word must contain at least three syllables</span>
+                                </li>
+                                <li class="inner-card-item">
+                                    <span>Word must start with the correct letter</span>
+                                </li>
+                                <li class="inner-card-item">
+                                    <span>No offensive words</span>
+                                </li>
+                                <li class="inner-card-item">
+                                    <span>No reused words</span>
+                                </li>
+                                <li class="inner-card-item">
+                                    <span>No two-part words</span>
+                                    <span class="fz1">(no spaces or hyphens in the word)</span>
+                                </li>
+                            </ul>
+                            <div class="vert gap1 margin-v-1 txt-center">
+                                <span>Break a rule; get a strike.</span>
+                                <span class="underline">Three strikes and you're out!</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vert gap1" v-show="!isWaiting && !countingDown">
+                        <button class="btn" @click.prevent="startWebSocket(); mpSTisHidden=true;" v-if="isPartyLeader">Start Match</button>
+                        <button class="btn" @click.prevent="startWebSocket(); mpSTisHidden=true;" v-else>Join Match</button>
+                        <div class="vert gap-5">
+                            <span>Letter Order:</span>
+                            <div class="flex center gap1 letter-order">
+                                <button class="btn order-picker" :class="{ active: !isRandomOrder }" @click="randomOrder($event, false)" >A to Z</button>
+                                <button class="btn order-picker" :class="{ active: isRandomOrder }" @click="randomOrder($event, true)">Random</button>
+                            </div>
+                        </div>
+                        <button class="btn font2 light-btn" @click="mpSTHide(); speedTutToggle(); scrollToTop();" v-if="!mpSTisHidden">go back</button>
+                    </div>
+                </section>
+                <section id="battle-mode" class="vert gap2" v-show="mpBattleTut">
+                    <button class="btn-abs-l light-btn font2" @click.prevent="mpBattleTut=false; mpWTisHidden=true;" v-show="!isWaiting">back</button>
+                    <button class="btn-abs-r light-btn font2" @click="mpWTHide" v-if="mpWTisHidden" v-show="!isWaiting">show rules</button>
+                    <div class="vert gap-5">
+                        <h1 class="font1 fz2">Battle Mode</h1>
+                        <span class="font2 txt-center">Play the word with the most syllables!</span>
+                    </div>
+                    <div class="vert gap2" v-show="!mpWTisHidden">
+                        <button class="btn-abs-r light-btn font2 fz1" @click.prevent="mpWTHide(); scrollToTop();">hide rules</button>
+                        <div class="vert gap2">
+                            <div class="vert">
+                                <p class="gap1 txt-center">
+                                    <span>Two players battle to play the word with the most syllables for the current starting letter.</span>
+                                    <span>The highest syllable word wins the amount of points detected in the word.</span>
+                                    <span>If there is a tie, players repeat the same letter until one word is higher.</span>
+                                    <span>The target letter advances once a winner for the current letter is decided.</span>
+                                    <span>Play for 26 letters <br>OR<br> until someone strikes out.</span>
+                                </p>
+                            </div>
+                            <div class="vert gap1">
+                                <span class="font1">example round:<br></span>
+                                <ul class="vert inner-card">
+                                    <li class="inner-card-item">
+                                        <span class="fz175">al <span>&nbsp;*&nbsp;</span> ler <span>&nbsp;*&nbsp;</span> gy</span>
+                                        <span>3 syllables = 0 points</span>
+                                    </li>
+                                    <li class="inner-card-item">
+                                        <span class="fz175">as <span>&nbsp;*&nbsp;</span> tro <span>&nbsp;*&nbsp;</span> lo <span>&nbsp;*&nbsp;</span> gy</span>
+                                        <span>4 syllables = 4 points &nbsp;<span class="fz-75">✅</span></span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="vert gap1">
+                            <h2 class="font1 fz2">Rules</h2>
+                            <ul class="vert inner-card">
+                                <li class="inner-card-item">
+                                    <span>Play within 15 seconds</span>
+                                </li>
+                                <li class="inner-card-item">
+                                    <span>Word must contain at least three syllables</span>
+                                </li>
+                                <li class="inner-card-item">
+                                    <span>Word must start with the correct letter</span>
+                                </li>
+                                <li class="inner-card-item">
+                                    <span>No offensive words</span>
+                                </li>
+                                <li class="inner-card-item">
+                                    <span>No reused words</span>
+                                </li>
+                                <li class="inner-card-item">
+                                    <span>No two-part words</span>
+                                    <span class="fz1">(no spaces or hyphens in the word)</span>
+                                </li>
+                            </ul>
+                            <div class="vert gap1 margin-v-1 txt-center">
+                                <span>Break a rule; get a strike.</span>
+                                <span class="underline">Three strikes and you're out!</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vert gap1" v-show="!isWaiting && !countingDown">
+                        <button class="btn" @click.prevent="startWebSocket(); mpWTisHidden=true;" v-if="isPartyLeader">Start Match</button>
+                        <button class="btn" @click.prevent="startWebSocket(); mpWTisHidden=true;" v-else>Join Match</button>
+                        <div class="vert gap-5">
+                            <span>Letter Order:</span>
+                            <div class="flex center gap1 letter-order">
+                                <button class="btn order-picker" :class="{ active: !isRandomOrder }" @click="randomOrder($event, false)" >A to Z</button>
+                                <button class="btn order-picker" :class="{ active: isRandomOrder }" @click="randomOrder($event, true)">Random</button>
+                            </div>
+                        </div>
+                        <button  class="btn font2 light-btn" @click="mpWTHide(); battleTutToggle(); scrollToTop();" v-if="!mpWTisHidden">go back</button>
+                    </div>
+                </section>
+            </section>
+            <section id="waiting-room" class="tut-card vert gap1 full-width" v-show="!started && (inParty || isWaiting) || (isPartyLeader && countingDown)">
+                <div id="waiting-room-mode" class="vert gap-5">
+                    <div v-if="countingDown || isPartyLeader || !inParty">
+                        <h1 class="font1 fz2">{{ mode }} Mode</h1>
+                        <span class="font2 txt-center">{{ modeDescriptor }}</span>
+                    </div>
+                    <div class="vert center gap1" v-else-if="inParty">
+                        <h1 class="font1 fz2">Party Room</h1>
+                        <div class="vert center gap-5">
+                            <h2 class="font1 fz1-35">Leader:</h2>
+                            <h2 class="font1 fz175">{{ partyLeaderUsername }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="vert center gap2" v-if="!countingDown">
+                    <div id="pre-game" class="vert center gap1" v-if="!inParty">
+                        <div class="font2 txt-center" id="waiting-text">finding an opponent</div>
+                        <button class="btn fit-width" id="cancel-ws" @click.prevent="softCloseWS();">Cancel</button>
+                    </div>
+                    <div id="pre-game" class="vert center gap1" v-else>
+                        <div class="font2 txt-center" id="waiting-text">waiting for leader</div>
+                        <button class="btn fit-width" id="cancel-ws" @click.prevent="leaveParty();">Leave Party</button>
+                    </div>
+                </div>
+                <div id="countdown" class="vert center gap1" v-else>
+                    <div class="vert center gap-5">
+                        <h2 class="font1 fz1-35">opponent:</h2>
+                        <h2 class="font1 fz175">{{ opponentName }}</h2>
+                    </div>
+                    <span class="font2">starting match in:</span>
+                    <span class="font1 fz2">{{ countdown }}</span>
+                </div>
+            </section>
+            <section id="core-game" class="meat" v-show="started">
+                <div class="txt-card">
+                    <div class="vert left">
+                        <span>score: 
+                            <span class="font1 fz2">{{ score }}</span>
+                        </span>
+                        <span class="font2 fz1" v-show="newHighScore">new high score!</span>
+                    </div>
+                    <span ref="wordMsg" id="word-msg">{{ wordMsg }}</span>
+                    <span>strikes: <span class="font1 fz2">{{ strikes }}</span></span>
+                </div>
+                <div class="main">
+                    <form id="form" class="form" spellcheck="false" autocapitalize="off" autocomplete="off" action="">
+                        <input v-model="input" type="text" ref="input" id="text" title="Type your word here!" aria-label="Type your word here!">
+                        <input class="font2 btn" type="submit" value="go" id="post" ref="post" title="Click to enter your word"></input>
+                    </form>
+                </div>
+                <div class="txt-card">
+                    <div class="letter-meta gap1">
+                        <div class="letter-wrap" title="Play a word starting with this letter!">
+                            <span class="font2">letter: &nbsp;</span>
+                            <span class="font1 fz2">{{ currentLetter }}</span>
+                        </div>
+                    </div>
+                    <div class="timer-wrap">
+                        <span class="font2 font">timer: </span>
+                        <span class="timer">{{ t }}</span>
+                    </div>
+                </div>
+                <div class="game-btn-wrap">
+                    <button class="quit btn font2" @click.prevent="quit();" title="Quit the game">
+                        <span>quit</span>
+                    </button>
+                    <button class="pause btn font2" :class="{ active: pausePress }" @click.prevent="pause()" v-show="!multiPlayer" title="Pause the game">
+                        <span v-if="paused && pausePress">resume</span>
+                        <span v-else>pause</span>
+                    </button>
+                </div>
+            </section>
+            <section id="word-list" class="wl-wrap gap1" v-show="wordsList.size !== 0 && !tutorialOn">
+                <div class="vert gap-5 center">
+                    <h2 class="font1">Words Used:</h2>
+                </div>
+                <ul tabindex="-1" class="wl" ref="wl" title="scroll left & right OR shift + wouse wheel up & down">
+                    <li v-for="w in wordsList"><button @click.prevent="replaceWordCard" @enter.prevent="replaceWordCard" @space.prevent="replaceWordCard" class="btn font2">{{ w }}</button></li>
+                </ul>
+            </section>
+            <section id="word-card" class="word-card-wrap" v-show="wordCard.word && !tutorialOn">
+                <div class="word-card-scroller" ref="wcScroller">
+                    <div id="wordCard" class="word-card gap-5" ref="wordCardDisplay">
+                        <div class="vert gap-5">
+                            <h3 class="font1 fz1-5" v-show="finalWord != '' && lost">"{{ finalWord }}"</h3>
+                            <h3 class="font1 fz1-5">{{ wordCard.word }}</h3>
+                        </div>
+                        <div class="word-card-info">
+                            <span v-show="foundClosest && !wordCard.type" >Did you mean: "{{ closest }}"?</span>
+                            <h4 v-show="wordCard.type">{{ wordCard.type }}</h4>
+                            <ul v-show="wordCard.defs">
+                                <li v-for="def in wordCard.defs">{{ def }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <footer id="credit" class="margin-v-2" v-show="!started && !lost && !tutorialOn && !isWaiting">
+                <a class="font2 btn credit" href="https://ondre.org" target="_blank" title="External link to creator's portfolio">created by ondre</a>
+            </footer>
+        </div>
+    </main>
+</body>
+</html>

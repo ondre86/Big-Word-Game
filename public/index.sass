@@ -1,59 +1,141 @@
+/////////////////////////////////////////////////////
+// COLOR VARIABLES
 $bg: #f5f5f5
-$yellow: #fddc02
 $yellowLight: #FEEB72
+$yellow: #fddc02
 $yellowDark: #dec20f
 $yellowDark2: #B79E01
 $green: #169B00
 $red: #CA0505
 $purple: #8875FF
 $dm-purple: #5318a0
-$dm-purpleDark: #3c1889
+$dm-purpleDark: #321473
 $dm-purpleDark2: #2e0e57
 $dm-bg: #212121
 $dm-bgLight: #2c2c2c
 
+/////////////////////////////////////////////////////
+// FONTS
 @font-face 
     font-family: 'freckle'
-    src: url("/fonts/FreckleFace-Regular.woff2")
+    src: url("./fonts/FreckleFace-Regular.woff2")
+    font-weight: 600
+    font-style: normal
+@font-face 
+    font-family: 'nanum'
+    src: url("./fonts/NanumPen.woff2")
     font-weight: 600
     font-style: normal
 
-@font-face 
-    font-family: 'nanum'
-    src: url("/fonts/NanumPen.woff2")
-    font-weight: 600
-    font-style: normal
-
-%f1
+%font1
     font-family: 'freckle'
-
-%f2
+%font2
     font-family: 'nanum'
 
-%f1-l
-    font-size: 3rem
-%f1-m
+%fz-2-5
     font-size: 2.5rem
-%doubleFont
+%fz-2-25
+    font-size: 2.25rem
+%fz-2
     font-size: 2rem
-%f2-m
+%fz-1-75
+    font-size: 1.75rem
+%fz-1-5
     font-size: 1.5rem
-%f2-s
+%fz-1-35
+    font-size: 1.35rem
+%fz-1
     font-size: 1rem
 
-%btn
-    padding: .5rem 1rem
+/////////////////////////////////////////////////////
+// UTILITY MIXINS
+
+///////////////////////////////////
+// VISUAL
+%transition
+    -webkit-transition: all 0.3s ease-in-out
+    -moz-transition: all 0.3s ease-in-out
+    -o-transition: all 0.3s ease-in-out
+    transition: all 0.3s ease-in-out
+
+%hidden
+    opacity: 0
+
+%bg-normal
     background-color: $yellow
-%focus
-    &:focus
-        outline: 9px solid $yellowDark2
-        color: black
-%active
-    &:active
-        background-color: $purple
-%hover
-    &:hover
-        background-color: $yellowDark
+%bg-acc1
+    background-color: $yellowDark
+%bg-acc2
+    background-color: $yellowDark2
+
+///////////////////////////////////
+// LAYOUT
+%gap-5
+    gap: .5rem
+%gap1
+    gap: 1rem
+%gap1-5
+    gap: 1.5rem
+%gap2
+    gap: 2rem
+%gap2-5
+    gap: 2.5rem
+
+%fullParent
+    height: 100%
+    width: 100%
+
+%autoHeight
+    height: auto
+%fitHeight
+    height: fit-content
+%fullWidth
+    width: 100%
+%fitWidth
+    width: fit-content
+
+%resetLayout
+    margin: 0
+    padding: 0
+
+%flex-h
+    display: flex
+    flex-direction: row
+
+%flex-v
+    display: flex
+    flex-direction: column
+
+%center
+    justify-content: center
+    align-items: center
+    align-self: center
+
+%left
+    justify-content: flex-start
+    align-items: flex-start
+    align-self: flex-start
+    text-align: left
+
+%absolute-center
+    position: absolute
+    left: 50%
+    top: 50%
+    transform: translate(-50%, -50%)
+
+%topCenter
+    justify-content: flex-start
+    align-items: center
+
+// COMPONENT 
+%component-bg
+    background-color: $yellow
+%component-bg-light
+    background-color: $yellowLight
+%component-bg-dark
+    background-color: $yellowDark
+%component-bg-dark2
+    background-color: $yellowDark2
 
 %border
     border: 3px solid black
@@ -63,247 +145,340 @@ $dm-bgLight: #2c2c2c
     border-bottom-right-radius: 120px 24px
     outline-offset: 0px
 
-%flex-h
-    display: flex
+%outline
+    outline: 4.5px solid $yellowDark2
+%outlineNone
+    outline: 0px solid $yellowDark2
 
-%flex-v
-    display: flex
-    flex-direction: column
+%hover
+    cursor: pointer
+    &:hover
+        @extend %component-bg-dark
+%focus
+    &:focus
+        @extend %component-bg-dark, %outline
+%active
+    &:active
+        @extend %component-bg-dark2, %outlineNone
 
-%center
-    justify-content: center
-    align-items: center
 
-%hidden
-    opacity: 0
+//////////////////////////////////////////////////////
+// CLASSES
 
-%fullParent
-    height: 100%
-    width: 100%
-%gap1
-    gap: 1rem
-%gap2
-    gap: 2rem
+////////////////////////////////////
+// UTILITY CLASSES
+.font1
+    @extend %font1
+.font2
+    @extend %font2
+.fz25
+    @extend %fz-2-5
+.fz225
+    @extend %fz-2-25
+.fz2
+    @extend %fz-2
+.fz175
+    @extend %fz-1-75
+.fz15
+    @extend %fz-1-5
+.fz135
+    @extend %fz-1-35
+.fz1
+    @extend %fz-1
+.fz-75
+    font-size: .75rem
+.underline
+    text-decoration: underline
+    
+.center
+    @extend %center
+.top-center
+    @extend %topCenter
+.txt-center
+    text-align: center
+.left
+    @extend %left
+.flex
+    @extend %flex-h
+.vert
+    @extend %flex-v
+.gap-5
+    @extend %gap-5
+.gap1
+    @extend %gap1
+.gap2
+    @extend %gap2
+.full-width
+    @extend %fullWidth
+.fit-width
+    @extend %fitWidth
 
+.margin-v-1
+    margin: 1rem 0
+.margin-v-2
+    margin: 2rem 0
+
+///////////////////////////////////
+//  NATIVE ELEMENTS - TOP LEVEL
 *
+    color: black
+    text-decoration: none
     -ms-overflow-style: none
     scrollbar-width: none
     &::-webkit-scrollbar
         display: none  
+    @extend %fz-1-35, %font2, %resetLayout
 
 html, body
-    margin: 0
-    padding: 0 
-    background-color: $bg
-
-html
-    height: 100%
-    min-height: 100%
-    overflow-y: scroll
-    
-body
+    @extend %resetLayout
     position: relative
     box-sizing: border-box
     height: 100%
-    max-height: 100%
-    overflow-x: hidden
+    background-color: $bg
     overflow-y: scroll
-        
-    @extend %flex-v
+    overflow-x: hidden
 
-    transition: all .5s
+html
+    min-height: 100%
+    
+body
+    @extend %flex-v, %transition
+    max-height: 100%     
 
 noscript
-    @extend %flex-v
+    @extend %flex-v, %center
 
-a   
-    text-decoration: none
-    color: black
-
-    @extend %focus
     
 h1, h2, h3, h4
-    margin: 0
-    padding: 0
+    @extend %resetLayout
 
-#logo
-    &:focus
-        outline: none
-    &:active
-        outline: 0px
+
+///////////////////////////////////
+// APP //
 
 #app
-    @extend %flex-v
-    opacity: 0
-    justify-content: flex-start
-    align-items: center
-    height: auto
-    transition: all .5s
+    @extend %flex-v, %transition, %autoHeight, %topCenter
+    display: none
 
-.app-wrap
+#app-wrap
+    @extend %flex-v, %center, %autoHeight, %topCenter, %transition
     max-width: 500px
     min-width: 300px
-    height: auto
-    min-height: 90%
-    @extend %flex-v, %center
-    justify-content: flex-start
+    min-height: 95%
     padding: .5rem 0 2rem
-    transition: all .5s
 
-.meat
-    @extend %flex-v, %center
-    gap: 2rem
+///////////////////////////////////
+// LOGO //
+header
+    margin: .5rem auto 1rem
+    a
+        display: inline-block
+        height: fit-content
+#logo
+    background-image: url('/img/logo(day).webp')
+    background-position: left top
+    background-repeat: no-repeat
+    background-size: 90px 60px
+    height: 60px
+    width: 90px
 
-.logo-holster
-    @extend %flex-v, %center
-    height: 90px
-    width: 100vw
-    margin: 0 0 2rem
+///////////////////////////////////
+// CARDS & CONTAINERS //
 
-.logo
-    width: 120px
-    height: 80px
-    padding-top: 10px
+.card, .tut-card, .word-card
+    min-width: 270px
+    max-width: 340px
+    @extend %font2, %fz-2-5, %flex-v, %border, %component-bg-light, %transition
+
+    * :not(span, .letter-order, ul, li, p.left)
+        @extend %flex-v, %center
+    * :not(.btn-abs-l, .btn-abs-r, #cancel-ws, #change-username, #user-post, #user-text, .order-picker, span, .word-card div h3)
+        @extend %fullWidth
+    br
+        display: block
+    p.left
+        @extend %flex-v, %left
+
+.tut-card
+    @extend %flex-v, %gap2, %center
+    padding: 1.5rem 1rem
+    position: relative
+    
+.rule-card
+    padding: 1.5rem
+
+.inner-card
+    @extend %border, %fullWidth
+    text-align: center
+
+.inner-card-item
+    @extend %flex-v
+    padding: 1rem 0
     margin: 0
 
-.font1
-    @extend %f1, %f1-m
-.font2
-    @extend %f2, %f2-m
-.center
-    @extend %center
-.flex
-    @extend %flex-h
-.vert
-    @extend %flex-v, %center
-.gap1
-    @extend %flex-h, %gap1
-.gap2
-    @extend %flex-h, %gap2
-.main
-    @extend %flex-v, %center, %gap2
+    span:not(span.fz175 + span, span.fz-75)
+        @extend %flex-h, %center
+        max-width: 85%
+    span:has(span.fz-75)
+        @extend %flex-h, %center
 
-.btn
-    @extend %btn, %border, %f1, %f2-m, %focus, %active, %hover
-    color: black
-    text-decoration: none
+.inner-card-item:nth-of-type(2n)
+    border-top: 3px solid black
+    border-bottom: 3px solid black
+.inner-card-item:last-of-type
+    border-bottom: 0px solid black
 
-    -webkit-transition: all 0.3s ease-in-out
-    -moz-transition: all 0.3s ease-in-out
-    -o-transition: all 0.3s ease-in-out
-    transition: all 0.3s ease-in-out
+p.left
+    align-items: left
 
-    &:hover
-        cursor: pointer
 
-    &:active
-        outline: 0px solid #000
-        background-color: $yellowDark2
+///////////////////////////////////
+// BUTTONS //
 
-.pause, .quit
-    &:hover
-        background-color: $yellowDark
+.btn, .btn-abs-l, .btn-abs-r
+    @extend %border, %font1, %fz-1-35, %focus, %active, %hover, %transition, %component-bg, %fitHeight
+    padding: .5rem 1rem
 
-    &:active
-        background-color: $yellowDark2
+.pause
+    min-width: 120px
 
-.quit
-    height: fit-content
+.btn-abs-l, .btn-abs.r, .order-picker, .credit
+    font-family: 'nanum'
+
+.btn-abs-l
+    position: absolute
+    top: -1.5rem
+    left: -.5rem
+    @extend %fz-1
+
+.btn-abs-r
+    position: absolute
+    top: -1.5rem
+    right: -.5rem
+    @extend %fz-1
+
+.order-picker
+    padding: .25rem .5rem
+    font-size: 1.15rem
+
+.credit
+    margin: 1rem 0 0 0
 
 .active
-    &:hover
-        background-color: $yellowDark
-
-    &:active
-        background-color: $yellowDark2
-
-    background-color: $yellowDark
+    @extend %component-bg-dark, %hover, %active, %transition
     outline: 4.5px solid #B79E01
 
-.btn-highlight
-    outline: 9px solid $yellowDark2
-    transition: all 0.3s ease-in-out
+.light-btn
+    @extend %component-bg-light
 
-.btn-highlight2
-    outline: 0px solid $yellowDark2
-    transition: all 0.3s ease-in-out
+.letter-order
+    margin: 0 0 1rem 0
 
-.waitingMsg
-    position: absolute
-    left: 50%
-    top: 50%
-    transform: translate(-50%, -50%)
+@media (pointer: coarse)
+    .btn
+        &:hover
+            background-color: $yellow
+        &:focus
+            outline: 4.5px solid $yellowDark2
+    .active
+        &:hover
+            background-color: $yellowDark
+        &:focus
+            background-color: $yellowDark
+    .pause
+        &:hover:not(.active)
+            background-color: $yellow
+        &:focus:not(.active)
+            background-color: $yellow
 
-#credit
-    background-color: $yellow
-    &:hover
-        background-color: $yellowDark
+///////////////////////////////////
+// CORE GAME //
 
-.intro  
-    justify-self: center
-    margin: 2rem 0
-    .btn      
-        font-size: 3rem
-
-.timer-wrap
-    @extend %flex-h, %center
-    height: fit-content
-    gap: .5rem
-    min-width: 105px
-    justify-content: space-between
-
-.timer
-    @extend %f1, %f1-m
+.meat, .main
+    @extend %flex-v, %center
+    gap: .75rem  
 
 .txt-card
-    @extend %f2, %f2-m, %flex-h, %center
+    @extend %font2, %fz-2-5, %flex-h, %center, %fullWidth
     justify-content: space-between
-    width: 100%
-
-.bottom-txt
+    align-items: flex-start
     position: relative
-    align-items: initial
-    
-.form
-    @extend %flex-h, %gap1 
-    width: fit-content
-
-input
-    @extend %f1, %f1-m
-    width: 100%
-    padding: 1rem
-    transition: all .3s
-
-    &:focus
-        outline: 9px solid $yellow
-        color: black
-
-    &::placeholder
-        font-size: 3rem
-    &::-moz-placeholder
-        font-size: 3rem
-    &:-ms-input-placeholder
-        font-size: 3rem
-    &:-ms-input-placeholder
-        font-size: 3rem
-                  
-#text-input
-    padding-right: 1rem
-    @extend %border       
 
 .letter-meta
     @extend %flex-v
+    justify-content: flex-start
+
 .letter-wrap
-    @extend %flex-h, %f2-m, %gap1
+    @extend %fz-2-5, %gap1, %center
     justify-content: flex-end
-.tvc
+
+    span
+        width: fit-content
+        display: inline-block
+
+.timer-wrap
+    @extend %flex-h, %center, %fitHeight
+    gap: .5rem
+    min-width: 135px
+    justify-content: space-between
+
+.timer
+    @extend %font1, %fz-2-5
+
+.game-btn-wrap
+    @extend %flex-h, %fullWidth
+    justify-content: space-between
+
+#word-msg
+    @extend %fz-1
     align-self: center
+
+#waiting-text
+    display: inline-block
     text-align: center
 
+.def-pop
+    align-self: flex-start
+    @extend %fz-1
+
+////////////////////
+// FORM INPUTS //
+
+.form
+    @extend %flex-h, %gap1, %fitWidth
+    position: relative
+    margin: .5rem 0 0 0
+
+
+input
+    @extend %font1, %transition, %fullWidth
+    padding: 1rem
+                  
+#text, #user-text
+    @extend %border, %fz-2  
+    padding-right: 1rem
+    letter-spacing: .05rem
+
+    &:focus
+        outline: 7px solid $yellowDark2
+
+#user-text
+    @extend %fz-1-5
+    width: 80%
+    padding: .5rem 1rem
+
+#post, #user-post
+    @extend %border, %focus, %active, %hover
+    width: fit-content 
+    height: initial
+
+
+///////////////////////////////////
+// WORD INFO //
+
 .wl-wrap
-    @extend %flex-v
+    @extend %flex-v, %fullWidth
     margin: 2rem 0 0
-    width: 100%
     max-width: 100%
     position: relative
 
@@ -329,60 +504,22 @@ input
         background-color: rgba(0, 0, 0, 0)
         z-index: 100
 
+    span
+        text-align: center
+
 .wl
-    padding: 1rem 1.25rem
-    @extend %flex-h
-    list-style-type: none
-    gap: 1rem
+    @extend %flex-h, %gap1
+
+    padding: .5rem 1.25rem 1rem
     position: relative
     justify-content: center
+    list-style-type: none
 
     overflow-x: scroll 
-    -ms-overflow-style: none
-    scrollbar-width: none
-    &::-webkit-scrollbar
-        display: none
-
-.middle-example
-    border-top: 3px solid black
-    border-bottom: 3px solid black
-.top-example
-    border-bottom: 3px solid black
-
-.card
-    max-width: 320px
-    background-color: $yellowLight
-    @extend %f2, %f2-m, %flex-v, %border, %btn
-    transition: all .3s
-
-li.tvc.card
-    padding: 1.5rem
-
-.back
-    position: absolute
-    top: -1.5rem
-    left: -.5rem
-.back2
-    position: absolute
-    top: -1.5rem
-    right: -.5rem
-
-.example
-    width: 100%
-    padding: 1rem 0
-    @extend %border
-
-.tut-card
-    @extend %flex-v, %gap2
-    padding: 2rem
-    position: relative
-
-    .btn
-        transition: all .3s
 
 .word-card-wrap
-    @extend %flex-v
-    margin: .5rem 0 0 0
+    @extend %flex-v, %fullWidth
+    margin: 1rem 0 0 0
     position: relative
     height: 40vh
     min-width: 300px
@@ -393,7 +530,7 @@ li.tvc.card
         top: 0
         left: 0
         width: 100%
-        height: 8%
+        height: 1.5rem
         background-image: linear-gradient(0deg, rgba(0, 0, 0, 0), $bg)
         background-color: rgba(0, 0, 0, 0)
         z-index: 100
@@ -404,65 +541,81 @@ li.tvc.card
         bottom: -2px
         left: 0
         width: 100%
-        height: 8%
+        height: 1.5rem
         background-image: linear-gradient(0deg,  $bg, rgba(0, 0, 0, 0))
         background-color: rgba(0, 0, 0, 0)
         z-index: 100
 
 .word-card-scroller
+    @extend %topCenter, %fullWidth, %flex-v
     padding: 10% 3%
     overflow-y: scroll
     overflow-x: hidden
-    -ms-overflow-style: none
-    scrollbar-width: none
-    &::-webkit-scrollbar
-        display: none
+    min-width: 100%
+
+    &:focus
+        @extend %outline
 
 .word-card
-    padding: 1rem 1rem 1.5rem 1rem
-    transition: all .5s
+    @extend %flex-v, %center, %fullWidth
+    padding: 1rem 0
+    max-width: 340px
 
-        
-.lost-card
-    padding: 1rem 1rem 1.5rem 1rem
-    @extend %gap1
+    ul
+        max-width: 75%
+        text-align: left
+        list-style: disc outside
+        @extend %gap-5, %flex-v
 
-@media (pointer: coarse)
-    .btn
-        &:hover
-            background-color: $yellow
-        &:focus
-            outline: 4.5px solid $yellowDark2
-    .active
-        &:hover
-            background-color: $yellowDark
-        &:focus
-            background-color: $yellowDark
-    .pause
-        &:hover:not(.active)
-            background-color: $yellow
-        &:focus:not(.active)
-            background-color: $yellow
+        li
+            display: list-item
+
+    div 
+        max-width: 85%
+
+        h3
+            text-align: center
+
+.word-card-info 
+    @extend %flex-v, %gap1, %center
+
+    ul
+        padding-left: 10%
+
+    span
+        max-width: 75%
+        text-align: center
 
 
+
+////////////////////////////////////////////////////
+// MOBILE //
 
 @media (max-width: 535px)
-    .app-wrap
+    #app-wrap
         max-width: 90%
+    .card, .tut-card
+        min-width: 270px
+        max-width: 270px
+
+
+////////////////////////////////////////////////////
+// DARK MODE //
 
 @media (prefers-color-scheme: dark)
+    #logo
+        background-image: url('/img/logo(night).webp')
     %focus
         &:focus
-            outline: 9px solid $purple
+            outline: 4.5px solid $purple
 
     html, body
         background-color: $dm-bg
+
+    *
         color: white
 
-    a
-        color: white
-        
-    .btn, .card
+    .btn, .btn-abs-l, .btn-abs-r, #post, #user-post
         background-color: $dm-purple
         color: white
         border-color: white
@@ -477,20 +630,10 @@ li.tvc.card
             color: white
             background-color: $dm-purpleDark2
 
-    .example
-        border-color: white
-    .card
-        background-color: $dm-purpleDark2
+    .light-btn
+        background-color: $dm-purpleDark
 
-    .btn-highlight
-        outline: 9px solid $purple
-        transition: all 0.3s ease-in-out
-
-    .btn-highlight2
-        outline: 0px solid $purple
-        transition: all 0.3s ease-in-out
-
-    .pause, .quit
+    .pause, .quit, #post, #user-post
         &:hover
             background-color: $dm-purpleDark2
 
@@ -501,51 +644,8 @@ li.tvc.card
         background-color: $dm-purpleDark2
         outline: 4.5px solid $purple
 
-    #credit
-        background-color: $dm-purple
-        &:hover
-            background-color: $dm-purpleDark2
-        &:focus
-            background-color: $dm-purpleDark2
-
-    input
-        background-color: $dm-bgLight
-        color: white
-        border-color: white
-        caret-color: white
-        &:focus
-            outline: 9px solid $purple
-            color: white
-
-    #text-input
-        border-color: white
-
-    .wl-wrap
-        &::before
-            background-image: linear-gradient(270deg, rgba(0, 0, 0, 0), $dm-bg)
-
-        &::after
-            background-image: linear-gradient(270deg,  $dm-bg, rgba(0, 0, 0, 0))
-
-    .word-card-wrap
-        &::before
-            background-image: linear-gradient(0deg, rgba(0, 0, 0, 0), $dm-bg)
-
-        &::after
-            background-image: linear-gradient(0deg,  $dm-bg, rgba(0, 0, 0, 0))
-
-    .middle-example
-        border-top: 3px solid white
-        border-bottom: 3px solid white
-
-    .top-example
-        border-bottom: 3px solid white
-
     @media (pointer: coarse)
-        // %focus
-        //     &:focus
-        //         outline: 4.5px solid $purple
-        .btn
+        .btn, #post, #user-post
             &:hover
                 background-color: $dm-purple
             &:focus
@@ -560,3 +660,56 @@ li.tvc.card
                 background-color: $dm-purple
             &:focus:not(.active)
                 background-color: $dm-purple
+
+    .card, .tut-card, .word-card
+        background-color: $dm-purpleDark2
+        color: white
+        border-color: white
+
+    .inner-card, .inner-card-item, .inner-card-item:nth-of-type(2n)
+        border-color: white
+
+    .middle-example
+        border-top: 3px solid white
+        border-bottom: 3px solid white
+
+    .top-example
+        border-bottom: 3px solid white
+
+    input
+        background-color: $dm-bgLight
+        color: white
+        border-color: white
+        caret-color: white
+        &:focus
+            outline: 4.5px solid $purple
+            color: white
+
+    #text, #user-text, #post, #user-post
+        border-color: white
+    #text, #user-text
+        &:focus
+            outline: 7px solid $purple
+            color: white
+    #post, #user-post
+        background-color: $dm-purple
+
+
+    .wl-wrap
+        &::before
+            background-image: linear-gradient(270deg, rgba(0, 0, 0, 0), $dm-bg)
+
+        &::after
+            background-image: linear-gradient(270deg,  $dm-bg, rgba(0, 0, 0, 0))
+
+    .word-card-wrap
+        &::before
+            background-image: linear-gradient(0deg, rgba(0, 0, 0, 0), $dm-bg)
+
+        &::after
+            background-image: linear-gradient(0deg,  $dm-bg, rgba(0, 0, 0, 0))
+    li
+        &::marker
+            color: white
+
+

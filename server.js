@@ -1,12 +1,198 @@
 const express = require('express')
-const helmet = require('helmet')
-const syl = require('syllabificate')
 const app = express()
 const expressWS = require('express-ws')(app)
+const helmet = require('helmet')
+const rateLimit = require('express-rate-limit')
+const limiter = rateLimit({
+	windowMs: 1 * 60 * 1000,
+	limit: 45, // Limit each IP to 45 POST requests per minute (45 words per minute)
+	standardHeaders: true, 
+	legacyHeaders: false
+})
 
+const syl = require('syllabificate')
+const profanity = require('@2toad/profanity')
+const pf = new profanity.Profanity({wholeWord: false})
+const letterArray = "abcdefghijklmnopqrstuvwxyz".split("")
 const port = 8383
-let data
 
+// DICTIONARY API
+let dictionaryData
+async function dictionaryCall(input){
+    try{
+        const response = await fetch(`https://www.dictionaryapi.com/api/v3/references/collegiate/json/${input}?key=${process.env.API_KEY}`)
+        if (!response.ok){
+            throw new Error("Could not fetch resource")
+        }
+        dictionaryData = await response.json()
+    }
+    catch(e){
+        console.error(e)
+    }
+}
+
+// PLAYER INFORMATION
+let registeredOnlineUsernames = new Set()
+let registeredOnlinePlayers = []
+let sockets = []
+let partyLeaders = new Set()
+let parties = []
+let lobbies = []
+let lookingForMatch
+
+class OnlineRegisteredPlayer {
+    constructor(req) {
+        this.oldUsername = req.body.oldUsername
+        this.oldJoinDate = req.body.oldJoinDate
+        this.username = req.body.username
+        this.joinDate = req.body.joinDate
+    }
+}
+class SearchingSocket {
+    constructor(ws, msg) {
+        this.socket = ws 
+        this.details = {
+            mode: JSON.parse(msg).mode ? JSON.parse(msg).mode : null,
+            order: JSON.parse(msg).order ? JSON.parse(msg).order : null
+        }
+        this.username = JSON.parse(msg).username
+        this.uuid = crypto.randomUUID() 
+        this.triesToConnect = 0
+        this.inParty = JSON.parse(msg).inParty
+        this.inPartyTimeCheck = null
+        this.inPartyInactiveMinutes = 0
+        this.partyLeader = JSON.parse(msg).partyLeader
+        this.isPartyLeader = JSON.parse(msg).isPartyLeader
+    }
+    startPartyTimeoutClock(){
+        this.inPartyTimeCheck = setInterval(() => {
+            for (let sock in sockets){
+                if (this.socket == sockets[sock].socket){
+                    this.inPartyInactiveMinutes++
+                }
+            }
+            if (this.inPartyInactiveMinutes == 2){
+                if (this.isPartyLeader){partyLeaders.delete(this.username)}
+                else {
+                    this.socket.send(JSON.stringify({
+                        waiting: false
+                    }))
+                    for (let ls in sockets){
+                        if (sockets[ls].username == this.partyLeader){
+                            sockets[ls].startPartyTimeoutClock()
+                        }
+                    }
+                }
+
+                removePairs(this.username)
+                this.clearPartyTimeoutClock()
+                this.socket.close()
+            }
+        }, 60000)
+    }
+    clearPartyTimeoutClock(){
+        clearInterval(this.inPartyTimeCheck)
+        this.inPartyInactiveMinutes = 0
+    }
+}
+class GameRoom {
+    constructor(p1, p2) {
+        this.details = p1.details ? p1.details : p2.details
+        this.lobbyID = crypto.randomUUID()
+        this.turns = 0
+        this.clIndex = 0
+        this.currentLetter = "a"
+        this.lettersPlayed = 0
+        this.player1 = new PlayingSocket(p1)
+        this.player2 = new PlayingSocket(p2)
+        this.player1Turn = null
+    }
+    changeLetter(){
+        this.lettersPlayed++
+        if (this.details.order == "default"){
+            if (this.clIndex == 25){
+                this.clIndex = 0
+                this.currentLetter = letterArray[this.clIndex]
+            }
+            else {
+                this.clIndex++
+                this.currentLetter = letterArray[this.clIndex]
+            }
+        }
+        else {
+            this.clIndex = Math.floor(Math.random() * 26)
+            this.currentLetter = letterArray[this.clIndex]
+        }
+    }
+    startGame() {
+        if (this.details.order != "default"){
+            this.clIndex = Math.floor(Math.random() * 26)
+            this.currentLetter = letterArray[this.clIndex]
+        }
+        if (this.details.mode == "Classic"){
+            this.player1Turn = true
+            this.player1.socket.send(JSON.stringify({
+                mode: this.details.mode,
+                isClassic: true,
+                isYourTurn: true,
+                inGame: true,
+                waiting: false,
+                letter: this.currentLetter,
+                letterIndex: this.clIndex,
+                opponent: this.player2.username
+            }))
+            this.player2.socket.send(JSON.stringify({
+                mode: this.details.mode,
+                isClassic: true,
+                isYourTurn: false,
+                inGame: true,
+                waiting: false,
+                letter: this.currentLetter,
+                letterIndex: this.clIndex,
+                opponent: this.player1.username
+            }))
+        }
+        else {
+            this.player1.socket.send(JSON.stringify({
+                mode: this.details.mode,
+                inGame: true,
+                waiting: false,
+                letter: this.currentLetter,
+                letterIndex: this.clIndex,
+                opponent: this.player2.username
+            }))
+            this.player2.socket.send(JSON.stringify({
+                mode: this.details.mode,
+                inGame: true,
+                waiting: false,
+                letter: this.currentLetter,
+                letterIndex: this.clIndex,
+                opponent: this.player1.username
+            }))
+        }
+    }
+}
+class PlayingSocket {
+    constructor(SearchingSocket) {
+        this.socket = SearchingSocket.socket
+        this.uuid = SearchingSocket.uuid
+        this.username = SearchingSocket.username
+        this.totalScore = 0
+        this.strikes = null
+        this.wordPlayedList = []
+        this.lastWordPlayed = null
+    }
+}
+class PlayedWord {
+    constructor(msg) {
+        this.word = msg.word
+        this.score = msg.score
+        this.time = msg.time
+        this.autoSent = msg.autoSent
+    }
+}
+
+// EXPRESS SERVER
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
@@ -23,756 +209,32 @@ app.use(helmet({
       },
 }))
 app.disable('x-powered-by')
-app.use(express.static('public')).use(express.json())
+app.use(express.static('public')).use(express.json()).use(express.text())
 
-app.post('/', async (req, res)=>{
-    if(!req.body){
-        return res.status(400).send({ status: 'failed' })
+app.post('/', limiter, async (req, res)=>{
+    // FAIL
+    if (!req.body){ 
+        return res.status(400).send({ status: 'failed' }) 
     }
-    if (req.body.mode != null || req.body.mode != undefined){}
-    else {await dictionaryCall(req.body.input)}
-
-    res.status(200).send({ 
-        data: data,
-        tps: syl.countSyllables(req.body.input)
-    })
+    else{
+        directPostMessages(req, res)
+    }
 })
 
 app.get("/", (req, res) => {
     res.status(200).send()
 })
 
-let sockets = []
-let lobbies = []
-let letterArray = "abcdefghijklmnopqrstuvwxyz".split("")
-
-function receiveSocketAndPlaceInLobby(ws, msg) {
-    sockets.push({
-        socket: ws, 
-        details: null, 
-        uuid: crypto.randomUUID(), 
-        inLobby: false, 
-        triesToConnect: 0,
-        timerInt: null,
-        searching: null
-    })
-
-    console.log(`current total connections: ${sockets.length}`)
-    sockets[sockets.length-1].details = msg
-    sockets[sockets.length-1].socket.send(JSON.stringify({
-        waiting: true
-    }))
-
-    console.log(sockets[sockets.length-1].details)
-    console.log(`uuid: ${sockets[sockets.length-1].uuid}`)
-    
-    searching(sockets[sockets.length-1])
-
-    function searching(client) {
-        client.searching = true
-        client.triesToConnect++
-        if (client.triesToConnect >= 15){
-            client.inLobby = false
-            client.socket.close()
-            return false
-        }
-        if (!makeMatch(client)){
-            looking = setTimeout(() => {
-                searching(client)
-            }, 1000)
-        }
-        else { clearTimeout(looking) }
-    }
-    
-    function makeMatch(client){
-        let lobby;
-
-        try{
-            for (x of sockets){
-                if (x.details == client.details && x.uuid != client.uuid && x.socket != client.socket){
-                    client.triesToConnect = 0
-                    lobby = {
-                        lobbyID: crypto.randomUUID(),
-                        turns: 0,
-                        player1Turn: null,
-                        details: JSON.parse(x.details),
-                        clIndex: 0,
-                        currentLetter: letterArray[this.clIndex],
-                        lettersPlayed: 0,
-                        player1: {
-                            socket: x.socket,
-                            uuid: x.uuid,
-                            score: null,
-                            totalScore: 0,
-                            time: null,
-                            word: null,
-                            strikes: null,
-                            autoSent: false
-                        },
-                        player2: {
-                            socket: client.socket,
-                            uuid: client.uuid,
-                            score: null,
-                            totalScore: 0,
-                            time: null,
-                            word: null,
-                            strikes: null,
-                            autoSent: false
-                        },
-                        changeLetter(){
-                            this.lettersPlayed++
-                            if (this.details.order == "default"){
-                                if (this.clIndex == 25){
-                                    this.clIndex = 0
-                                    this.currentLetter = letterArray[this.clIndex]
-                                }
-                                else {
-                                    this.clIndex++
-                                    this.currentLetter = letterArray[this.clIndex]
-                                }
-                            }
-                            else {
-                                this.clIndex = Math.floor(Math.random() * 26)
-                                this.currentLetter = letterArray[this.clIndex]
-                            }
-                        }
-                    }
-                    if (JSON.parse(x.details).order != "default"){
-                        lobby.clIndex = Math.floor(Math.random() * 26)
-                        lobby.currentLetter = letterArray[this.clIndex]
-                    }
-                    else {
-                        lobby.currentLetter = "a"
-                    }
-
-                    if (lobby!=null || lobby!= undefined || lobby != ''){
-                        lobbies.push(lobby)
-                    }
-
-                    console.log(`lobby ID: ${lobbies[lobbies.length-1].lobbyID}`)
-                    console.log(`Player 1: ${lobbies[lobbies.length-1].player1.uuid}`)
-                    console.log(`Player 2: ${lobbies[lobbies.length-1].player2.uuid}`)
-
-                    x.inLobby = true
-                    client.inLobby = true
-
-                    if (JSON.parse(x.details).mode == "classic"){
-                        lobby.player1Turn = true
-                        lobby.player1.socket.send(JSON.stringify({
-                            isClassic: true,
-                            isYourTurn: true,
-                            inGame: true,
-                            waiting: false,
-                            letter: lobby.currentLetter,
-                            letterIndex: lobby.clIndex,
-                        }))
-                        lobby.player2.socket.send(JSON.stringify({
-                            isClassic: true,
-                            isYourTurn: false,
-                            inGame: true,
-                            waiting: false,
-                            letter: lobby.currentLetter,
-                            letterIndex: lobby.clIndex,
-                        }))
-                    }
-                    else {
-                        x.socket.send(JSON.stringify({
-                            inGame: true,
-                            waiting: false,
-                            letter: lobby.currentLetter,
-                            letterIndex: lobby.clIndex,
-                        }))
-                        client.socket.send(JSON.stringify({
-                            inGame: true,
-                            waiting: false,
-                            letter: lobby.currentLetter,
-                            letterIndex: lobby.clIndex,
-                        }))
-                    }
-
-                    sockets = sockets.filter(s => s.uuid !== client.uuid)
-                    sockets = sockets.filter(s => s.uuid !== x.uuid)
-                    
-                    return true
-                }
-                else { return false }
-            }
-        }
-        catch(e){console.error(e)}
-
-        console.log(`lobbies active: ${lobbies.length}`)
-    }
-}
-
 app.ws('/', function(ws, req) {
     ws.on('message', function (msg) {
         if (lobbies.length == 0){
             receiveSocketAndPlaceInLobby(ws, msg)
         }
-        let messageFoundLobby = null;
-        for(l in lobbies){
-            if (ws == lobbies[l].player1.socket || ws == lobbies[l].player2.socket){
-                messageFoundLobby = true
-                if (ws == lobbies[l].player1.socket && JSON.parse(msg).mode == undefined){
-                    lobbies[l].player1.score = JSON.parse(msg).score
-                    lobbies[l].player1.time = JSON.parse(msg).time
-                    lobbies[l].player1.word = JSON.parse(msg).word
-                    lobbies[l].player1.strikes = JSON.parse(msg).strikes
-                    lobbies[l].player1.autoSent = JSON.parse(msg).autoSent
-                    lobbies[l].turns++
-                }
-                if (ws == lobbies[l].player2.socket && JSON.parse(msg).mode == undefined){
-                    lobbies[l].player2.score = JSON.parse(msg).score
-                    lobbies[l].player2.time = JSON.parse(msg).time
-                    lobbies[l].player2.word = JSON.parse(msg).word
-                    lobbies[l].player2.strikes = JSON.parse(msg).strikes
-                    lobbies[l].player2.autoSent = JSON.parse(msg).autoSent
-                    lobbies[l].turns++
-                }
-
-                if (lobbies[l].turns % 2 == 0 && lobbies[l].turns >= 2  && lobbies[l].details.mode != 'classic'){
-                    if (lobbies[l].player1.score == 0){
-                        if (lobbies[l].player1.strikes == 3 && lobbies[l].player2.strikes != 3){
-                            lobbies[l].player1.socket.send(JSON.stringify({
-                                lost: true,
-                                totalScore: lobbies[l].player1.totalScore,
-                                otherScore: lobbies[l].player2.totalScore,
-                                reason: "You struck out"
-                            }))
-                            lobbies[l].player2.socket.send(JSON.stringify({
-                                won: true,
-                                totalScore: lobbies[l].player2.totalScore,
-                                otherScore: lobbies[l].player1.totalScore,
-                                reason: "Opponent struck out"
-                            }))
-                            lobbies[l].player1.socket.close()
-                            lobbies[l].player2.socket.close()
-                        }
-                        else if (lobbies[l].player1.strikes == 3 && lobbies[l].player2.strikes == 3){
-                            if (lobbies[l].player1.totalScore > lobbies[l].player2.totalScore){
-                                lobbies[l].player1.socket.send(JSON.stringify({
-                                    won: true,
-                                    totalScore: lobbies[l].player1.totalScore,
-                                    otherScore: lobbies[l].player2.totalScore,
-                                    reason: "You both struck out, but your score was higher!"
-                                }))
-                                lobbies[l].player2.socket.send(JSON.stringify({
-                                    lost: true,
-                                    totalScore: lobbies[l].player2.totalScore,
-                                    otherScore: lobbies[l].player1.totalScore,
-                                    reason: "You both struck out, but your score was lower."
-                                }))
-                            }
-                            else if (lobbies[l].player1.totalScore == lobbies[l].player2.totalScore){
-                                lobbies[l].player1.socket.send(JSON.stringify({
-                                    tie: true,
-                                    totalScore: lobbies[l].player1.totalScore,
-                                    otherScore: lobbies[l].player2.totalScore,
-                                    reason: "You both struck out...and you tied!"
-                                }))
-                                lobbies[l].player2.socket.send(JSON.stringify({
-                                    tie: true,
-                                    totalScore: lobbies[l].player2.totalScore,
-                                    otherScore: lobbies[l].player1.totalScore,
-                                    reason: "You both struck out...and you tied!"
-                                }))
-                            }
-                            else {
-                                lobbies[l].player1.socket.send(JSON.stringify({
-                                    lost: true,
-                                    totalScore: lobbies[l].player1.totalScore,
-                                    otherScore: lobbies[l].player2.totalScore,
-                                    reason: "You both struck out, but your score was lower"
-                                }))
-                                lobbies[l].player2.socket.send(JSON.stringify({
-                                    won: true,
-                                    totalScore: lobbies[l].player2.totalScore,
-                                    otherScore: lobbies[l].player1.totalScore,
-                                    reason: "You both struck out, but your score was higher!"
-                                }))
-                            }
-                            lobbies[l].player1.socket.close()
-                            lobbies[l].player2.socket.close()
-                        }
-                    }
-                    if (lobbies[l].player2.score == 0){
-                        if (lobbies[l].player2.strikes == 3 && lobbies[l].player1.strikes != 3){
-                            lobbies[l].player2.socket.send(JSON.stringify({
-                                lost: true,
-                                totalScore: lobbies[l].player2.totalScore,
-                                otherScore: lobbies[l].player1.totalScore,
-                                reason: "You struck out"
-                            }))
-                            lobbies[l].player1.socket.send(JSON.stringify({
-                                won: true,
-                                totalScore: lobbies[l].player1.totalScore,
-                                otherScore: lobbies[l].player2.totalScore,
-                                reason: "Opponent struck out"
-                            }))
-                            lobbies[l].player1.socket.close()
-                            lobbies[l].player2.socket.close()
-                        }
-                        else if (lobbies[l].player1.strikes == 3 && lobbies[l].player2.strikes == 3){
-                            if (lobbies[l].player1.totalScore > lobbies[l].player2.totalScore){
-                                lobbies[l].player1.socket.send(JSON.stringify({
-                                    won: true,
-                                    totalScore: lobbies[l].player1.totalScore,
-                                    otherScore: lobbies[l].player2.totalScore,
-                                    reason: "You both struck out, but your score was higher!"
-                                }))
-                                lobbies[l].player2.socket.send(JSON.stringify({
-                                    lost: true,
-                                    totalScore: lobbies[l].player2.totalScore,
-                                    otherScore: lobbies[l].player1.totalScore,
-                                    reason: "You both struck out, but your score was lower."
-                                }))
-                            }
-                            else if (lobbies[l].player1.totalScore == lobbies[l].player2.totalScore){
-                                lobbies[l].player1.socket.send(JSON.stringify({
-                                    tie: true,
-                                    totalScore: lobbies[l].player1.totalScore,
-                                    otherScore: lobbies[l].player2.totalScore,
-                                    reason: "You both struck out...and you tied!"
-                                }))
-                                lobbies[l].player2.socket.send(JSON.stringify({
-                                    tie: true,
-                                    totalScore: lobbies[l].player2.totalScore,
-                                    otherScore: lobbies[l].player1.totalScore,
-                                    reason: "You both struck out...and you tied!"
-                                }))
-                            }
-                            else {
-                                lobbies[l].player1.socket.send(JSON.stringify({
-                                    lost: true,
-                                    totalScore: lobbies[l].player1.totalScore,
-                                    otherScore: lobbies[l].player2.totalScore,
-                                    reason: "You both struck out, but your score was lower"
-                                }))
-                                lobbies[l].player2.socket.send(JSON.stringify({
-                                    won: true,
-                                    totalScore: lobbies[l].player2.totalScore,
-                                    otherScore: lobbies[l].player1.totalScore,
-                                    reason: "You both struck out, but your score was higher!"
-                                }))
-                            }
-                            lobbies[l].player1.socket.close()
-                            lobbies[l].player2.socket.close()
-                        }
-                    }
-
-                    if (lobbies[l].details.mode == 'war'){
-                        if (lobbies[l].player1.score > lobbies[l].player2.score){
-                            lobbies[l].player1.totalScore += lobbies[l].player1.score
-                            lobbies[l].changeLetter()
-                            lobbies[l].player1.socket.send(JSON.stringify({
-                                winner: true,
-                                winningWord: lobbies[l].player1.word,
-                                letter: lobbies[l].currentLetter,
-                                letterIndex: lobbies[l].clIndex,
-                                score: lobbies[l].player1.score
-                            }))
-                            lobbies[l].player2.socket.send(JSON.stringify({
-                                winner: false,
-                                winningWord: lobbies[l].player1.word,
-                                letter: lobbies[l].currentLetter,
-                                letterIndex: lobbies[l].clIndex,
-                                score: lobbies[l].player2.score
-                            }))
-                        }
-                        else if(lobbies[l].player1.score == lobbies[l].player2.score){
-                            lobbies[l].player1.socket.send(JSON.stringify({
-                                winner: "tie",
-                                letter: lobbies[l].currentLetter,
-                                letterIndex: lobbies[l].clIndex,
-                                score: lobbies[l].player1.score
-                            }))
-                            lobbies[l].player2.socket.send(JSON.stringify({
-                                winner: "tie",
-                                letter: lobbies[l].currentLetter,
-                                letterIndex: lobbies[l].clIndex,
-                                score: lobbies[l].player2.score
-                            }))
-                        }
-                        else { 
-                            lobbies[l].player2.totalScore += lobbies[l].player2.score
-                            lobbies[l].changeLetter()
-                            lobbies[l].player2.socket.send(JSON.stringify({
-                                winner: true,
-                                winningWord: lobbies[l].player2.word,
-                                letter: lobbies[l].currentLetter,
-                                letterIndex: lobbies[l].clIndex,
-                                score: lobbies[l].player2.score
-                            }))
-                            lobbies[l].player1.socket.send(JSON.stringify({
-                                winner: false,
-                                winningWord: lobbies[l].player2.word,
-                                letter: lobbies[l].currentLetter,
-                                letterIndex: lobbies[l].clIndex,
-                                score: lobbies[l].player1.score
-                            }))
-                        }
-
-                        if (lobbies[l].lettersPlayed == 26){
-                            if (lobbies[l].player1.totalScore > lobbies[l].player2.totalScore){
-                                lobbies[l].player1.socket.send(JSON.stringify({
-                                    won: true,
-                                    totalScore: lobbies[l].player1.totalScore,
-                                    reason: "Round ended"
-                                }))
-                                lobbies[l].player2.socket.send(JSON.stringify({
-                                    lost: true,
-                                    totalScore: lobbies[l].player2.totalScore,
-                                    reason: "Round ended"
-                                }))
-                            }
-                            else {
-                                lobbies[l].player1.socket.send(JSON.stringify({
-                                    lost: true,
-                                    totalScore: lobbies[l].player1.totalScore,
-                                    reason: "Round ended"
-                                }))
-                                lobbies[l].player2.socket.send(JSON.stringify({
-                                    won: true,
-                                    totalScore: lobbies[l].player2.totalScore,
-                                    reason: "Round ended"
-                                }))
-                            }
-                        }
-                    }
-
-                    if (lobbies[l].details.mode == 'speed'){
-
-                        if (lobbies[l].player1.time < lobbies[l].player2.time){
-                            if (lobbies[l].player1.word != null && lobbies[l].player1.autoSent != true){
-                                lobbies[l].player1.totalScore += lobbies[l].player1.score
-                                lobbies[l].changeLetter()
-                                lobbies[l].player1.socket.send(JSON.stringify({
-                                    winner: true,
-                                    winningWord: lobbies[l].player1.word,
-                                    letter: lobbies[l].currentLetter,
-                                    letterIndex: lobbies[l].clIndex,
-                                    score: lobbies[l].player1.score
-                                }))
-                                lobbies[l].player2.socket.send(JSON.stringify({
-                                    winner: false,
-                                    winningWord: lobbies[l].player1.word,
-                                    letter: lobbies[l].currentLetter,
-                                    letterIndex: lobbies[l].clIndex,
-                                    score: lobbies[l].player2.score
-                                }))
-                            }
-                            else if (lobbies[l].player1.word == null && lobbies[l].player2.word != null){
-                                lobbies[l].player2.totalScore += lobbies[l].player2.score
-                                lobbies[l].changeLetter()
-                                lobbies[l].player2.socket.send(JSON.stringify({
-                                    winner: true,
-                                    winningWord: lobbies[l].player2.word,
-                                    letter: lobbies[l].currentLetter,
-                                    letterIndex: lobbies[l].clIndex,
-                                    score: lobbies[l].player2.score
-                                }))
-                                lobbies[l].player1.socket.send(JSON.stringify({
-                                    winner: false,
-                                    winningWord: lobbies[l].player2.word,
-                                    letter: lobbies[l].currentLetter,
-                                    letterIndex: lobbies[l].clIndex,
-                                    score: lobbies[l].player1.score
-                                }))
-                            }
-                            else if ((lobbies[l].player1.word == null && lobbies[l].player2.word == null) || (lobbies[l].player1.autoSent == true && lobbies[l].player2.autoSent == true)){
-                                lobbies[l].player1.socket.send(JSON.stringify({
-                                    winner: "tie",
-                                    letter: lobbies[l].currentLetter,
-                                    letterIndex: lobbies[l].clIndex,
-                                    score: lobbies[l].player1.score
-                                }))
-                                lobbies[l].player2.socket.send(JSON.stringify({
-                                    winner: "tie",
-                                    letter: lobbies[l].currentLetter,
-                                    letterIndex: lobbies[l].clIndex,
-                                    score: lobbies[l].player2.score
-                                }))
-                            }
-                        }
-                        else if (lobbies[l].player1.time > lobbies[l].player2.time) { 
-                            if (lobbies[l].player2.word != null && lobbies[l].player2.autoSent != true){
-                                lobbies[l].player2.totalScore += lobbies[l].player2.score
-                                lobbies[l].changeLetter()
-                                lobbies[l].player2.socket.send(JSON.stringify({
-                                    winner: true,
-                                    winningWord: lobbies[l].player2.word,
-                                    letter: lobbies[l].currentLetter,
-                                    letterIndex: lobbies[l].clIndex,
-                                    score: lobbies[l].player2.score
-                                }))
-                                lobbies[l].player1.socket.send(JSON.stringify({
-                                    winner: false,
-                                    winningWord: lobbies[l].player2.word,
-                                    letter: lobbies[l].currentLetter,
-                                    letterIndex: lobbies[l].clIndex,
-                                    score: lobbies[l].player1.score
-                                }))
-                            }
-                            else if (lobbies[l].player2.word == null && lobbies[l].player1.word != null){
-                                lobbies[l].player1.totalScore += lobbies[l].player1.score
-                                lobbies[l].changeLetter()
-                                lobbies[l].player1.socket.send(JSON.stringify({
-                                    winner: true,
-                                    winningWord: lobbies[l].player1.word,
-                                    letter: lobbies[l].currentLetter,
-                                    letterIndex: lobbies[l].clIndex,
-                                    score: lobbies[l].player1.score
-                                }))
-                                lobbies[l].player2.socket.send(JSON.stringify({
-                                    winner: false,
-                                    winningWord: lobbies[l].player1.word,
-                                    letter: lobbies[l].currentLetter,
-                                    letterIndex: lobbies[l].clIndex,
-                                    score: lobbies[l].player2.score
-                                }))
-                            }
-                            else if (lobbies[l].player1.word == null && lobbies[l].player2.word == null){
-                                lobbies[l].player1.socket.send(JSON.stringify({
-                                    winner: "tie",
-                                    letter: lobbies[l].currentLetter,
-                                    letterIndex: lobbies[l].clIndex,
-                                    score: lobbies[l].player1.score
-                                }))
-                                lobbies[l].player2.socket.send(JSON.stringify({
-                                    winner: "tie",
-                                    letter: lobbies[l].currentLetter,
-                                    letterIndex: lobbies[l].clIndex,
-                                    score: lobbies[l].player2.score
-                                }))
-                            }
-                            else if ((lobbies[l].player1.word == null && lobbies[l].player2.word == null) || (lobbies[l].player1.autoSent == true && lobbies[l].player2.autoSent == true)){
-                                lobbies[l].player1.socket.send(JSON.stringify({
-                                    winner: "tie",
-                                    letter: lobbies[l].currentLetter,
-                                    letterIndex: lobbies[l].clIndex,
-                                    score: lobbies[l].player1.score
-                                }))
-                                lobbies[l].player2.socket.send(JSON.stringify({
-                                    winner: "tie",
-                                    letter: lobbies[l].currentLetter,
-                                    letterIndex: lobbies[l].clIndex,
-                                    score: lobbies[l].player2.score
-                                }))
-                            }
-                        }
-
-                        if (lobbies[l].lettersPlayed == 26){
-                            if (lobbies[l].player1.totalScore > lobbies[l].player2.totalScore){
-                                lobbies[l].player1.socket.send(JSON.stringify({
-                                    won: true,
-                                    totalScore: lobbies[l].player1.totalScore,
-                                    reason: "Round ended"
-                                }))
-                                lobbies[l].player2.socket.send(JSON.stringify({
-                                    lost: true,
-                                    totalScore: lobbies[l].player2.totalScore,
-                                    reason: "Round ended"
-                                }))
-                            }
-                            else if (lobbies[l].player1.totalScore == lobbies[l].player2.totalScore){
-                                lobbies[l].player1.socket.send(JSON.stringify({
-                                    tie: true,
-                                    totalScore: lobbies[l].player1.totalScore,
-                                    reason: "Round ended"
-                                }))
-                                lobbies[l].player2.socket.send(JSON.stringify({
-                                    tie: true,
-                                    totalScore: lobbies[l].player2.totalScore,
-                                    reason: "Round ended"
-                                }))
-                            }
-                            else {
-                                lobbies[l].player1.socket.send(JSON.stringify({
-                                    lost: true,
-                                    totalScore: lobbies[l].player1.totalScore,
-                                    reason: "Round ended"
-                                }))
-                                lobbies[l].player2.socket.send(JSON.stringify({
-                                    won: true,
-                                    totalScore: lobbies[l].player2.totalScore,
-                                    reason: "Round ended"
-                                }))
-                            }
-                        }
-                    }
-                }
-
-                if (lobbies[l].details.mode == 'classic' && lobbies[l].turns >= 1){
-
-                    if (lobbies[l].player1Turn == true){
-                        if (lobbies[l].player1.word != null) { 
-                            lobbies[l].player1.totalScore += lobbies[l].player1.score
-                            lobbies[l].changeLetter()
-                            lobbies[l].player1.socket.send(JSON.stringify({
-                                winner: true,
-                                letter: lobbies[l].currentLetter,
-                                winningWord: lobbies[l].player1.word,
-                                letterIndex: lobbies[l].clIndex,
-                                score: lobbies[l].player1.score,
-                                isYourTurn: false
-                            }))
-                            lobbies[l].player2.socket.send(JSON.stringify({
-                                winner: false,
-                                winningWord: lobbies[l].player1.word,
-                                letter: lobbies[l].currentLetter,
-                                letterIndex: lobbies[l].clIndex,
-                                isYourTurn: true
-                            }))
-                        }
-                        else {
-                            lobbies[l].player1.socket.send(JSON.stringify({
-                                winner: "tie",
-                                letter: lobbies[l].currentLetter,
-                                letterIndex: lobbies[l].clIndex,
-                                score: lobbies[l].player1.score,
-                                isYourTurn: false
-                            }))
-                            lobbies[l].player2.socket.send(JSON.stringify({
-                                winner: "tie",
-                                letter: lobbies[l].currentLetter,
-                                letterIndex: lobbies[l].clIndex,
-                                isYourTurn: true
-                            }))
-                            if (lobbies[l].player1.score == 0){
-                                if (lobbies[l].player1.strikes == 3 && lobbies[l].player2.strikes != 3){
-                                    lobbies[l].player1.socket.send(JSON.stringify({
-                                        lost: true,
-                                        totalScore: lobbies[l].player1.totalScore,
-                                        otherScore: lobbies[l].player2.totalScore,
-                                        reason: "You struck out"
-                                    }))
-                                    lobbies[l].player2.socket.send(JSON.stringify({
-                                        won: true,
-                                        totalScore: lobbies[l].player2.totalScore,
-                                        otherScore: lobbies[l].player1.totalScore,
-                                        reason: "Opponent struck out"
-                                    }))
-                                    lobbies[l].player1.socket.close()
-                                    lobbies[l].player2.socket.close()
-                                }
-                            }
-                        }
-                    }      
-                    if (lobbies[l].player1Turn == false){
-                        if (lobbies[l].player2.word != null) { 
-                            lobbies[l].player2.totalScore += lobbies[l].player2.score
-                            lobbies[l].changeLetter()
-                            lobbies[l].player2.socket.send(JSON.stringify({
-                                winner: true,
-                                winningWord: lobbies[l].player2.word,
-                                letter: lobbies[l].currentLetter,
-                                letterIndex: lobbies[l].clIndex,
-                                score: lobbies[l].player2.score,
-                                isYourTurn: false
-                            }))
-                            lobbies[l].player1.socket.send(JSON.stringify({
-                                winner: false,
-                                winningWord: lobbies[l].player2.word,
-                                letter: lobbies[l].currentLetter,
-                                letterIndex: lobbies[l].clIndex,
-                                isYourTurn: true
-                            }))
-                        }
-                        else {
-                            lobbies[l].player2.socket.send(JSON.stringify({
-                                winner: "tie",
-                                letter: lobbies[l].currentLetter,
-                                letterIndex: lobbies[l].clIndex,
-                                score: lobbies[l].player2.score,
-                                isYourTurn: false
-                            }))
-                            lobbies[l].player1.socket.send(JSON.stringify({
-                                winner: "tie",
-                                letter: lobbies[l].currentLetter,
-                                letterIndex: lobbies[l].clIndex,
-                                isYourTurn: true
-                            }))
-                            if (lobbies[l].player2.score == 0){
-                                if (lobbies[l].player2.strikes == 3 && lobbies[l].player1.strikes != 3){
-                                    lobbies[l].player2.socket.send(JSON.stringify({
-                                        lost: true,
-                                        totalScore: lobbies[l].player2.totalScore,
-                                        otherScore: lobbies[l].player1.totalScore,
-                                        reason: "You struck out"
-                                    }))
-                                    lobbies[l].player1.socket.send(JSON.stringify({
-                                        won: true,
-                                        totalScore: lobbies[l].player1.totalScore,
-                                        otherScore: lobbies[l].player2.totalScore,
-                                        reason: "Opponent struck out"
-                                    }))
-                                    lobbies[l].player1.socket.close()
-                                    lobbies[l].player2.socket.close()
-                                }
-                            }
-                        }
-                    }
-                    if (lobbies[l].player1Turn == true){lobbies[l].player1Turn = false}
-                    else if(lobbies[l].player1Turn == false){lobbies[l].player1Turn = true}
-                    
-                }
-            }
-            if (l == lobbies.length-1 && messageFoundLobby == null){
-                receiveSocketAndPlaceInLobby(ws, msg)
-            }
-        }
+        deliverSocketMessage(ws, msg)
     })
 
     ws.on('close', function (msg) {
-        console.log(`a client left`)
-        for (s in sockets){
-            if (sockets[s].socket == ws){
-                clearInterval(looking)}
-        }
-        function clearAndDeleteLobby(){
-            try {
-                for (c in lobbies){
-                    if (lobbies[c].player1.socket == ws){
-                        lobbies[c].player2.socket.send(JSON.stringify({
-                            opponentForfeit: true,
-                            otherScore: lobbies[c].player1.totalScore
-                        }))
-                        lobbies[c].player2.socket.terminate()
-                    }
-                    if (lobbies[c].player2.socket == ws){
-                        lobbies[c].player1.socket.send(JSON.stringify({
-                            opponentForfeit: true,
-                            otherScore: lobbies[c].player2.totalScore
-                        }))
-                        lobbies[c].player1.socket.terminate()
-                    }
-                } 
-                lobbies = lobbies.filter(l => (l.player1.socket !== ws)) 
-
-            } catch (error) {
-                for (c in lobbies){
-                    if (lobbies[c].player1.socket == ws){
-                        lobbies[c].player2.socket.send(JSON.stringify({
-                            opponentForfeit: true
-                        }))
-                        lobbies[c].player2.socket.terminate()
-                    }
-                    if (lobbies[c].player2.socket == ws){
-                        lobbies[c].player1.socket.send(JSON.stringify({
-                            opponentForfeit: true
-                        }))
-                        lobbies[c].player1.socket.terminate()
-                    }
-                lobbies = lobbies.filter(l => (l.player2.socket !== ws)) 
-                }
-            }
-        }
-        clearAndDeleteLobby()
-        console.log(`current lobbies: ${lobbies.length}`)
-
-        sockets = sockets.filter(s => s.socket !== ws)
-        console.log(`current connections: ${sockets.length}`)
-
+        removeSocketAndDeleteLobby(ws)  
     })
 })
 
@@ -781,25 +243,656 @@ app.use((req, res, next) => {
 })
   
 app.use((err, req, res, next) => {
-    console.error(err.stack)
     res.status(500).send('Something broke!')
 })
 
-app.listen(port, () => {
-    console.log("app started")
-})
+app.listen(port)
 
-async function dictionaryCall(input){
-    try{
-        let dictURL = `https://www.dictionaryapi.com/api/v3/references/collegiate/json/${input}?key=${process.env.API_KEY}`
-        const response = await fetch(dictURL)
-        if (!response.ok){
-            throw new Error("Could not fetch resource")
+
+// FUNCTIONS
+// handling messages
+function removeSocketAndDeleteLobby(ws){
+    for (s in sockets){
+        if (sockets[s].socket == ws){
+            if (lookingForMatch) {clearInterval(lookingForMatch)}
         }
-        data = await response.json()
     }
-    catch(e){
-        console.error(e)
+    sockets = sockets.filter(s => s.socket !== ws)
+    
+    try {
+        for (c in lobbies){
+            if (lobbies[c].player1.socket == ws){
+                lobbies[c].player2.socket.send(JSON.stringify({
+                    opponentForfeit: true,
+                    reason: "Opponent quit or disconnected",
+                    otherScore: lobbies[c].player1.totalScore
+                }))
+                lobbies[c].player2.socket.terminate()
+            }
+            if (lobbies[c].player2.socket == ws){
+                lobbies[c].player1.socket.send(JSON.stringify({
+                    opponentForfeit: true,
+                    reason: "Opponent quit or disconnected",
+                    otherScore: lobbies[c].player2.totalScore
+                }))
+                lobbies[c].player1.socket.terminate()
+            }
+        } 
+        lobbies = lobbies.filter(l => (l.player1.socket !== ws)) 
+
+    } catch (error) {
+        for (c in lobbies){
+            if (lobbies[c].player1.socket == ws){
+                lobbies[c].player2.socket.send(JSON.stringify({
+                    opponentForfeit: true,
+                    reason: "Opponent quit or disconnected",
+                }))
+                lobbies[c].player2.socket.terminate()
+            }
+            if (lobbies[c].player2.socket == ws){
+                lobbies[c].player1.socket.send(JSON.stringify({
+                    opponentForfeit: true,
+                    reason: "Opponent quit or disconnected",
+                }))
+                lobbies[c].player1.socket.terminate()
+            }
+        lobbies = lobbies.filter(l => (l.player2.socket !== ws)) 
+        }
     }
 }
-   
+function removePairs(username) {
+    for (let pair in parties) {
+        // LEADER ENDS THE PARTY
+        if (parties[pair] && parties[pair][0] && parties[pair][0] == username){
+            for (s in sockets){
+                if (sockets[s].username == parties[pair][1]){
+                    sockets[s].socket.send(JSON.stringify({
+                        waiting: false
+                    }))
+                    sockets[s].socket.close()
+                    sockets = sockets.filter(socket => socket.username !== sockets[s].username)
+                }
+            }
+            sockets = sockets.filter(socket => socket.username !== username)
+            parties.splice(pair, 1)
+        }
+        // MEMBER LEAVES THE PARTY
+        if (parties[pair] && parties[pair][1] && parties[pair][1] == username){
+            for (s in sockets){
+                if (sockets[s].username == parties[pair][0]){
+                    sockets[s].socket.send(JSON.stringify({
+                        partyMemberUsername: ' '
+                    }))
+                }
+            }
+            sockets = sockets.filter(socket => socket.username !== username)
+            parties.splice(pair, 1)
+        }
+    }
+}
+async function directPostMessages(req, res) {
+    directDictionaryMessages(req, res)
+    directOnlineWorldMessages(req, res)
+    directPartyMessages(req, res)
+
+    async function directDictionaryMessages(req, res) {
+        // DICTIONARY CALL
+        if (req.body.input){
+            await dictionaryCall(req.body.input)
+            res.status(200).send({ 
+                data: dictionaryData,
+                tps: syl.countSyllables(req.body.input)
+            })
+        }
+    }
+    function directOnlineWorldMessages(req, res) {
+        // JOIN ONLINE WORLD
+        if (req.body.request == "join"){
+            if (pf.exists(req.body.username)){
+                res.status(200).send({ 
+                    registered: false,
+                    profane: true
+                })
+            }
+            if (registeredOnlineUsernames.has(req.body.username)){
+                res.status(200).send({ 
+                    registered: false
+                })
+            }
+            else {
+                if (req.body.oldUsername && req.body.oldJoinDate){
+                    for (player in registeredOnlinePlayers){
+                        if ((req.body.oldUsername == registeredOnlinePlayers[player].username) && (req.body.oldJoinDate == registeredOnlinePlayers[player].oldJoinDate)){
+                            registeredOnlinePlayers.splice(player, 1)
+                            registeredOnlineUsernames.delete(req.body.oldUsername)
+                        }
+                    }
+                }
+                registeredOnlinePlayers.push(new OnlineRegisteredPlayer(req))
+                registeredOnlineUsernames.add(registeredOnlinePlayers[registeredOnlinePlayers.length-1].username)
+
+                res.status(200).send({ 
+                    registered: true
+                })
+            }
+        }
+        // LEAVING ONLINE
+        if (typeof req.body === "string" ){
+            if (JSON.parse(req.body).request == "leave"){
+                for (player in registeredOnlinePlayers){
+                    if ((JSON.parse(req.body).username == registeredOnlinePlayers[player].username)){
+                        registeredOnlinePlayers.splice(player, 1)
+                    }
+                }
+                registeredOnlineUsernames.delete(JSON.parse(req.body).username)
+
+                if (JSON.parse(req.body).partyLeaderUsername){
+                    partyLeaders.delete(JSON.parse(req.body).partyLeaderUsername)
+                }
+                else {partyLeaders.delete(JSON.parse(req.body).username)}
+                
+                removePairs(JSON.parse(req.body).username)
+            }
+        }
+
+    }
+    function directPartyMessages(req, res) {
+        // CREATE A PARTY
+        if (req.body.partyRequest == "create"){
+            if (!partyLeaders.has(req.body.username)){
+                partyLeaders.add(req.body.username)
+                res.status(200).send({ 
+                    createdNewParty: true
+                })
+            }
+            else {
+                res.status(200).send({ 
+                    createdNewParty: false,
+                })
+            }
+        }
+        // JOIN A PARTY
+        if (req.body.partyRequest == "join"){            
+            if (!checkIsInactiveParty(req, res) && !checkIsOwnName(req, res) && !checkIsPartyFull(req, res)){
+                parties.push([req.body.partyLeaderUsername, req.body.username])
+                res.status(200).send({ 
+                    joinedParty: true,
+                    waiting: true
+                })
+            }
+        }
+
+        function checkIsInactiveParty(req, res) {
+            if (!partyLeaders.has(req.body.partyLeaderUsername)){
+                res.status(200).send({ 
+                    joinedParty: false,
+                    inactive: true
+                })
+                return true
+            }
+            return false
+        }
+        function checkIsOwnName(req, res) {
+            if (req.body.partyLeaderUsername == req.body.username){
+                res.status(200).send({ 
+                    joinedParty: false,
+                    duplicate: true
+                })
+                return true
+            }
+            else return false
+        }
+        function checkIsPartyFull(req, res) {
+            for (let pair in parties) {
+                if (parties[pair] && parties[pair][0] && parties[pair][0] == req.body.partyLeaderUsername){
+                    res.status(200).send({ 
+                        joinedParty: false,
+                        full: true
+                    })
+                    return true
+                }
+            }
+            return false
+        }
+    }
+}
+function deliverSocketMessage(ws, msg) {    
+    if (JSON.parse(msg).partyRequest){
+        if (JSON.parse(msg).partyRequest === "delete"){
+            partyLeaders.delete(JSON.parse(msg).username)
+            removePairs(JSON.parse(msg).username)
+            ws.close()
+            return
+        }
+        if (JSON.parse(msg).partyRequest === "leave"){
+            // partyLeaders.delete(JSON.parse(msg).partyLeader)
+            removePairs(JSON.parse(msg).username)
+            ws.close()
+            return
+        }
+    }
+    else{
+        let messageFoundLobby
+        for(l in lobbies){
+            if (ws == lobbies[l].player1.socket || ws == lobbies[l].player2.socket){
+                messageFoundLobby = true
+                assignWSMessageToLobbyPlayer(ws, msg)
+                decideGameMode()
+            }
+            if (l == lobbies.length-1 && !messageFoundLobby){
+                receiveSocketAndPlaceInLobby(ws, msg)
+            }
+        }
+    }
+}
+function receiveSocketAndPlaceInLobby(ws, msg) {
+    determineMatchmakingMode() 
+
+    function determineMatchmakingMode() {
+        if (!checkIfPartyMSG()){
+            if (parties.length > 0){
+                for (pair in parties){
+                    let foundPairToStartPartyGame
+                    if (parties[pair][0] == JSON.parse(msg).username){
+                        if (JSON.parse(msg).mode){
+                            foundPairToStartPartyGame = true
+                            let partyGameRoom = makeMatch(sockets[sockets.length-1], JSON.parse(msg))
+                            partyGameRoom.startGame()
+                        }
+                    }
+                    if (pair == parties.length-1 && !foundPairToStartPartyGame){
+                        sockets.push(new SearchingSocket(ws, msg))
+                        sockets[sockets.length-1].socket.send(JSON.stringify({
+                            waiting: true
+                        }))
+                        searching(sockets[sockets.length-1])
+                    }
+                }
+            }
+            else {
+                sockets.push(new SearchingSocket(ws, msg))
+                sockets[sockets.length-1].socket.send(JSON.stringify({
+                    waiting: true
+                }))
+                searching(sockets[sockets.length-1])
+            }
+        }
+    }
+    function checkIfPartyMSG() {
+        if (JSON.parse(msg).inParty || JSON.parse(msg).isPartyLeader || JSON.parse(msg).partyRequest){
+            if (JSON.parse(msg).inParty){
+                sockets.push(new SearchingSocket(ws, msg))
+                sockets[sockets.length-1].startPartyTimeoutClock()
+                sockets[sockets.length-1].socket.send(JSON.stringify({
+                    waiting: true
+                }))
+                for (s in sockets){
+                    if (sockets[s].username == JSON.parse(msg).partyLeader){
+                        sockets[s].clearPartyTimeoutClock()
+                        sockets[s].socket.send(JSON.stringify({
+                            partyMemberUsername: JSON.parse(msg).username
+                        }))
+                    }
+                }
+                return true
+            }
+            if (JSON.parse(msg).isPartyLeader){
+                sockets.push(new SearchingSocket(ws, msg))
+                sockets[sockets.length-1].startPartyTimeoutClock()
+                return true
+            }
+            if (JSON.parse(msg).partyRequest){
+                return true
+            }
+        }
+        else {return false}
+    }
+    function searching(client) {
+        client.triesToConnect++
+        if (client.triesToConnect >= 15){
+            client.socket.close()
+            return false
+        }
+        if (!makeMatch(client)){
+            lookingForMatch = setTimeout(() => {
+                searching(client)
+            }, 1000)
+        }
+        else { clearTimeout(lookingForMatch) }
+    }  
+    function makeMatch(client, msg){
+        let createdGame
+        // MATCHMAKING
+        for (x of sockets){
+            // RANDOM - create Game Room and start game instantly once match is made
+            if ((x.details.mode == client.details.mode && x.details.order == client.details.order) 
+                && (x.uuid != client.uuid && x.socket != client.socket) 
+                && !((x.isPartyLeader && client.inParty) && (x.username === client.partyLeader)))
+            {
+                createdGame = createGameRoom(x, client)
+                createdGame.startGame()
+                return true
+            }
+            // PARTY - create Game Room and start game once member has joined leader
+            if ((x.isPartyLeader && client.inParty) && (x.username === client.partyLeader)){
+                x.details = {
+                    mode: msg.mode,
+                    order: msg.order
+                }
+                client.clearPartyTimeoutClock()
+                createdGame = createGameRoom(x, client)
+                return createdGame
+            }
+            if (x == sockets.length-1 && !createdGame){
+                return false 
+            }
+        }
+
+        function createGameRoom(x, client) {
+            client.triesToConnect = 0
+            let lobby = new GameRoom(x, client)
+
+            if (lobby && lobby != ''){
+                lobbies.push(lobby)
+            }
+
+            sockets = sockets.filter(s => s.uuid !== client.uuid)
+            sockets = sockets.filter(s => s.uuid !== x.uuid)
+
+            return lobby
+        }
+    }
+
+    
+}
+
+// game logic
+function assignWSMessageToLobbyPlayer(ws, msg) {
+    if (ws == lobbies[l].player1.socket && !JSON.parse(msg).mode){
+        lobbies[l].turns++
+        lobbies[l].player1.strikes = JSON.parse(msg).strikes
+        lobbies[l].player1.wordPlayedList.push(new PlayedWord(JSON.parse(msg)))
+        lobbies[l].player1.lastWordPlayed = lobbies[l].player1.wordPlayedList[lobbies[l].player1.wordPlayedList.length-1]
+    }
+    if (ws == lobbies[l].player2.socket && !JSON.parse(msg).mode){
+        lobbies[l].turns++
+        lobbies[l].player2.strikes = JSON.parse(msg).strikes
+        lobbies[l].player2.wordPlayedList.push(new PlayedWord(JSON.parse(msg)))
+        lobbies[l].player2.lastWordPlayed = lobbies[l].player2.wordPlayedList[lobbies[l].player2.wordPlayedList.length-1]
+    }
+}
+function decideGameMode() {
+    // TWO PLAYERS AT ONCE - ONE ROUND
+    if (lobbies[l].details.mode != 'Classic' && (lobbies[l].turns % 2 == 0 && lobbies[l].turns >= 2)){
+        check2PWinner()
+        checkStrikeOutAndBroadcast()
+        checkRoundEndAndBroadcast()
+    }
+    // ONE PLAYER AT A TIME - UNLIMITED
+    if (lobbies[l].details.mode == 'Classic' && lobbies[l].turns >= 1){
+        checkClassicWinner()
+        checkStrikeOutAndBroadcast()
+        flipTurns()
+    }
+}
+function check2PWinner() {
+    if (lobbies[l].details.mode == 'Battle'){
+        if (lobbies[l].player1.lastWordPlayed.score > lobbies[l].player2.lastWordPlayed.score){
+            broadcastWinnerAndAdvance(lobbies[l].player1, lobbies[l].player2)
+        }
+        else if (lobbies[l].player1.lastWordPlayed.score == lobbies[l].player2.lastWordPlayed.score){
+            broadcastTieAndAdvance(lobbies[l].player1, lobbies[l].player2)
+        }
+        else { 
+            broadcastWinnerAndAdvance(lobbies[l].player2, lobbies[l].player1)
+        }
+    }
+    if (lobbies[l].details.mode == 'Speed'){
+        // TIE CHECK (NULL / AUTOSENT / EQUAL TIME)
+        if ((!lobbies[l].player1.lastWordPlayed.word && !lobbies[l].player2.lastWordPlayed.word)
+            || ((lobbies[l].player1.lastWordPlayed.word && lobbies[l].player2.lastWordPlayed.word) && (lobbies[l].player1.lastWordPlayed.autoSent && lobbies[l].player2.lastWordPlayed.autoSent))
+            || lobbies[l].player1.lastWordPlayed.time == lobbies[l].player2.lastWordPlayed.time){
+
+            broadcastTieAndAdvance(lobbies[l].player1, lobbies[l].player2)
+        }
+        // WINNER CHECK (TIME / NULL)
+        else{
+            if (((lobbies[l].player1.lastWordPlayed.word && lobbies[l].player2.lastWordPlayed.word) && lobbies[l].player1.lastWordPlayed.time < lobbies[l].player2.lastWordPlayed.time) 
+                || (lobbies[l].player1.lastWordPlayed.word && !lobbies[l].player2.lastWordPlayed.word)){
+                
+                broadcastWinnerAndAdvance(lobbies[l].player1, lobbies[l].player2)
+            }
+            else if ((lobbies[l].player1.lastWordPlayed.word && lobbies[l].player2.lastWordPlayed.word) && (lobbies[l].player2.lastWordPlayed.time < lobbies[l].player1.lastWordPlayed.time) 
+                || (lobbies[l].player2.lastWordPlayed.word && !lobbies[l].player1.lastWordPlayed.word)) { 
+                
+                broadcastWinnerAndAdvance(lobbies[l].player2, lobbies[l].player1)
+            }
+        }
+    }
+}
+function checkClassicWinner() {
+    if (lobbies[l].player1Turn){
+        if (lobbies[l].player1.lastWordPlayed.word != null) { 
+            classicBroadcastWinnerAndAdvance(lobbies[l].player1, lobbies[l].player2)
+        }
+        else {
+            classicBroadcastTieAndAdvance(lobbies[l].player1, lobbies[l].player2)
+        }
+    }      
+    if (!lobbies[l].player1Turn){
+        if (lobbies[l].player2.lastWordPlayed.word != null) { 
+            classicBroadcastWinnerAndAdvance(lobbies[l].player2, lobbies[l].player1)
+        }
+        else {
+            classicBroadcastTieAndAdvance(lobbies[l].player2, lobbies[l].player1)
+        }
+    }
+}
+function broadcastWinnerAndAdvance(winner, loser) {
+    winner.totalScore += winner.lastWordPlayed.score
+    lobbies[l].changeLetter()
+    winner.socket.send(JSON.stringify({
+        winner: true,
+        winningWord: winner.lastWordPlayed.word,
+        letter: lobbies[l].currentLetter,
+        letterIndex: lobbies[l].clIndex,
+        score: winner.lastWordPlayed.score
+    }))
+    loser.socket.send(JSON.stringify({
+        winner: false,
+        winningWord: winner.lastWordPlayed.word,
+        letter: lobbies[l].currentLetter,
+        letterIndex: lobbies[l].clIndex,
+        score: loser.lastWordPlayed.score
+    }))
+}
+function broadcastTieAndAdvance(p1, p2) {
+    p1.socket.send(JSON.stringify({
+        winner: "tie",
+        letter: lobbies[l].currentLetter,
+        letterIndex: lobbies[l].clIndex,
+        score: p1.lastWordPlayed.score
+    }))
+    p2.socket.send(JSON.stringify({
+        winner: "tie",
+        letter: lobbies[l].currentLetter,
+        letterIndex: lobbies[l].clIndex,
+        score: p2.lastWordPlayed.score
+    }))
+}
+function classicBroadcastWinnerAndAdvance(winner, loser) {
+    winner.totalScore += winner.lastWordPlayed.score
+    lobbies[l].changeLetter()
+    winner.socket.send(JSON.stringify({
+        winner: true,
+        winningWord: winner.lastWordPlayed.word,
+        letter: lobbies[l].currentLetter,
+        letterIndex: lobbies[l].clIndex,
+        score: winner.lastWordPlayed.score,
+        isYourTurn: false
+    }))
+    loser.socket.send(JSON.stringify({
+        winner: false,
+        winningWord: winner.lastWordPlayed.word,
+        letter: lobbies[l].currentLetter,
+        letterIndex: lobbies[l].clIndex,
+        isYourTurn: true
+    }))
+}
+function classicBroadcastTieAndAdvance(currentPlayer, otherPlayer) {
+    currentPlayer.socket.send(JSON.stringify({
+        winner: "tie",
+        letter: lobbies[l].currentLetter,
+        letterIndex: lobbies[l].clIndex,
+        score: currentPlayer.lastWordPlayed.score,
+        isYourTurn: false
+    }))
+    otherPlayer.socket.send(JSON.stringify({
+        winner: "tie",
+        letter: lobbies[l].currentLetter,
+        letterIndex: lobbies[l].clIndex,
+        isYourTurn: true
+    }))
+}
+function checkStrikeOutAndBroadcast() {
+    if (lobbies[l].player1.strikes == 3 && lobbies[l].player2.strikes != 3){
+        lobbies[l].player1.socket.send(JSON.stringify({
+            lost: true,
+            totalScore: lobbies[l].player1.totalScore,
+            otherScore: lobbies[l].player2.totalScore,
+            reason: "You struck out"
+        }))
+        lobbies[l].player2.socket.send(JSON.stringify({
+            won: true,
+            totalScore: lobbies[l].player2.totalScore,
+            otherScore: lobbies[l].player1.totalScore,
+            reason: "Opponent struck out"
+        }))
+        lobbies[l].player1.socket.close()
+        lobbies[l].player2.socket.close()
+        partyLeaders.delete(lobbies[l].player1.username)
+        removePairs(lobbies[l].player1.username)
+    }
+    else if (lobbies[l].player1.strikes == 3 && lobbies[l].player2.strikes == 3){
+        if (lobbies[l].player1.totalScore > lobbies[l].player2.totalScore){
+            lobbies[l].player1.socket.send(JSON.stringify({
+                won: true,
+                totalScore: lobbies[l].player1.totalScore,
+                otherScore: lobbies[l].player2.totalScore,
+                reason: "You both struck out, but your score was higher!"
+            }))
+            lobbies[l].player2.socket.send(JSON.stringify({
+                lost: true,
+                totalScore: lobbies[l].player2.totalScore,
+                otherScore: lobbies[l].player1.totalScore,
+                reason: "You both struck out, but your score was lower."
+            }))
+        }
+        else if (lobbies[l].player1.totalScore == lobbies[l].player2.totalScore){
+            lobbies[l].player1.socket.send(JSON.stringify({
+                tie: true,
+                totalScore: lobbies[l].player1.totalScore,
+                otherScore: lobbies[l].player2.totalScore,
+                reason: "You both struck out...and you tied!"
+            }))
+            lobbies[l].player2.socket.send(JSON.stringify({
+                tie: true,
+                totalScore: lobbies[l].player2.totalScore,
+                otherScore: lobbies[l].player1.totalScore,
+                reason: "You both struck out...and you tied!"
+            }))
+        }
+        else {
+            lobbies[l].player1.socket.send(JSON.stringify({
+                lost: true,
+                totalScore: lobbies[l].player1.totalScore,
+                otherScore: lobbies[l].player2.totalScore,
+                reason: "You both struck out, but your score was lower"
+            }))
+            lobbies[l].player2.socket.send(JSON.stringify({
+                won: true,
+                totalScore: lobbies[l].player2.totalScore,
+                otherScore: lobbies[l].player1.totalScore,
+                reason: "You both struck out, but your score was higher!"
+            }))
+        }
+        lobbies[l].player1.socket.close()
+        lobbies[l].player2.socket.close()
+        partyLeaders.delete(lobbies[l].player1.username)
+        removePairs(lobbies[l].player1.username)
+    }
+    else if ((lobbies[l].player2.strikes == 3 && lobbies[l].player1.strikes != 3)) {
+        lobbies[l].player2.socket.send(JSON.stringify({
+            lost: true,
+            totalScore: lobbies[l].player2.totalScore,
+            otherScore: lobbies[l].player1.totalScore,
+            reason: "You struck out"
+        }))
+        lobbies[l].player1.socket.send(JSON.stringify({
+            won: true,
+            totalScore: lobbies[l].player1.totalScore,
+            otherScore: lobbies[l].player2.totalScore,
+            reason: "Opponent struck out"
+        }))
+        lobbies[l].player1.socket.close()
+        lobbies[l].player2.socket.close()
+        partyLeaders.delete(lobbies[l].player1.username)
+        removePairs(lobbies[l].player1.username)
+    }
+}
+function checkRoundEndAndBroadcast() {
+    if (lobbies[l].lettersPlayed == 26){
+        if (lobbies[l].player1.totalScore > lobbies[l].player2.totalScore){
+            lobbies[l].player1.socket.send(JSON.stringify({
+                won: true,
+                totalScore: lobbies[l].player1.totalScore,
+                otherScore: lobbies[l].player2.totalScore,
+                reason: "Round ended"
+            }))
+            lobbies[l].player2.socket.send(JSON.stringify({
+                lost: true,
+                totalScore: lobbies[l].player2.totalScore,
+                otherScore: lobbies[l].player1.totalScore,
+                reason: "Round ended"
+            }))
+        }
+        else if (lobbies[l].player1.totalScore == lobbies[l].player2.totalScore){
+            lobbies[l].player1.socket.send(JSON.stringify({
+                tie: true,
+                totalScore: lobbies[l].player1.totalScore,
+                otherScore: lobbies[l].player2.totalScore,
+                reason: "Round ended"
+            }))
+            lobbies[l].player2.socket.send(JSON.stringify({
+                tie: true,
+                totalScore: lobbies[l].player2.totalScore,
+                otherScore: lobbies[l].player1.totalScore,
+                reason: "Round ended"
+            }))
+        }
+        else {
+            lobbies[l].player1.socket.send(JSON.stringify({
+                lost: true,
+                totalScore: lobbies[l].player1.totalScore,
+                otherScore: lobbies[l].player2.totalScore,
+                reason: "Round ended"
+            }))
+            lobbies[l].player2.socket.send(JSON.stringify({
+                won: true,
+                totalScore: lobbies[l].player2.totalScore,
+                otherScore: lobbies[l].player1.totalScore,
+                reason: "Round ended"
+            }))
+        }
+        removePairs(lobbies[l].player1.username)
+        partyLeaders.delete(lobbies[l].player1.username)
+    }
+}
+function flipTurns() {
+    if (lobbies[l].player1Turn){lobbies[l].player1Turn = false}
+    else if (!lobbies[l].player1Turn){lobbies[l].player1Turn = true}
+}
+
+
+
+
