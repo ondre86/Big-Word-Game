@@ -191,7 +191,7 @@ const app = Vue.createApp({
                         })
                     })
                     .then(res => res.json())
-                    .then(res => res.createdNewParty ? this.isPartyLeader = res.createdNewParty : this.isPartyLeader = false)
+                    .then(res => this.isPartyLeader = res.createdNewParty)
                     .then(() => {
                         if (this.isPartyLeader){
                             this.startWebSocket()
