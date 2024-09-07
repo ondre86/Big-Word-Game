@@ -1043,10 +1043,10 @@ const app = Vue.createApp({
                     }
                     else {
                         if (!this.hasUsername){
-                            localStorage.setItem("username", this.mpUsername)
-                            localStorage.setItem("usernameDate", this.mpUserTimestamp)
                             this.hasUsername = true
                         }
+                        localStorage.setItem("username", this.mpUsername)
+                        localStorage.setItem("usernameDate", this.mpUserTimestamp)
                         this.$refs.userInput.value = ''
                         this.usernameInput = ''
                     }

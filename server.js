@@ -17,7 +17,7 @@ const port = 8383
 
 // EXPRESS SERVER
 // app.use(limiter)
-// app.set('trust proxy', 1)
+// app.set('trust proxy', 1 /* number of proxies between user and server */)
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
@@ -377,7 +377,7 @@ async function directPostMessages(req, res) {
             else {
                 if (req.body.oldUsername && req.body.oldJoinDate){
                     for (player in registeredOnlinePlayers){
-                        if ((req.body.oldUsername == registeredOnlinePlayers[player].username) && (req.body.oldJoinDate == registeredOnlinePlayers[player].oldJoinDate)){
+                        if ((req.body.oldUsername == registeredOnlinePlayers[player].username) && (req.body.oldJoinDate == registeredOnlinePlayers[player].joinDate)){
                             registeredOnlinePlayers.splice(player, 1)
                             registeredOnlineUsernames.delete(req.body.oldUsername)
                         }

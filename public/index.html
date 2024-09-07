@@ -24,7 +24,7 @@
     <script defer src="https://unpkg.com/vue@3.4.38/dist/vue.global.prod.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollToPlugin.min.js"></script>
-    <script defer src="index-min.js"></script>
+    <script defer src="index.js"></script>
     <script defer src="https://cloud.umami.is/script.js" data-website-id="678801f6-b826-4887-9e95-1de149947467"></script>
 </head>
 <body>
@@ -185,14 +185,14 @@
                     </div>
                 </section>
                 <section id="choose-game-mode" class="vert gap2" v-show="hasUsername && chosenMatchmakingMode && !joiningParty && !mpClassicTut && !mpSpeedTut && !mpBattleTut">
-                    <button class="btn-abs-l light-btn font2" @click.prevent="chosenMatchmakingMode = false; deleteParty(); scrollToTop();" v-if="isPartyLeader">end party</button>
-                    <button class="btn-abs-l light-btn font2" @click.prevent="chosenMatchmakingMode = false; scrollToTop();" v-else>back</button>
-                    <div class="vert gap-5" v-if="wantsToCreateParty">
+                    <button class="btn-abs-l light-btn font2" @click.prevent="chosenMatchmakingMode = false; deleteParty(); scrollToTop();" v-show="wantsToCreateParty">end party</button>
+                    <button class="btn-abs-l light-btn font2" @click.prevent="chosenMatchmakingMode = false; scrollToTop();" v-show="!wantsToCreateParty">back</button>
+                    <div class="vert gap-5" v-show="wantsToCreateParty">
                         <h1 class="font1 fz2">Party Leader</h1>
-                        <span class="font2 txt-center" v-if="partyMemberUsername !== ' '">In party: {{ partyMemberUsername }}</span>
-                        <span class="font2 txt-center" v-else>Party empty</span>
+                        <span class="font2 txt-center" v-show="partyMemberUsername !== ' '">In party: {{ partyMemberUsername }}</span>
+                        <span class="font2 txt-center" v-show="!partyMemberUsername || partyMemberUsername == ' '">Party empty</span>
                     </div>
-                    <div class="vert gap-5" v-else>
+                    <div class="vert gap-5" v-show="!wantsToCreateParty">
                         <h1 class="font1 fz2">Choose Mode</h1>
                         <span class="font2 txt-center">Play against others globally!</span>
                     </div>
