@@ -9,6 +9,11 @@ const limiter = rateLimit({
 	standardHeaders: true, 
 	legacyHeaders: false
 })
+const syl = require('syllabificate')
+const profanity = require('@2toad/profanity')
+const pf = new profanity.Profanity({wholeWord: false})
+const letterArray = "abcdefghijklmnopqrstuvwxyz".split("")
+const port = 8383
 
 // EXPRESS SERVER
 app.set('trust proxy', 1 /* number of proxies between user and server */)
@@ -66,12 +71,6 @@ app.use((err, req, res, next) => {
 })
 
 app.listen(port)
-
-const syl = require('syllabificate')
-const profanity = require('@2toad/profanity')
-const pf = new profanity.Profanity({wholeWord: false})
-const letterArray = "abcdefghijklmnopqrstuvwxyz".split("")
-const port = 8383
 
 // DICTIONARY API
 let dictionaryData
