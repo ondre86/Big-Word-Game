@@ -10,6 +10,63 @@ const limiter = rateLimit({
 	legacyHeaders: false
 })
 
+// EXPRESS SERVER
+app.set('trust proxy', 1 /* number of proxies between user and server */)
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            connectSrc: ["'self'",
+                "https://api-gateway.umami.dev/api/send"
+            ],
+            scriptSrc: ["'self'", 
+                "https://unpkg.com/vue@3.4.38/dist/vue.global.prod.js", 
+                "https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js", 
+                "https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollToPlugin.min.js", 
+                "https://cloud.umami.is/script.js",,
+                "'unsafe-eval'"],
+        },
+      },
+}))
+app.disable('x-powered-by')
+app.use(express.static('public')).use(express.json()).use(express.text())
+
+app.post('/', limiter, async (req, res)=>{
+    // FAIL
+    if (!req.body){ 
+        return res.status(400).send({ status: 'failed' }) 
+    }
+    else{
+        directPostMessages(req, res)
+    }
+})
+
+app.get("/", (req, res) => {
+    res.status(200).send()
+})
+
+app.ws('/', function(ws, req) {
+    ws.on('message', function (msg) {
+        if (lobbies.length == 0){
+            receiveSocketAndPlaceInLobby(ws, msg)
+        }
+        deliverSocketMessage(ws, msg)
+    })
+
+    ws.on('close', function (msg) {
+        removeSocketAndDeleteLobby(ws)  
+    })
+})
+
+app.use((req, res, next) => {
+    res.status(404).sendFile('404.html', {root: 'public'})
+})
+  
+app.use((err, req, res, next) => {
+    res.status(500).send('Something broke!')
+})
+
+app.listen(port)
+
 const syl = require('syllabificate')
 const profanity = require('@2toad/profanity')
 const pf = new profanity.Profanity({wholeWord: false})
@@ -191,63 +248,6 @@ class PlayedWord {
         this.autoSent = msg.autoSent
     }
 }
-
-// EXPRESS SERVER
-app.use(helmet({
-    contentSecurityPolicy: {
-        directives: {
-            connectSrc: ["'self'",
-                "https://api-gateway.umami.dev/api/send"
-            ],
-            scriptSrc: ["'self'", 
-                "https://unpkg.com/vue@3.4.38/dist/vue.global.prod.js", 
-                "https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js", 
-                "https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollToPlugin.min.js", 
-                "https://cloud.umami.is/script.js",,
-                "'unsafe-eval'"],
-        },
-      },
-}))
-app.disable('x-powered-by')
-app.use(express.static('public')).use(express.json()).use(express.text())
-
-app.post('/', limiter, async (req, res)=>{
-    // FAIL
-    if (!req.body){ 
-        return res.status(400).send({ status: 'failed' }) 
-    }
-    else{
-        directPostMessages(req, res)
-    }
-})
-
-app.get("/", (req, res) => {
-    res.status(200).send()
-})
-
-app.ws('/', function(ws, req) {
-    ws.on('message', function (msg) {
-        if (lobbies.length == 0){
-            receiveSocketAndPlaceInLobby(ws, msg)
-        }
-        deliverSocketMessage(ws, msg)
-    })
-
-    ws.on('close', function (msg) {
-        removeSocketAndDeleteLobby(ws)  
-    })
-})
-
-app.use((req, res, next) => {
-    res.status(404).sendFile('404.html', {root: 'public'})
-})
-  
-app.use((err, req, res, next) => {
-    res.status(500).send('Something broke!')
-})
-
-app.listen(port)
-
 
 // FUNCTIONS
 // handling messages
