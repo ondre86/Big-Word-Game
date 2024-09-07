@@ -285,8 +285,8 @@ p.left {
 
 .btn-abs-r {
   position: absolute;
-  top: -1.5rem;
-  right: -0.5rem;
+  top: -2rem;
+  right: -1.5rem;
 }
 
 .order-picker {
