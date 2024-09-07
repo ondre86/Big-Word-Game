@@ -2,13 +2,13 @@ const express = require('express')
 const app = express()
 const expressWS = require('express-ws')(app)
 const helmet = require('helmet')
-const rateLimit = require('express-rate-limit')
-const limiter = rateLimit({
-	windowMs: 1 * 60 * 1000,
-	limit: 45, // Limit each IP to 45 POST requests per minute (45 words per minute)
-	standardHeaders: true, 
-	legacyHeaders: false
-})
+// const rateLimit = require('express-rate-limit')
+// const limiter = rateLimit({
+// 	windowMs: 1 * 60 * 1000,
+// 	limit: 45, // Limit each IP to 45 POST requests per minute (45 words per minute)
+// 	standardHeaders: true, 
+// 	legacyHeaders: false
+// })
 const syl = require('syllabificate')
 const profanity = require('@2toad/profanity')
 const pf = new profanity.Profanity({wholeWord: false})
@@ -16,7 +16,7 @@ const letterArray = "abcdefghijklmnopqrstuvwxyz".split("")
 const port = 8383
 
 // EXPRESS SERVER
-app.set('trust proxy', 1 /* number of proxies between user and server */)
+// app.set('trust proxy', 1 /* number of proxies between user and server */)
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
@@ -35,7 +35,7 @@ app.use(helmet({
 app.disable('x-powered-by')
 app.use(express.static('public')).use(express.json()).use(express.text())
 
-app.post('/', limiter, async (req, res)=>{
+app.post('/', async (req, res)=>{
     // FAIL
     if (!req.body){ 
         return res.status(400).send({ status: 'failed' }) 
