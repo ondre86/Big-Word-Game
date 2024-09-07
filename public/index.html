@@ -148,7 +148,7 @@
                     <button class="btn light-btn font2" @click="tutorialToggle(); scrollToTop();">hide rules</button>
                 </div>
             </section>
-            <section id="multiplayer-path" class="tut-card" v-show="!started && !tutorialOn && !lost && multiPlayer && !isWaiting && !(isPartyLeader && countingDown)">
+            <section id="multiplayer-path" class="tut-card" v-show="!started && !tutorialOn && !lost && multiPlayer && !isWaiting && !joiningParty && !(isPartyLeader && countingDown)">
                 <section id="username-section" class="vert gap2" v-show="(!hasUsername || joiningParty) && !inParty">
                     <div>
                         <button class="btn-abs-l light-btn font2" @click.prevent="twoPlayer(); scrollToTop();" v-if="!joiningParty && !changingUsername">back</button>
@@ -191,7 +191,7 @@
                         <h1 class="font1 fz2">Choose Mode</h1>
                         <span class="font2 txt-center">Play against others globally!</span>
                     </div>
-                    <div class="vert gap-5" v-else-if="wantsToCreateParty && isPartyLeader">
+                    <div class="vert gap-5" v-else>
                         <h1 class="font1 fz2">Party Leader</h1>
                         <span class="font2 txt-center" v-if="partyMemberUsername !== ' '">In party: {{ partyMemberUsername }}</span>
                         <span class="font2 txt-center" v-else>Party empty</span>
