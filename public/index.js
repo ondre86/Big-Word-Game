@@ -65,6 +65,7 @@ const app = Vue.createApp({
 
             chosenMatchmakingMode: false,
             joiningParty: false,
+            wantsToCreateParty: false,
             partyLeaderUsername: '',
             inParty: false,
             isPartyLeader: false,
@@ -123,39 +124,6 @@ const app = Vue.createApp({
             if(this.introOff){this.introOff = false}
             else {this.introOff = true}
         },
-        chooseMatchmakingMode(type){
-            switch (type) {
-                case 'random':
-                    this.chosenMatchmakingMode = true
-                    break
-                case 'leader':
-                    this.chosenMatchmakingMode = true
-                    fetch('/', {
-                        method: 'POST',
-                        headers: {
-                            "Content-Type": 'application/json'
-                        },
-                        body: JSON.stringify({
-                            username: this.mpUsername,
-                            partyRequest: "create"
-                        })
-                    })
-                    .then(res => res.json())
-                    .then(res => res.createdNewParty ? this.isPartyLeader = res.createdNewParty : this.isPartyLeader = false)
-                    .then(() => {
-                        if (this.isPartyLeader){
-                            this.startWebSocket()
-                        }
-                        else {
-                            this.usernameErrorMSG("Party could not be created.")
-                        }
-                    })
-                    break
-                case 'member':
-                    this.joiningParty = true
-                    break
-            }
-        },
         mpCTHide(){
             if (!this.mpCTisHidden){this.mpCTisHidden = true}
             else{this.mpCTisHidden = false}
@@ -203,6 +171,40 @@ const app = Vue.createApp({
             this.opponentScore = otherScore
             this.mpLostReason = reason
             this.scrollToTop()
+        },
+        chooseMatchmakingMode(type){
+            switch (type) {
+                case 'random':
+                    this.chosenMatchmakingMode = true
+                    break
+                case 'leader':
+                    this.chosenMatchmakingMode = true
+                    this.wantsToCreateParty = true
+                    fetch('/', {
+                        method: 'POST',
+                        headers: {
+                            "Content-Type": 'application/json'
+                        },
+                        body: JSON.stringify({
+                            username: this.mpUsername,
+                            partyRequest: "create"
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(res => res.createdNewParty ? this.isPartyLeader = res.createdNewParty : this.isPartyLeader = false)
+                    .then(() => {
+                        if (this.isPartyLeader){
+                            this.startWebSocket()
+                        }
+                        else {
+                            this.usernameErrorMSG("Party could not be created.")
+                        }
+                    })
+                    break
+                case 'member':
+                    this.joiningParty = true
+                    break
+            }
         },
 
         // STARTING A GAME
@@ -1109,6 +1111,7 @@ const app = Vue.createApp({
                 username: this.mpUsername,
                 partyRequest: "delete"
             }))
+            this.wantsToCreateParty = false
             this.isPartyLeader = false
             this.chosenMatchmakingMode = false
             this.partyMemberUsername = ' '
