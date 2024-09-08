@@ -1569,7 +1569,9 @@ const app = Vue.createApp({
             }
         }
         else{
-            this.expandHeader()
+            setTimeout(() => {
+                this.expandHeader()
+            }, 50)
             this.cookieScore = localStorage.lastScore
             this.cookieHighScore = localStorage.highScore
         }
