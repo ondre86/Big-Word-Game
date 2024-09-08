@@ -185,7 +185,7 @@ const app = Vue.createApp({
             }
         },
         twoPlayer(){
-            if(this.multiPlayer && !this.lost){
+            if(this.multiPlayer){
                 this.multiPlayer = false
                 navigator.sendBeacon("/", JSON.stringify({
                     username: this.mpUsername,
@@ -194,10 +194,10 @@ const app = Vue.createApp({
                 }))
             }
             else {
-                this.multiPlayer = true
                 if (localStorage.username){
                     this.usernameInput = localStorage.username
                     this.$refs.userInput.value = localStorage.username
+                    this.hasUsername = true
                 }
                 this.setUsername()
             }
@@ -333,7 +333,6 @@ const app = Vue.createApp({
             this.started = false
             this.tutorialOn = false
             this.backToHome()
-            this.expandHeader()
 
             if (this.webSocket){
                 this.terminateWS()
@@ -1123,6 +1122,7 @@ const app = Vue.createApp({
                         }               
                     }
                     else {
+                        this.multiPlayer = true
                         this.hasUsername = true
                         localStorage.setItem("username", this.mpUsername)
                         localStorage.setItem("usernameDate", this.mpUserTimestamp)

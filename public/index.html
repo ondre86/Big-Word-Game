@@ -42,7 +42,7 @@
     <main id="app" hidden>
         <div id="app-wrap">
             <section id="interactive" class="tut-card" v-show="!started && !tutorialOn && !introOff">
-                <button class="btn-abs-r font2 light-btn" @click="tutorialToggle();">show<br>rules</button>
+                <button class="btn-abs-r font2 light-btn" @click="tutorialToggle();">rules</button>
                 <div class="vert gap2" v-if="!multiPlayer">
                     <h1 class="font1 fz2" v-if="!lost">Let's Play!</h1>
                     <h1 class="font1 fz2" v-else>Game Over</h1>
@@ -53,11 +53,11 @@
                     </div>
                 </div>
                 <div class="vert gap2" v-else>
-                    <div class="vert gap-5">
-                        <h1 class="font1 fz2" v-if="lost && mpLost">You Lost!</h1>
-                        <h1 class="font1 fz2" v-else-if="lost && mpTie">You Tied!</h1>
-                        <h1 class="font1 fz2" v-else-if="lost && !mpLost && !mpTie">You Won!</h1>
-                        <span class="font2 txt-center" v-if="lost">{{ mpLostReason }}</span>
+                    <div class="vert gap-5" v-if="lost">
+                        <h1 class="font1 fz2" v-if="mpLost">You Lost!</h1>
+                        <h1 class="font1 fz2" v-else-if="mpTie">You Tied!</h1>
+                        <h1 class="font1 fz2" v-else-if="!mpLost && !mpTie">You Won!</h1>
+                        <span class="font2 txt-center">{{ mpLostReason }}</span>
                     </div>
                     <div class="vert gap1">
                         <h2 class="font1 fz1-75">Your Score: {{ score }}</h2>
@@ -148,30 +148,30 @@
                     <button class="btn light-btn font2" @click="tutorialToggle(); scrollToTop();">hide rules</button>
                 </div>
             </section>
+            <section id="username-section" class="vert gap2 tut-card" v-show="!started && introOff && !tutorialOn && !lost && !isWaiting && (!hasUsername || joiningParty) && !inParty && !(isPartyLeader && countingDown)">
+                <div>
+                    <button class="btn-abs-l light-btn font2" @click.prevent="twoPlayer(); scrollToTop();" v-if="!joiningParty && !changingUsername">back</button>
+                    <button class="btn-abs-l light-btn font2" @click.prevent="hasUsername = true; changingUsername = false; scrollToTop();" v-else-if="!joiningParty && changingUsername">cancel</button>
+                    <button class="btn-abs-l light-btn font2" @click.prevent="joiningParty = false; scrollToTop();" v-else>back</button>
+                </div>
+                <div class="vert gap1">
+                    <h1 class="font1 fz2 txt-center" v-if="!joiningParty">Choose Your Username</h1>
+                    <h1 class="font1 fz2 txt-center" v-else>Join Party by Username</h1>
+                </div>
+                <form id="username-form" class="form user-form" spellcheck="false" autocapitalize="off" autocomplete="off" action="">
+                    <input required v-model="usernameInput" type="text" ref="userInput" id="user-text" title="Type username here!" aria-label="Type your username here!"></input>
+                    <input class="font2 btn" type="submit" ref="userPost" id="user-post" title="Enter Multiplayer Zone" value="enter" @click.prevent="setUsername($event)" v-if="!joiningParty"></input>
+                    <input class="font2 btn" type="submit" ref="userPost" id="user-post" title="Join Party" value="join party" @click.prevent="joinPartyByUsername($event)" v-else></input>
+                </form>
+            </section>
             <section id="multiplayer-path" v-show="!started && !tutorialOn && !lost && multiPlayer && !isWaiting && !inParty && !(isPartyLeader && countingDown)">
-                <section id="username-section" class="vert gap2 tut-card" v-show="(!hasUsername || joiningParty) && !inParty">
-                    <div>
-                        <button class="btn-abs-l light-btn font2" @click.prevent="twoPlayer(); scrollToTop();" v-if="!joiningParty && !changingUsername">back</button>
-                        <button class="btn-abs-l light-btn font2" @click.prevent="hasUsername = true; changingUsername = false; scrollToTop();" v-else-if="!joiningParty && changingUsername">cancel</button>
-                        <button class="btn-abs-l light-btn font2" @click.prevent="joiningParty = false; scrollToTop();" v-else>back</button>
-                    </div>
-                    <div class="vert gap1">
-                        <h1 class="font1 fz2 txt-center" v-if="!joiningParty">Choose Your Username</h1>
-                        <h1 class="font1 fz2 txt-center" v-else>Join Party by Username</h1>
-                    </div>
-                    <form id="username-form" class="form user-form" spellcheck="false" autocapitalize="off" autocomplete="off" action="">
-                        <input required v-model="usernameInput" type="text" ref="userInput" id="user-text" title="Type username here!" aria-label="Type your username here!"></input>
-                        <input class="font2 btn" type="submit" ref="userPost" id="user-post" title="Enter Multiplayer Zone" value="enter" @click.prevent="setUsername($event)" v-if="!joiningParty"></input>
-                        <input class="font2 btn" type="submit" ref="userPost" id="user-post" title="Join Party" value="join party" @click.prevent="joinPartyByUsername($event)" v-else></input>
-                    </form>
-                </section>
                 <section id="party-or-random" class="vert gap2 tut-card" v-show="hasUsername && !chosenMatchmakingMode && !joiningParty">
                     <button class="btn-abs-l light-btn font2" @click.prevent=" twoPlayer(); scrollToTop();">back</button>
-                    <button id="change-username" class="btn-abs-r font2 light-btn" @click="hasUsername = false; changingUsername = true">change<br>name</button>
                     <div class="vert gap-5">
                         <h1 class="font1 fz2 txt-center">Play Online</h1>
                         <div class="vert gap-5">
                             <span class="font2 txt-center">username: {{ mpUsername }}</span>
+                            <button id="change-username" class="btn font2 fz1 light-btn small-btn" @click="hasUsername = false; changingUsername = true">change username</button>
                         </div>
                     </div>
                     <div class="vert gap1 full-width">
@@ -204,7 +204,7 @@
                 </section>
                 <section id="classic-mode" class="vert gap2 tut-card" v-show="mpClassicTut">
                     <button class="btn-abs-l light-btn font2" @click.prevent="mpClassicTut=false; mpCTisHidden=true;" v-show="!isWaiting">back</button>
-                    <button class="btn-abs-r light-btn font2 mp-rules-toggle" @click="mpCTHide" v-if="mpCTisHidden" v-show="!isWaiting">show<br>rules</button>
+                    <button class="btn-abs-r light-btn font2 mp-rules-toggle" @click="mpCTHide" v-if="mpCTisHidden" v-show="!isWaiting">rules</button>
                     <button class="btn-abs-r light-btn font2 mp-rules-toggle" @click.prevent="mpCTHide(); scrollToTop();" v-else>hide rules</button>
                     <div class="vert gap-5">
                         <h1 class="font1 fz2">Classic Mode</h1>
@@ -283,7 +283,7 @@
                 </section>
                 <section id="speed-mode" class="vert gap2 tut-card" v-show="mpSpeedTut">
                     <button class="btn-abs-l light-btn font2" @click.prevent="mpSpeedTut=false; mpSTisHidden=true;" v-show="!isWaiting">back</button>
-                    <button class="btn-abs-r light-btn font2 mp-rules-toggle" @click="mpSTHide" v-if="mpSTisHidden" v-show="!isWaiting">show<br>rules</button>
+                    <button class="btn-abs-r light-btn font2 mp-rules-toggle" @click="mpSTHide" v-if="mpSTisHidden" v-show="!isWaiting">rules</button>
                     <button class="btn-abs-r light-btn font2 mp-rules-toggle" @click.prevent="mpSTHide(); scrollToTop();" v-else>hide rules</button>
                     <div class="vert gap-5">
                         <h1 class="font1 fz2">Speed Mode</h1>
@@ -357,7 +357,7 @@
                 </section>
                 <section id="battle-mode" class="vert gap2 tut-card" v-show="mpBattleTut">
                     <button class="btn-abs-l light-btn font2" @click.prevent="mpBattleTut=false; mpWTisHidden=true;" v-show="!isWaiting">back</button>
-                    <button class="btn-abs-r light-btn font2 mp-rules-toggle" @click="mpWTHide" v-if="mpWTisHidden" v-show="!isWaiting">show<br>rules</button>
+                    <button class="btn-abs-r light-btn font2 mp-rules-toggle" @click="mpWTHide" v-if="mpWTisHidden" v-show="!isWaiting">rules</button>
                     <button class="btn-abs-r light-btn font2 mp-rules-toggle" @click.prevent="mpWTHide(); scrollToTop();" v-else>hide rules</button>
                     <div class="vert gap-5">
                         <h1 class="font1 fz2">Battle Mode</h1>
@@ -524,7 +524,7 @@
                     </div>
                 </div>
             </section>
-            <footer id="credit" class="margin-v-2" v-show="!started && !lost && !tutorialOn && !isWaiting && !multiPlayer">
+            <footer id="credit" class="margin-v-2" v-show="!started && !lost && !tutorialOn && !isWaiting && !multiPlayer && !introOff">
                 <a class="font2 btn credit" href="https://ondre.org" target="_blank" title="External link to creator's portfolio">created by ondre</a>
             </footer>
         </div>
