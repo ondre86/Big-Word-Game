@@ -1122,8 +1122,8 @@ const app = Vue.createApp({
                         }               
                     }
                     else {
-                        this.multiPlayer = true
                         this.hasUsername = true
+                        this.multiPlayer = true
                         localStorage.setItem("username", this.mpUsername)
                         localStorage.setItem("usernameDate", this.mpUserTimestamp)
                         this.$refs.userInput.value = ''
