@@ -198,7 +198,6 @@ const app = Vue.createApp({
                 if (localStorage.username){
                     this.usernameInput = localStorage.username
                     this.$refs.userInput.value = localStorage.username
-                    this.hasUsername = true
                 }
                 this.setUsername()
             }
@@ -260,8 +259,6 @@ const app = Vue.createApp({
                     this.chosenMatchmakingMode = true
                     break
                 case 'leader':
-                    this.wantsToCreateParty = true
-                    this.chosenMatchmakingMode = true
                     fetch('/', {
                         method: 'POST',
                         headers: {
@@ -276,6 +273,8 @@ const app = Vue.createApp({
                     .then(res => this.isPartyLeader = res.createdNewParty)
                     .then(() => {
                         if (this.isPartyLeader){
+                            this.wantsToCreateParty = true
+                            this.chosenMatchmakingMode = true
                             this.startWebSocket()
                         }
                         else {
@@ -1124,9 +1123,7 @@ const app = Vue.createApp({
                         }               
                     }
                     else {
-                        if (!this.hasUsername){
-                            this.hasUsername = true
-                        }
+                        this.hasUsername = true
                         localStorage.setItem("username", this.mpUsername)
                         localStorage.setItem("usernameDate", this.mpUserTimestamp)
                         this.$refs.userInput.value = ''
@@ -1553,7 +1550,7 @@ const app = Vue.createApp({
             inOut.set(".tut-card", {
                 y:50,
                 opacity: 0,
-                duration: .1,
+                duration: .05,
                 ease: "power1.inOut"
             })
         }
@@ -1591,7 +1588,7 @@ const app = Vue.createApp({
             inOut.to(".tut-card", {
                 y:0,
                 opacity: 1,
-                duration: .1,
+                duration: .05,
                 ease: "power1.inOut"
             })
         }
