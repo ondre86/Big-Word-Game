@@ -2,13 +2,6 @@ const express = require('express')
 const app = express()
 const expressWS = require('express-ws')(app)
 const helmet = require('helmet')
-// const { rateLimit } = require('express-rate-limit')
-// const limiter = rateLimit({
-// 	windowMs: 1 * 60 * 1000,
-// 	limit: 45, // Limit each IP to 45 POST requests per minute (45 words per minute)
-// 	standardHeaders: true, 
-// 	legacyHeaders: false
-// })
 const syl = require('syllabificate')
 const profanity = require('@2toad/profanity')
 const pf = new profanity.Profanity({wholeWord: false})
@@ -16,8 +9,6 @@ const letterArray = "abcdefghijklmnopqrstuvwxyz".split("")
 const port = 8383
 
 // EXPRESS SERVER
-// app.use(limiter)
-// app.set('trust proxy', 1 /* number of proxies between user and server */)
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
@@ -363,13 +354,19 @@ async function directPostMessages(req, res) {
     function directOnlineWorldMessages(req, res) {
         // JOIN ONLINE WORLD
         if (req.body.request == "join"){
-            if (pf.exists(req.body.username)){
+            if (req.body.username == ''){
+                res.status(200).send({ 
+                    registered: false,
+                    empty: true
+                })
+            }
+            else if (pf.exists(req.body.username)){
                 res.status(200).send({ 
                     registered: false,
                     profane: true
                 })
             }
-            if (registeredOnlineUsernames.has(req.body.username)){
+            else if (registeredOnlineUsernames.has(req.body.username)){
                 res.status(200).send({ 
                     registered: false
                 })
@@ -480,7 +477,6 @@ function deliverSocketMessage(ws, msg) {
             return
         }
         if (JSON.parse(msg).partyRequest === "leave"){
-            // partyLeaders.delete(JSON.parse(msg).partyLeader)
             removePairs(JSON.parse(msg).username)
             ws.close()
             return

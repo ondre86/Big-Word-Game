@@ -71,8 +71,8 @@
                     <div class="vert gap-5">
                         <span>Letter Order:</span>
                         <div class="flex center gap1 letter-order">
-                            <button class="btn order-picker" :class="{ active: !isRandomOrder }" @click="randomOrder($event, false)">A to Z</button>
-                            <button class="btn order-picker" :class="{ active: isRandomOrder }" @click="randomOrder($event, true)">Random</button>
+                            <button class="btn order-picker" :class="{ active: !isRandomOrder }" @click="randomOrder(false)">A to Z</button>
+                            <button class="btn order-picker" :class="{ active: isRandomOrder }" @click="randomOrder(true)">Random</button>
                         </div>
                     </div>
                 </div>
@@ -141,15 +141,15 @@
                     <div class="vert gap-5">
                         <span>Letter Order:</span>
                         <div class="flex center gap1 letter-order">
-                            <button class="btn order-picker" :class="{ active: !isRandomOrder }" @click="randomOrder($event, false)" >A to Z</button>
-                            <button class="btn order-picker" :class="{ active: isRandomOrder }" @click="randomOrder($event, true)">Random</button>
+                            <button class="btn order-picker" :class="{ active: !isRandomOrder }" @click="randomOrder(false)" >A to Z</button>
+                            <button class="btn order-picker" :class="{ active: isRandomOrder }" @click="randomOrder(true)">Random</button>
                         </div>
                     </div>
                     <button class="btn light-btn font2" @click="tutorialToggle(); scrollToTop();">hide rules</button>
                 </div>
             </section>
-            <section id="multiplayer-path" class="tut-card" v-show="!started && !tutorialOn && !lost && multiPlayer && !isWaiting && !inParty && !(isPartyLeader && countingDown)">
-                <section id="username-section" class="vert gap2" v-show="(!hasUsername || joiningParty) && !inParty">
+            <section id="multiplayer-path" v-show="!started && !tutorialOn && !lost && multiPlayer && !isWaiting && !inParty && !(isPartyLeader && countingDown)">
+                <section id="username-section" class="vert gap2 tut-card" v-show="(!hasUsername || joiningParty) && !inParty">
                     <div>
                         <button class="btn-abs-l light-btn font2" @click.prevent="twoPlayer(); scrollToTop();" v-if="!joiningParty && !changingUsername">back</button>
                         <button class="btn-abs-l light-btn font2" @click.prevent="hasUsername = true; changingUsername = false; scrollToTop();" v-else-if="!joiningParty && changingUsername">cancel</button>
@@ -165,7 +165,7 @@
                         <input class="font2 btn" type="submit" ref="userPost" id="user-post" title="Join Party" value="join party" @click.prevent="joinPartyByUsername($event)" v-else></input>
                     </form>
                 </section>
-                <section id="party-or-random" class="vert gap2" v-show="hasUsername && !chosenMatchmakingMode && !joiningParty">
+                <section id="party-or-random" class="vert gap2 tut-card" v-show="hasUsername && !chosenMatchmakingMode && !joiningParty">
                     <button class="btn-abs-l light-btn font2" @click.prevent=" twoPlayer(); scrollToTop();">back</button>
                     <button id="change-username" class="btn-abs-r font2 light-btn" @click="hasUsername = false; changingUsername = true">change<br>name</button>
                     <div class="vert gap-5">
@@ -184,7 +184,7 @@
                         <button class="btn" @click.prevent="chooseMatchmakingMode('leader'); scrollToTop();">Create Party</button>
                     </div>
                 </section>
-                <section id="choose-game-mode" class="vert gap2" v-show="hasUsername && chosenMatchmakingMode && !joiningParty && !mpClassicTut && !mpSpeedTut && !mpBattleTut">
+                <section id="choose-game-mode" class="vert gap2 tut-card" v-show="hasUsername && chosenMatchmakingMode && !joiningParty && !mpClassicTut && !mpSpeedTut && !mpBattleTut">
                     <button class="btn-abs-l light-btn font2" @click.prevent="chosenMatchmakingMode = false; deleteParty(); scrollToTop();" v-show="wantsToCreateParty">end party</button>
                     <button class="btn-abs-l light-btn font2" @click.prevent="chosenMatchmakingMode = false; scrollToTop();" v-show="!wantsToCreateParty">back</button>
                     <div class="vert gap-5" v-show="wantsToCreateParty">
@@ -202,16 +202,16 @@
                         <button class="btn" @click.prevent="battleTutToggle(); scrollToTop();">Battle</button>
                     </div>
                 </section>
-                <section id="classic-mode" class="vert gap2" v-show="mpClassicTut">
+                <section id="classic-mode" class="vert gap2 tut-card" v-show="mpClassicTut">
                     <button class="btn-abs-l light-btn font2" @click.prevent="mpClassicTut=false; mpCTisHidden=true;" v-show="!isWaiting">back</button>
-                    <button class="btn-abs-r light-btn font2" @click="mpCTHide" v-if="mpCTisHidden" v-show="!isWaiting">show<br>rules</button>
+                    <button class="btn-abs-r light-btn font2 mp-rules-toggle" @click="mpCTHide" v-if="mpCTisHidden" v-show="!isWaiting">show<br>rules</button>
+                    <button class="btn-abs-r light-btn font2 mp-rules-toggle" @click.prevent="mpCTHide(); scrollToTop();" v-else>hide rules</button>
                     <div class="vert gap-5">
                         <h1 class="font1 fz2">Classic Mode</h1>
                         <span class="font2 txt-center" v-if="!countingDown">Take turns playing big words!</span>
                         <span class="font2 txt-center" v-else>opponent: </span>
                     </div>
-                    <div class="vert gap2" v-show="!mpCTisHidden">
-                        <button class="btn-abs-r light-btn font2 fz1" @click.prevent="mpCTHide(); scrollToTop();">hide rules</button>
+                    <div class="vert gap2 extra-rules" v-show="!mpCTisHidden">
                         <div class="vert gap2">
                             <div class="vert">
                                 <p class="gap1 txt-center">
@@ -281,15 +281,15 @@
                         <button class="btn font2 light-btn" @click="mpCTHide(); classicTutToggle(); scrollToTop();" v-if="!mpCTisHidden">go back</button>
                     </div>
                 </section>
-                <section id="speed-mode" class="vert gap2" v-show="mpSpeedTut">
+                <section id="speed-mode" class="vert gap2 tut-card" v-show="mpSpeedTut">
                     <button class="btn-abs-l light-btn font2" @click.prevent="mpSpeedTut=false; mpSTisHidden=true;" v-show="!isWaiting">back</button>
-                    <button class="btn-abs-r light-btn font2" @click="mpSTHide" v-if="mpSTisHidden" v-show="!isWaiting">show<br>rules</button>
+                    <button class="btn-abs-r light-btn font2 mp-rules-toggle" @click="mpSTHide" v-if="mpSTisHidden" v-show="!isWaiting">show<br>rules</button>
+                    <button class="btn-abs-r light-btn font2 mp-rules-toggle" @click.prevent="mpSTHide(); scrollToTop();" v-else>hide rules</button>
                     <div class="vert gap-5">
                         <h1 class="font1 fz2">Speed Mode</h1>
                         <span class="font2 txt-center">Race to play your word first!</span>
                     </div>
-                    <div class="vert gap2" v-show="!mpSTisHidden">
-                        <button class="btn-abs-r light-btn font2 fz1" @click.prevent="mpSTHide(); scrollToTop();">hide rules</button>
+                    <div class="vert gap2 extra-rules" v-show="!mpSTisHidden">
                         <div class="vert gap2">
                             <div class="vert">
                                 <p class="gap1 txt-center">
@@ -348,22 +348,22 @@
                         <div class="vert gap-5">
                             <span>Letter Order:</span>
                             <div class="flex center gap1 letter-order">
-                                <button class="btn order-picker" :class="{ active: !isRandomOrder }" @click="randomOrder($event, false)" >A to Z</button>
-                                <button class="btn order-picker" :class="{ active: isRandomOrder }" @click="randomOrder($event, true)">Random</button>
+                                <button class="btn order-picker" :class="{ active: !isRandomOrder }" @click="randomOrder(false)" >A to Z</button>
+                                <button class="btn order-picker" :class="{ active: isRandomOrder }" @click="randomOrder(true)">Random</button>
                             </div>
                         </div>
                         <button class="btn font2 light-btn" @click="mpSTHide(); speedTutToggle(); scrollToTop();" v-if="!mpSTisHidden">go back</button>
                     </div>
                 </section>
-                <section id="battle-mode" class="vert gap2" v-show="mpBattleTut">
+                <section id="battle-mode" class="vert gap2 tut-card" v-show="mpBattleTut">
                     <button class="btn-abs-l light-btn font2" @click.prevent="mpBattleTut=false; mpWTisHidden=true;" v-show="!isWaiting">back</button>
-                    <button class="btn-abs-r light-btn font2" @click="mpWTHide" v-if="mpWTisHidden" v-show="!isWaiting">show<br>rules</button>
+                    <button class="btn-abs-r light-btn font2 mp-rules-toggle" @click="mpWTHide" v-if="mpWTisHidden" v-show="!isWaiting">show<br>rules</button>
+                    <button class="btn-abs-r light-btn font2 mp-rules-toggle" @click.prevent="mpWTHide(); scrollToTop();" v-else>hide rules</button>
                     <div class="vert gap-5">
                         <h1 class="font1 fz2">Battle Mode</h1>
                         <span class="font2 txt-center">Play the word with the most syllables!</span>
                     </div>
-                    <div class="vert gap2" v-show="!mpWTisHidden">
-                        <button class="btn-abs-r light-btn font2 fz1" @click.prevent="mpWTHide(); scrollToTop();">hide rules</button>
+                    <div class="vert gap2 extra-rules" v-show="!mpWTisHidden">
                         <div class="vert gap2">
                             <div class="vert">
                                 <p class="gap1 txt-center">
@@ -423,8 +423,8 @@
                         <div class="vert gap-5">
                             <span>Letter Order:</span>
                             <div class="flex center gap1 letter-order">
-                                <button class="btn order-picker" :class="{ active: !isRandomOrder }" @click="randomOrder($event, false)" >A to Z</button>
-                                <button class="btn order-picker" :class="{ active: isRandomOrder }" @click="randomOrder($event, true)">Random</button>
+                                <button class="btn order-picker" :class="{ active: !isRandomOrder }" @click="randomOrder(false)" >A to Z</button>
+                                <button class="btn order-picker" :class="{ active: isRandomOrder }" @click="randomOrder(true)">Random</button>
                             </div>
                         </div>
                         <button  class="btn font2 light-btn" @click="mpWTHide(); battleTutToggle(); scrollToTop();" v-if="!mpWTisHidden">go back</button>
@@ -466,14 +466,14 @@
             </section>
             <section id="core-game" class="meat" v-show="started">
                 <div class="txt-card">
-                    <div class="vert left">
-                        <span>score: 
-                            <span class="font1 fz2">{{ score }}</span>
-                        </span>
+                    <div class="vert left score-wrap">
+                        <div id="score">score:&nbsp;<span class="font1 fz2 score">{{ score }}</span></div>
                         <span class="font2 fz1" v-show="newHighScore">new high score!</span>
                     </div>
                     <span ref="wordMsg" id="word-msg">{{ wordMsg }}</span>
-                    <span>strikes: <span class="font1 fz2">{{ strikes }}</span></span>
+                    <div class="flex center strike-wrap">
+                        <div id="strikes">strikes:&nbsp;<span class="font1 fz2">{{ strikes }}</span></div>
+                    </div>
                 </div>
                 <div class="main">
                     <form id="form" class="form" spellcheck="false" autocapitalize="off" autocomplete="off" action="">
@@ -484,14 +484,10 @@
                 <div class="txt-card">
                     <div class="letter-meta gap1">
                         <div class="letter-wrap" title="Play a word starting with this letter!">
-                            <span class="font2">letter: &nbsp;</span>
-                            <span class="font1 fz2">{{ currentLetter }}</span>
+                            <div id="letter">letter:&nbsp;<span class="font1 fz2">{{ currentLetter }}</span></div>
                         </div>
                     </div>
-                    <div class="timer-wrap">
-                        <span class="font2 font">timer: </span>
-                        <span class="timer">{{ t }}</span>
-                    </div>
+                    <div class="timer-wrap">timer:&nbsp;<span class="timer">{{ t }}</span></div>
                 </div>
                 <div class="game-btn-wrap">
                     <button class="quit btn font2" @click.prevent="quit();" title="Quit the game">
@@ -528,7 +524,7 @@
                     </div>
                 </div>
             </section>
-            <footer id="credit" class="margin-v-2" v-show="!started && !lost && !tutorialOn && !isWaiting">
+            <footer id="credit" class="margin-v-2" v-show="!started && !lost && !tutorialOn && !isWaiting && !multiPlayer">
                 <a class="font2 btn credit" href="https://ondre.org" target="_blank" title="External link to creator's portfolio">created by ondre</a>
             </footer>
         </div>

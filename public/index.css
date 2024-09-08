@@ -86,17 +86,17 @@ input, .active, .btn, .btn-abs-l, .btn-abs-r, .card, .tut-card, .word-card, #app
   padding: 0;
 }
 
-.wl, .form, .game-btn-wrap, .timer-wrap, .txt-card, .inner-card-item span:has(span.fz-75), .inner-card-item span:not(span.fz175 + span, span.fz-75), .flex {
+.wl, .form, .game-btn-wrap, .timer-wrap, .txt-card, .inner-card-item span:has(span.fz-75), .inner-card-item span:not(span.fz175 + span, span.fz-75), header, .flex {
   display: flex;
   flex-direction: row;
 }
 
-.word-card-info, .word-card ul, .word-card-scroller, .word-card-wrap, .wl-wrap, .letter-meta, .meat, .main, .inner-card-item, .card p.left, .tut-card p.left, .word-card p.left, .card * :not(span, .letter-order, ul, li, p.left), .tut-card * :not(span, .letter-order, ul, li, p.left), .word-card * :not(span, .letter-order, ul, li, p.left), .card, .tut-card, .word-card, #app-wrap, #app, noscript, body, .vert {
+.word-card-info, .word-card ul, .word-card-scroller, .word-card-wrap, .wl-wrap, .user-form, .letter-meta, .meat, .main, .inner-card-item, .card p.left, .tut-card p.left, .word-card p.left, .card * :not(span, .letter-order, ul, li, p.left), .tut-card * :not(span, .letter-order, ul, li, p.left), .word-card * :not(span, .letter-order, ul, li, p.left), .card, .tut-card, .word-card, #app-wrap, #app, noscript, body, .vert {
   display: flex;
   flex-direction: column;
 }
 
-.word-card-info, .word-card, .timer-wrap, .letter-wrap, .txt-card, .meat, .main, .inner-card-item span:has(span.fz-75), .inner-card-item span:not(span.fz175 + span, span.fz-75), .tut-card, .card * :not(span, .letter-order, ul, li, p.left), .tut-card * :not(span, .letter-order, ul, li, p.left), .word-card * :not(span, .letter-order, ul, li, p.left), #app-wrap, noscript, .center {
+.word-card-info, .word-card, .user-form, .timer-wrap, .letter-wrap, .txt-card, .meat, .main, .inner-card-item span:has(span.fz-75), .inner-card-item span:not(span.fz175 + span, span.fz-75), .tut-card, .card * :not(span, .letter-order, ul, li, p.left), .tut-card * :not(span, .letter-order, ul, li, p.left), .word-card * :not(span, .letter-order, ul, li, p.left), header, #app-wrap, noscript, .center {
   justify-content: center;
   align-items: center;
   align-self: center;
@@ -209,7 +209,7 @@ body {
 }
 
 header {
-  margin: 0.5rem auto 1rem;
+  margin: 20px 0 40px;
 }
 header a {
   display: inline-block;
@@ -350,7 +350,7 @@ p.left {
 
 .timer-wrap {
   gap: 0.5rem;
-  min-width: 135px;
+  min-width: 140px;
   justify-content: space-between;
 }
 
@@ -369,6 +369,18 @@ p.left {
 
 .def-pop {
   align-self: flex-start;
+}
+
+.score-wrap, .strike-wrap {
+  min-width: 115px;
+  justify-content: space-between;
+}
+
+#strikes, #score, #letter, .timer-wrap {
+  overflow: hidden;
+}
+#strikes span, #score span, #letter span, .timer-wrap span {
+  display: inline-block;
 }
 
 .form {

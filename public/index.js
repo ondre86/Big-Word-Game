@@ -27,6 +27,7 @@ const app = Vue.createApp({
                 syllablesCustom: null,
             },
             wordCardOutlineColor: "#B79E01",
+            textColor: "#000000",
             foundClosest: false,
             closest: null, 
             alpha: "abcdefghijklmnopqrstuvwxyz".split(''),
@@ -34,7 +35,6 @@ const app = Vue.createApp({
             currentLetter: '',
             isRandomOrder: false,
             randomCounter: 0,
-            rounds: 1,
             score: 0,
             cookieScore: 0,
             cookieHighScore: 0,
@@ -94,6 +94,84 @@ const app = Vue.createApp({
             mpFinalScore: null,
             autoSent: false,
             opponentScore: 0
+        }
+    },
+    watch: {
+        wordCard: {
+            handler() {
+                inOut.fromTo(["#word-card"], {
+                    y:75,
+                    opacity: 0,
+                }, {
+                    y:0,
+                    opacity: 1,
+                    duration: .5,
+                    ease: "power1.inOut"
+                })
+            },
+            deep: true
+        },
+        strikes: {
+            handler() {
+                gsap.fromTo("#strikes span", {
+                    y:75,
+                }, {
+                    y:0,
+                    duration: .5,
+                    ease: "power1.inOut"
+                })
+            },
+            deep: true
+        },
+        score: {
+            handler() {
+                gsap.fromTo("#score span", {
+                    y:75,
+                }, {
+                    y:0,
+                    duration: .5,
+                    ease: "power1.inOut"
+                })
+            },
+            deep: true
+        },
+        currentLetter: {
+            handler() {
+                gsap.fromTo("#letter span", {
+                    y:75,
+                }, {
+                    y:0,
+                    duration: .5,
+                    ease: "power1.inOut"
+                })
+            },
+            deep: true
+        },
+        t: {
+            handler() {
+                if (this.t == 15){
+                    gsap.fromTo(".timer", {
+                        y:75,
+                    }, {
+                        y:0,
+                        duration: .5,
+                        ease: "power1.inOut"
+                    })
+                }
+                if (this.t < 6){
+                    gsap.to(".timer", {
+                        color: "red",
+                        duration: .5
+                    })
+                }
+                else {
+                    gsap.to(".timer", {
+                        color: this.textColor,
+                        duration: .5
+                    })
+                }
+            },
+            deep: true
         }
     },
     methods: {
@@ -184,7 +262,6 @@ const app = Vue.createApp({
                 case 'leader':
                     this.wantsToCreateParty = true
                     this.chosenMatchmakingMode = true
-                    console.log(this.wantsToCreateParty)
                     fetch('/', {
                         method: 'POST',
                         headers: {
@@ -216,7 +293,9 @@ const app = Vue.createApp({
         newGame() {
             this.tutorialOn = false
             this.started = true
-            if (this.isRandomOrder){}
+            if (this.isRandomOrder && !this.multiPlayer){
+                this.alphaX = Math.floor(Math.random() * 26)
+            }
             else{this.alphaX = 0}
             this.currentLetter = this.alpha[this.alphaX]
             this.resetTimer()
@@ -230,12 +309,10 @@ const app = Vue.createApp({
         shrinkHeader(){
             gsap.to(["#logo"], {
                 height: "0px",
-                margin: "0px",
-                padding: "0px",
                 duration: .5
             })
             gsap.to("header", {
-                margin: "0px auto",
+                margin: "0px",
                 height: "0px",
                 duration: .5
             }, "<")
@@ -246,8 +323,8 @@ const app = Vue.createApp({
                 duration: .5
             })
             gsap.to("header", {
-                margin: "0.5rem auto 1rem",
-                height: "67px",
+                margin: "20px 0 40px",
+                height: "60px",
                 duration: .5
             }, "<")
         },
@@ -756,11 +833,11 @@ const app = Vue.createApp({
             }
         },
         mpWordCardUpdate(word){
-            if (word && word.word){toRaw(this.wordCard).word = word.word}
-            if (word && word.type){toRaw(this.wordCard).type = word.type}
-            if (word && word.defs){toRaw(this.wordCard).defs = word.defs}
-            if (word && word.syllablesOther){toRaw(this.wordCard).syllablesOther = word.syllablesOther}
-            if (word && word.syllableCountCustom){toRaw(this.wordCard).syllablesCustom = word.syllablesCustom}
+            if (word && word.word){this.wordCard.word = word.word}
+            if (word && word.type){this.wordCard.type = word.type}
+            if (word && word.defs){this.wordCard.defs = word.defs}
+            if (word && word.syllablesOther){this.wordCard.syllablesOther = word.syllablesOther}
+            if (word && word.syllableCountCustom){this.wordCard.syllablesCustom = word.syllablesCustom}
         },
         replaceWordCard(event){
             this.finalWord = ''
@@ -944,7 +1021,6 @@ const app = Vue.createApp({
         nextLetter() {
             if (this.isRandomOrder){
                 if (this.randomCounter == 26){
-                    this.rounds++
                     this.randomCounter = 0
                     this.alphaX = Math.floor(Math.random() * 26)
                     this.currentLetter = this.alpha[this.alphaX]
@@ -959,7 +1035,6 @@ const app = Vue.createApp({
                 if (this.alphaX == 25){
                     this.alphaX = 0
                     this.currentLetter = this.alpha[this.alphaX]
-                    this.rounds++
                 }
                 else{
                     this.alphaX++
@@ -989,7 +1064,7 @@ const app = Vue.createApp({
                     this.vWordsScrolled.push(this.$refs.wl.children[this.$refs.wl.children.length-1].scrollWidth)
                     gsap.to(this.$refs.wl, {
                         scrollTo: {y: 0, x: this.$refs.wl.scrollWidth, autokill: true},
-                        duration: .5
+                        duration: 1
                     })
                 }
             }, 100)
@@ -1013,10 +1088,9 @@ const app = Vue.createApp({
         setUsername(event){
             if (event) {event.preventDefault()}
 
-            if (this.usernameInput == '' || !this.$refs.userInput.value){
-                this.usernameErrorMSG("Username cannot be blank.")
-            }
-            else {
+            // if never been here & never set a username before, don't send username input automatically - wait for input to send
+            if ((this.usernameInput == '' || this.$refs.userInput == '' || !this.$refs.userInput) && !localStorage.username){}
+            else{
                 this.mpUsername = this.usernameInput.replace(/[^a-zA-Z0-9]/g, '')
                 this.mpUserTimestamp = Date.now()
                 fetch('/', {
@@ -1041,6 +1115,9 @@ const app = Vue.createApp({
                         }   
                         if (rep.profane){
                             this.usernameErrorMSG("No profanity allowed.")
+                        }  
+                        if (rep.empty){
+                            this.usernameErrorMSG("Username cannot be blank.")
                         }  
                         else{
                             this.usernameErrorMSG("Username taken.")
@@ -1254,7 +1331,6 @@ const app = Vue.createApp({
                     // PER LETTER LOGIC
                     if (this.started){
                         if (rep.winner == true){
-                            this.mpWordCardUpdate(rep.winningWord)
                             if (rep.winningWord) { this.mpWordListUpdate() }
                             this.mpWordMsg()
                             if (this.classicModeOn && !rep.isYourTurn){
@@ -1401,6 +1477,9 @@ const app = Vue.createApp({
         gsap.registerPlugin(ScrollToPlugin)
         this.scrollToTop()
         $("#app")[0].style.display = "flex"
+        inOut = gsap.timeline()
+        this.$forceUpdate()
+
 
         // GRAB SCORES FROM LOCALSTORAGE
         if (!localStorage.lastScore || !localStorage.highScore){
@@ -1463,9 +1542,21 @@ const app = Vue.createApp({
         
         // DARK MODE
         this.wordCardOutlineColor = window.matchMedia('(prefers-color-scheme: dark)').matches ? "#8875FF" : "#B79E01"
+        this.textColor = window.matchMedia('(prefers-color-scheme: dark)').matches ? "#ffffff" : "#000000"
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
             this.wordCardOutlineColor = window.matchMedia('(prefers-color-scheme: dark)').matches ? "#8875FF" : "#fddc02"
+            this.textColor = window.matchMedia('(prefers-color-scheme: dark)').matches ? "#ffffff" : "#000000"
         })
+    },
+    beforeUpdate: function anim() {
+        if (document.activeElement.nodeName !== "INPUT" && !document.activeElement.classList.contains("mp-rules-toggle") && !document.activeElement.classList.contains("order-picker") && !document.activeElement.classList.contains("quit") && !this.countingDown){
+            inOut.set(".tut-card", {
+                y:50,
+                opacity: 0,
+                duration: .1,
+                ease: "power1.inOut"
+            })
+        }
     },
     updated: function log(){
         // CHANGE WORD LIST DISPLAY FOR SCROLLING FIX
@@ -1494,6 +1585,15 @@ const app = Vue.createApp({
         }
         else {
             $("#username-form")[0].addEventListener("submit", this.setUsername)
+        }
+
+        if (document.activeElement.nodeName !== "INPUT" && !document.activeElement.classList.contains("mp-rules-toggle") && !document.activeElement.classList.contains("order-picker") && !document.activeElement.classList.contains("quit") && !this.countingDown){
+            inOut.to(".tut-card", {
+                y:0,
+                opacity: 1,
+                duration: .1,
+                ease: "power1.inOut"
+            })
         }
     }
 }).mount('#app')

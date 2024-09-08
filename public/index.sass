@@ -270,7 +270,8 @@ h1, h2, h3, h4
 ///////////////////////////////////
 // LOGO //
 header
-    margin: .5rem auto 1rem
+    @extend %flex-h, %center
+    margin: 20px 0 40px
     a
         display: inline-block
         height: fit-content
@@ -419,7 +420,7 @@ p.left
 .timer-wrap
     @extend %flex-h, %center, %fitHeight
     gap: .5rem
-    min-width: 135px
+    min-width: 140px
     justify-content: space-between
 
 .timer
@@ -441,6 +442,15 @@ p.left
     align-self: flex-start
     @extend %fz-1
 
+.score-wrap, .strike-wrap
+    min-width: 115px
+    justify-content: space-between    
+
+#strikes, #score, #letter, .timer-wrap
+    overflow: hidden
+    span
+        display: inline-block
+
 ////////////////////
 // FORM INPUTS //
 
@@ -449,6 +459,8 @@ p.left
     position: relative
     margin: .5rem 0 0 0
 
+.user-form
+    @extend %flex-v, %center
 
 input
     @extend %font1, %transition, %fullWidth
