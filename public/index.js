@@ -317,15 +317,15 @@ const app = Vue.createApp({
             }, "<")
         },
         expandHeader(){
-            gsap.to("header", {
-                margin: "20px 0 40px",
-                height: "60px",
-                duration: .5
-            })
             gsap.to(["#logo"], {
                 height: "60px",
                 duration: .5
             })
+            gsap.to("header", {
+                margin: "20px 0 40px",
+                height: "60px",
+                duration: .5
+            }, "<")
         },
 
         // RESETS
