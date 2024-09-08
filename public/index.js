@@ -56,7 +56,7 @@ const app = Vue.createApp({
             order: 'default',
             classicModeOn: false,
 
-            hasUsername: false,
+            hasUsername: localStorage.username ? true : false,
             usernameInput: '',
             mpUsername: '',
             usernameError: null,
@@ -317,15 +317,15 @@ const app = Vue.createApp({
             }, "<")
         },
         expandHeader(){
-            gsap.to(["#logo"], {
-                height: "60px",
-                duration: .5
-            })
             gsap.to("header", {
                 margin: "20px 0 40px",
                 height: "60px",
                 duration: .5
-            }, "<")
+            })
+            gsap.to(["#logo"], {
+                height: "60px",
+                duration: .5
+            })
         },
 
         // RESETS
@@ -1491,15 +1491,13 @@ const app = Vue.createApp({
         // ADD EVENT LISTENERS
         window.addEventListener("beforeunload", (event) => {
             // REMOVE USERNAME IN SERVER
-            if (this.hasUsername){
-                if (this.webSocket){
-                    this.webSocket.close()
-                }
-                navigator.sendBeacon("/", JSON.stringify({
-                    username: this.mpUsername,
-                    partyLeaderUsername: this.partyLeaderUsername ? this.partyLeaderUsername : null,
-                    request: "leave"
-                }))
+            navigator.sendBeacon("/", JSON.stringify({
+                username: this.mpUsername,
+                partyLeaderUsername: this.partyLeaderUsername ? this.partyLeaderUsername : null,
+                request: "leave"
+            }))
+            if (this.webSocket){
+                this.webSocket.close()
             }
 
             // SET SCORE
