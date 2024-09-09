@@ -1217,7 +1217,9 @@ const app = Vue.createApp({
             this.isPartyLeader = false
             this.chosenMatchmakingMode = false
             this.partyMemberUsername = ' '
-            this.newBranch()
+            if (!this.lost){
+                this.newBranch()
+            }
         },
         leaveParty(){
             this.webSocket.send(JSON.stringify({
@@ -1229,7 +1231,9 @@ const app = Vue.createApp({
             this.joiningParty = false
             this.isWaiting = false
             this.chosenMatchmakingMode = false
-            this.newBranch()
+            if (!this.lost){
+                this.newBranch()
+            }
         },
     
         // MP WEBSOCKETS GAME LOGIC
