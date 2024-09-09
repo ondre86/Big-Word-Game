@@ -7,6 +7,7 @@ const app = Vue.createApp({
     data() {
         return {
             started: null,
+            wasQuit: false,
             paused: false,
             pausePress: false,
             pauseScroll: false,
@@ -32,9 +33,8 @@ const app = Vue.createApp({
             closest: null, 
             alpha: "abcdefghijklmnopqrstuvwxyz".split(''),
             alphaX: 0,
-            currentLetter: '',
+            currentLetter: 'a',
             isRandomOrder: false,
-            randomCounter: 0,
             score: 0,
             cookieScore: 0,
             cookieHighScore: 0,
@@ -44,7 +44,8 @@ const app = Vue.createApp({
             wordsList: new Set(),
             vWordsScrolled: [],
             vWordsOBJList: [],
-            customScore:tpScore = null,
+            customScore: null,
+            tpScore: null,
             input: null,       
             time: null,
             tries: 0,
@@ -292,11 +293,6 @@ const app = Vue.createApp({
         newGame() {
             this.tutorialOn = false
             this.started = true
-            if (this.isRandomOrder && !this.multiPlayer){
-                this.alphaX = Math.floor(Math.random() * 26)
-            }
-            else{this.alphaX = 0}
-            this.currentLetter = this.alpha[this.alphaX]
             this.resetTimer()
         },
         mpClassicNewGame(){
@@ -330,6 +326,7 @@ const app = Vue.createApp({
 
         // RESETS
         quit(){
+            this.wasQuit = true
             this.started = false
             this.tutorialOn = false
             this.backToHome()
@@ -346,16 +343,18 @@ const app = Vue.createApp({
             
             this.cookieScore = localStorage.lastScore ? localStorage.lastScore : 0
             this.cookieHighScore = localStorage.highScore || this.cookieHighScore !== '' ? localStorage.highScore : 0
-
-            this.resetStats()
         },
         resetStats(){
+            this.wasQuit = false
             this.paused = false
             this.lost = false
-            this.currentLetter = ''
+            if (this.isRandomOrder && !this.multiPlayer){
+                this.alphaX = Math.floor(Math.random() * 26)
+            }
+            else{this.alphaX = 0}
+            this.currentLetter = this.alpha[this.alphaX]
             this.finalWord = ''
             this.input = ''
-            this.randomCounter = 0
             this.wordsList.clear()
             this.vWordsScrolled = []
             this.vWordsOBJList = []
@@ -1018,27 +1017,17 @@ const app = Vue.createApp({
         },
         nextLetter() {
             if (this.isRandomOrder){
-                if (this.randomCounter == 26){
-                    this.randomCounter = 0
-                    this.alphaX = Math.floor(Math.random() * 26)
-                    this.currentLetter = this.alpha[this.alphaX]
-                }
-                else {
-                    this.randomCounter++
-                    this.alphaX = Math.floor(Math.random() * 26)
-                    this.currentLetter = this.alpha[this.alphaX]
-                }
+                this.alphaX = Math.floor(Math.random() * 26)
             }
             else{
                 if (this.alphaX == 25){
                     this.alphaX = 0
-                    this.currentLetter = this.alpha[this.alphaX]
                 }
                 else{
                     this.alphaX++
-                    this.currentLetter = this.alpha[this.alphaX]
                 }
             }
+            this.currentLetter = this.alpha[this.alphaX]
             this.tpScore, this.customScore = false
             this.wordPlayed = false
             this.$refs.input.focus()
@@ -1544,7 +1533,7 @@ const app = Vue.createApp({
         })
     },
     beforeUpdate: function anim() {
-        if ((document.activeElement.nodeName !== "INPUT" || this.lost || (this.hasUsername && !this.chosenMatchmakingMode && !this.joiningParty)) && !document.activeElement.classList.contains("mp-rules-toggle") && !document.activeElement.classList.contains("order-picker") && !document.activeElement.classList.contains("quit") && !this.countingDown){
+        if ((document.activeElement.nodeName !== "INPUT" || (this.hasUsername && !this.chosenMatchmakingMode)) && !document.activeElement.classList.contains("mp-rules-toggle") && !document.activeElement.classList.contains("order-picker") && !document.activeElement.classList.contains("quit") && !this.countingDown && !this.wasQuit){
             inOut.set(".tut-card", {
                 y:50,
                 opacity: 0,
@@ -1582,12 +1571,11 @@ const app = Vue.createApp({
             $("#username-form")[0].addEventListener("submit", this.setUsername)
         }
 
-        if ((document.activeElement.nodeName !== "INPUT" || this.lost || (this.hasUsername && !this.chosenMatchmakingMode && !this.joiningParty)) && !document.activeElement.classList.contains("mp-rules-toggle") && !document.activeElement.classList.contains("order-picker") && !document.activeElement.classList.contains("quit") && !this.countingDown){
+        if ((document.activeElement.nodeName !== "INPUT" || (this.hasUsername && !this.chosenMatchmakingMode)) && !document.activeElement.classList.contains("mp-rules-toggle") && !document.activeElement.classList.contains("order-picker") && !document.activeElement.classList.contains("quit") && !this.countingDown && !this.wasQuit){
             inOut.to(".tut-card", {
                 y:0,
                 opacity: 1,
                 duration: .05,
-                delay: .05,
                 ease: "power1.inOut"
             })
         }
