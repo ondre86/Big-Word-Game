@@ -100,20 +100,6 @@ const app = Vue.createApp({
         }
     },
     watch: {
-        wordCard: {
-            handler() {
-                inOut.fromTo(["#word-card"], {
-                    y:75,
-                    opacity: 0,
-                }, {
-                    y:0,
-                    opacity: 1,
-                    duration: .5,
-                    ease: "power1.inOut"
-                })
-            },
-            deep: true
-        },
         strikes: {
             handler() {
                 gsap.fromTo("#strikes span", {
@@ -861,6 +847,15 @@ const app = Vue.createApp({
                     this.vWordsOBJList.push(Object.values(toRaw(this.wordCard)))  
                 }
             }
+            inOut.fromTo(["#word-card"], {
+                y:75,
+                opacity: 0,
+            }, {
+                y:0,
+                opacity: 1,
+                duration: .5,
+                ease: "power1.inOut"
+            })
         },
         mpWordCardUpdate(word){
             if (word && word.word){this.wordCard.word = word.word}
@@ -1372,13 +1367,23 @@ const app = Vue.createApp({
                             }
                             this.$forceUpdate()
                             this.emphasizeInput(true)
-                            this.emphasizeWordCard()
                             this.scoreKeeper()
                             this.mpNextLetter(rep.letter, rep.letterIndex)
                             this.mpRefreshTimer()
                             this.scrollWordCardList()
                         }
                         else if (!rep.winner){
+                            if (!this.wordCard.defs){
+                                inOut.fromTo(["#word-card"], {
+                                    y:75,
+                                    opacity: 0,
+                                }, {
+                                    y:0,
+                                    opacity: 1,
+                                    duration: .5,
+                                    ease: "power1.inOut"
+                                })
+                            }
                             this.finalWord = ''
                             this.mpWordCardUpdate(rep.winningWord)
                             if (rep.winningWord) { this.mpWordListUpdate() }

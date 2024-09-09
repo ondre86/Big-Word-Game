@@ -167,8 +167,9 @@
                     <button class="btn-abs-l light-btn font2" @click.prevent=" twoPlayer(); scrollToTop(); newBranch();">back</button>
                     <div class="vert gap-5">
                         <h1 class="font1 fz2 txt-center">Play Online</h1>
-                        <div class="vert gap-5">
-                            <span class="font2 txt-center">username: {{ mpUsername }}</span>
+                        <div class="vert">
+                            <span class="font2 txt-center">username:</span>
+                            <span class="font1 txt-center">{{ mpUsername }}</span>
                             <button id="change-username" class="btn font2 fz1 light-btn small-btn" @click="hasUsername = false; changingUsername = true; newBranch();">change username</button>
                         </div>
                     </div>
@@ -186,9 +187,11 @@
                     <button class="btn-abs-l light-btn font2" @click.prevent="chosenMatchmakingMode = false; deleteParty(); scrollToTop();" v-show="wantsToCreateParty">end party</button>
                     <button class="btn-abs-l light-btn font2" @click.prevent="chosenMatchmakingMode = false; newBranch(); scrollToTop();" v-show="!wantsToCreateParty">back</button>
                     <div class="vert gap-5" v-show="wantsToCreateParty">
-                        <h1 class="font1 fz2">Party Leader</h1>
-                        <span class="font2 txt-center" v-show="partyMemberUsername !== ' '">In party: {{ partyMemberUsername }}</span>
-                        <span class="font2 txt-center" v-show="!partyMemberUsername || partyMemberUsername == ' '">Party empty</span>
+                        <h1 class="font1 fz2">Party Room</h1>
+                        <div class="vert center gap-5">
+                            <h2 class="font2 fz1-35 txt-center">In party:</h2>
+                            <h2 class="font1 fz175 txt-center" v-show="partyMemberUsername || partyMemberUsername !== ' '">{{ partyMemberUsername }}</h2>
+                        </div>
                     </div>
                     <div class="vert gap-5" v-show="!wantsToCreateParty">
                         <h1 class="font1 fz2">Choose Mode</h1>
@@ -438,7 +441,7 @@
                     <div class="vert center gap1" v-else-if="inParty">
                         <h1 class="font1 fz2">Party Room</h1>
                         <div class="vert center gap-5">
-                            <h2 class="font1 fz1-35">Leader:</h2>
+                            <h2 class="font2 fz1-35">Leader:</h2>
                             <h2 class="font1 fz175">{{ partyLeaderUsername }}</h2>
                         </div>
                     </div>
