@@ -186,7 +186,7 @@ const app = Vue.createApp({
             }
         },
         twoPlayer(){
-            if(this.multiPlayer){
+            if(this.multiPlayer && !this.lost){
                 this.multiPlayer = false
                 navigator.sendBeacon("/", JSON.stringify({
                     username: this.mpUsername,
@@ -195,6 +195,7 @@ const app = Vue.createApp({
                 }))
             }
             else {
+                this.resetStats()
                 if (localStorage.username){
                     this.usernameInput = localStorage.username
                     this.$refs.userInput.value = localStorage.username
