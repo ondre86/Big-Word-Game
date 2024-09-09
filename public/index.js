@@ -351,7 +351,7 @@ const app = Vue.createApp({
         },
         resetStats(){
             this.paused = false
-            this.lost = null
+            this.lost = false
             this.currentLetter = ''
             this.finalWord = ''
             this.input = ''
@@ -1571,7 +1571,7 @@ const app = Vue.createApp({
         else{
             setTimeout(() => {
                 this.expandHeader()
-            }, 250)
+            }, 500)
             this.cookieScore = localStorage.lastScore
             this.cookieHighScore = localStorage.highScore
         }
