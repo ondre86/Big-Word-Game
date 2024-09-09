@@ -73,6 +73,7 @@ const app = Vue.createApp({
             partyMemberUsername: ' ',
 
             changedBranch: false,
+            branchTimer: null,
             multiPlayer: false, 
             mpClassicTut: false,
             mpSpeedTut: false,
@@ -184,14 +185,17 @@ const app = Vue.createApp({
                 y: 50,
                 opacity: 0
             })
-            setTimeout(() => {
-                this.changedBranch = false
-                gsap.set(".tut-card", {
-                    y: 0,
-                    opacity: 1,
-                    duration: .35
-                })
-            }, 100)
+            if (!this.branchTimer){
+                this.branchTimer = setTimeout(() => {
+                    this.changedBranch = false
+                    gsap.set(".tut-card", {
+                        y: 0,
+                        opacity: 1,
+                        duration: .35
+                    })
+                    this.branchTimer = null
+                }, 100)
+            }
         },
         tutorialToggle(){
             if(this.tutorialOn){
@@ -258,10 +262,10 @@ const app = Vue.createApp({
             this.mpSpeedTut = false
             this.mpBattleTut = false
             this.multiPlayer = false
+            this.introOff = false
             this.chosenMatchmakingMode = false
             this.joiningParty = false
             this.lost = false
-            this.introOff = false
             this.scrollToTop()
         },
         mpBackToHome(otherScore, reason){
@@ -271,6 +275,7 @@ const app = Vue.createApp({
             this.mpBattleTut = false
             this.introOff = false
             this.chosenMatchmakingMode = false
+            this.joiningParty = false
             this.mode = ''
             this.opponentScore = otherScore
             this.mpLostReason = reason
@@ -1104,7 +1109,7 @@ const app = Vue.createApp({
             if (event) {event.preventDefault()}
 
             // if never been here & never set a username before, don't send username input automatically - wait for input to send
-            if ((this.usernameInput == '' || this.$refs.userInput == '' || !this.$refs.userInput) && !localStorage.username){
+            if ((this.usernameInput == '' || this.$refs.userInput.value == '' || !this.$refs.userInput) && !localStorage.username){
                 this.newBranch()
             }
             else{
@@ -1137,7 +1142,7 @@ const app = Vue.createApp({
                         if (rep.profane){
                             this.usernameErrorMSG("No profanity allowed.")
                         }  
-                        if (rep.empty){
+                        else if (rep.empty){
                             this.usernameErrorMSG("Username cannot be blank.")
                         }  
                         else{
@@ -1145,8 +1150,7 @@ const app = Vue.createApp({
                         }               
                     }
                     else {
-                        this.hasUsername = true
-                        this.multiPlayer = true
+                        this.hasUsername, this.multiPlayer = true
                         localStorage.setItem("username", this.mpUsername)
                         localStorage.setItem("usernameDate", this.mpUserTimestamp)
                         this.$refs.userInput.value = ''
@@ -1273,7 +1277,7 @@ const app = Vue.createApp({
                 // RECEIVE GAME EVENTS FROM SERVER
                 this.webSocket.addEventListener("message", (event) => {
                     rep = JSON.parse(event.data)
-                    
+
                     // WAITING FOR MATCH
                     if (rep.waiting){
                         this.isWaiting = true
@@ -1308,7 +1312,6 @@ const app = Vue.createApp({
 
                         this.opponentName = rep.opponent
                         this.countingDown = true
-                        this.newBranch()
                         this.mpCountdownToGameStart = setInterval(() => {
                             this.countdown--
                             if (this.countdown == 0){
@@ -1459,7 +1462,7 @@ const app = Vue.createApp({
             this.resetWaiting()
             this.resetPlaceholder()
             this.stopTimerAndGame()
-            if (!this.inParty || !this.isPartyLeader){this.webSocket.close()} 
+            this.terminateWS()
         },
         softCloseWS(){
             if (this.webSocket){
