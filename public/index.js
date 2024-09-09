@@ -280,6 +280,7 @@ const app = Vue.createApp({
             switch (type) {
                 case 'random':
                     this.chosenMatchmakingMode = true
+                    this.newBranch()
                     break
                 case 'leader':
                     fetch('/', {
@@ -299,6 +300,7 @@ const app = Vue.createApp({
                             this.wantsToCreateParty = true
                             this.chosenMatchmakingMode = true
                             this.startWebSocket()
+                            this.newBranch()
                         }
                         else {
                             this.usernameErrorMSG("Party could not be created.")
@@ -307,9 +309,9 @@ const app = Vue.createApp({
                     break
                 case 'member':
                     this.joiningParty = true
+                    this.newBranch()
                     break
             }
-            this.newBranch()
         },
 
         // STARTING A GAME
