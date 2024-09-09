@@ -1544,7 +1544,7 @@ const app = Vue.createApp({
         })
     },
     beforeUpdate: function anim() {
-        if (document.activeElement.nodeName !== "INPUT" && !document.activeElement.classList.contains("mp-rules-toggle") && !document.activeElement.classList.contains("order-picker") && !document.activeElement.classList.contains("quit") && !this.countingDown){
+        if ((document.activeElement.nodeName !== "INPUT" || this.lost || (this.hasUsername && !this.chosenMatchmakingMode && !this.joiningParty)) && !document.activeElement.classList.contains("mp-rules-toggle") && !document.activeElement.classList.contains("order-picker") && !document.activeElement.classList.contains("quit") && !this.countingDown){
             inOut.set(".tut-card", {
                 y:50,
                 opacity: 0,
@@ -1582,7 +1582,7 @@ const app = Vue.createApp({
             $("#username-form")[0].addEventListener("submit", this.setUsername)
         }
 
-        if (document.activeElement.nodeName !== "INPUT" && !document.activeElement.classList.contains("mp-rules-toggle") && !document.activeElement.classList.contains("order-picker") && !document.activeElement.classList.contains("quit") && !this.countingDown){
+        if ((document.activeElement.nodeName !== "INPUT" || this.lost || (this.hasUsername && !this.chosenMatchmakingMode && !this.joiningParty)) && !document.activeElement.classList.contains("mp-rules-toggle") && !document.activeElement.classList.contains("order-picker") && !document.activeElement.classList.contains("quit") && !this.countingDown){
             inOut.to(".tut-card", {
                 y:0,
                 opacity: 1,
