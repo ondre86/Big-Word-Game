@@ -1587,6 +1587,7 @@ const app = Vue.createApp({
                 y:0,
                 opacity: 1,
                 duration: .05,
+                delay: .05,
                 ease: "power1.inOut"
             })
         }
