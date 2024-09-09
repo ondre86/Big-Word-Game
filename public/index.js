@@ -327,6 +327,9 @@ const app = Vue.createApp({
         // RESETS
         quit(){
             this.wasQuit = true
+            setTimeout(() => {
+                this.wasQuit = false
+            }, 500)
             this.started = false
             this.tutorialOn = false
             this.backToHome()
