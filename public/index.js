@@ -72,6 +72,7 @@ const app = Vue.createApp({
             isPartyLeader: false,
             partyMemberUsername: ' ',
 
+            changedBranch: false,
             multiPlayer: false, 
             mpClassicTut: false,
             mpSpeedTut: false,
@@ -177,6 +178,21 @@ const app = Vue.createApp({
     },
     methods: {
         // PATH BRANCHING & TUTORIALS
+        newBranch(){
+            this.changedBranch = true
+            gsap.set(".tut-card", {
+                y: 50,
+                opacity: 0
+            })
+            setTimeout(() => {
+                this.changedBranch = false
+                gsap.set(".tut-card", {
+                    y: 0,
+                    opacity: 1,
+                    duration: .35
+                })
+            }, 100)
+        },
         tutorialToggle(){
             if(this.tutorialOn){
                 this.tutorialOn = false
@@ -184,8 +200,12 @@ const app = Vue.createApp({
             else{
                 this.tutorialOn = true
             }
+            this.newBranch()
         },
         twoPlayer(){
+            if(this.introOff){this.introOff = false}
+            else {this.introOff = true}
+
             if(this.multiPlayer && !this.lost){
                 this.multiPlayer = false
                 navigator.sendBeacon("/", JSON.stringify({
@@ -193,6 +213,7 @@ const app = Vue.createApp({
                     partyLeaderUsername: this.partyLeaderUsername ? this.partyLeaderUsername : null,
                     request: "leave"
                 }))
+                this.newBranch()
             }
             else {
                 this.resetStats()
@@ -203,9 +224,6 @@ const app = Vue.createApp({
                 }
                 this.setUsername()
             }
-
-            if(this.introOff){this.introOff = false}
-            else {this.introOff = true}
         },
         mpCTHide(){
             if (!this.mpCTisHidden){this.mpCTisHidden = true}
@@ -222,14 +240,17 @@ const app = Vue.createApp({
         classicTutToggle(){
             if (!this.mpClassicTut){this.mpClassicTut = true}
             else{this.mpClassicTut = false}
+            this.newBranch()
         },
         speedTutToggle(){
             if (!this.mpSpeedTut){this.mpSpeedTut = true}
             else{this.mpSpeedTut = false}
+            this.newBranch()
         },
         battleTutToggle(){
             if (!this.mpBattleTut){this.mpBattleTut = true}
             else{this.mpBattleTut = false}
+            this.newBranch()
         },
         backToHome(){
             this.mpClassicTut = false
@@ -288,6 +309,7 @@ const app = Vue.createApp({
                     this.joiningParty = true
                     break
             }
+            this.newBranch()
         },
 
         // STARTING A GAME
@@ -1080,7 +1102,9 @@ const app = Vue.createApp({
             if (event) {event.preventDefault()}
 
             // if never been here & never set a username before, don't send username input automatically - wait for input to send
-            if ((this.usernameInput == '' || this.$refs.userInput == '' || !this.$refs.userInput) && !localStorage.username){}
+            if ((this.usernameInput == '' || this.$refs.userInput == '' || !this.$refs.userInput) && !localStorage.username){
+                this.newBranch()
+            }
             else{
                 this.mpUsername = this.usernameInput.replace(/[^a-zA-Z0-9]/g, '')
                 this.mpUserTimestamp = Date.now()
@@ -1101,9 +1125,13 @@ const app = Vue.createApp({
                 .then((rep) => {
                     if (!rep.registered){
                         this.hasUsername = false
+                        if (localStorage.username){
+                            this.newBranch()
+                        }
                         if (!this.changingUsername){
                             this.mpUsername = ''
-                        }   
+                        }
+                        else {this.mpUsername = localStorage.username}
                         if (rep.profane){
                             this.usernameErrorMSG("No profanity allowed.")
                         }  
@@ -1111,7 +1139,7 @@ const app = Vue.createApp({
                             this.usernameErrorMSG("Username cannot be blank.")
                         }  
                         else{
-                            this.usernameErrorMSG("Username taken.")
+                            this.usernameErrorMSG("Username unavailable.")
                         }               
                     }
                     else {
@@ -1121,6 +1149,7 @@ const app = Vue.createApp({
                         localStorage.setItem("usernameDate", this.mpUserTimestamp)
                         this.$refs.userInput.value = ''
                         this.usernameInput = ''
+                        this.newBranch()
                     }
                 })
             }
@@ -1174,6 +1203,7 @@ const app = Vue.createApp({
                     else {
                         this.inParty = true
                         this.startWebSocket()
+                        this.newBranch()
                     }
                 })
             }
@@ -1187,6 +1217,7 @@ const app = Vue.createApp({
             this.isPartyLeader = false
             this.chosenMatchmakingMode = false
             this.partyMemberUsername = ' '
+            this.newBranch()
         },
         leaveParty(){
             this.webSocket.send(JSON.stringify({
@@ -1198,6 +1229,7 @@ const app = Vue.createApp({
             this.joiningParty = false
             this.isWaiting = false
             this.chosenMatchmakingMode = false
+            this.newBranch()
         },
     
         // MP WEBSOCKETS GAME LOGIC
@@ -1239,6 +1271,7 @@ const app = Vue.createApp({
                     // WAITING FOR MATCH
                     if (rep.waiting){
                         this.isWaiting = true
+                        this.newBranch()
                         if (this.inParty){
                             this.waitingDots = setInterval(() => {
                                 $("#waiting-text")[0].textContent += "."
@@ -1269,6 +1302,7 @@ const app = Vue.createApp({
 
                         this.opponentName = rep.opponent
                         this.countingDown = true
+                        this.newBranch()
                         this.mpCountdownToGameStart = setInterval(() => {
                             this.countdown--
                             if (this.countdown == 0){
@@ -1438,7 +1472,7 @@ const app = Vue.createApp({
                     this.mpSpeedTut = false
                     this.mpBattleTut = true
                 }
-
+                this.newBranch()
                 this.terminateWS()
             }
         },
@@ -1536,16 +1570,6 @@ const app = Vue.createApp({
             this.textColor = window.matchMedia('(prefers-color-scheme: dark)').matches ? "#ffffff" : "#000000"
         })
     },
-    beforeUpdate: function anim() {
-        if ((document.activeElement.nodeName !== "INPUT" || (this.hasUsername && !this.chosenMatchmakingMode)) && !document.activeElement.classList.contains("mp-rules-toggle") && !document.activeElement.classList.contains("order-picker") && !document.activeElement.classList.contains("quit") && !this.countingDown && !this.wasQuit){
-            inOut.set(".tut-card", {
-                y:50,
-                opacity: 0,
-                duration: .05,
-                ease: "power1.inOut"
-            })
-        }
-    },
     updated: function log(){
         // CHANGE WORD LIST DISPLAY FOR SCROLLING FIX
         if (this.$refs.wl.children.length >= 3){
@@ -1573,15 +1597,6 @@ const app = Vue.createApp({
         }
         else {
             $("#username-form")[0].addEventListener("submit", this.setUsername)
-        }
-
-        if ((document.activeElement.nodeName !== "INPUT" || (this.hasUsername && !this.chosenMatchmakingMode)) && !document.activeElement.classList.contains("mp-rules-toggle") && !document.activeElement.classList.contains("order-picker") && !document.activeElement.classList.contains("quit") && !this.countingDown && !this.wasQuit){
-            inOut.to(".tut-card", {
-                y:0,
-                opacity: 1,
-                duration: .05,
-                ease: "power1.inOut"
-            })
         }
     }
 }).mount('#app')
