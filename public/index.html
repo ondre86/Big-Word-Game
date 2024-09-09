@@ -66,7 +66,7 @@
                     </div>
                 </div>
                 <div class="vert gap1 full-width" v-if="!inParty">
-                    <button class="btn" @click="twoPlayer(); resetStats(); scrollToTop();">Play Online</button>
+                    <button class="btn" @click="twoPlayer(); scrollToTop();">Play Online</button>
                     <button class="btn" @click.prevent="startTimer(); backToHome();">Play Solo</button>
                     <div class="vert gap-5">
                         <span>Letter Order:</span>
@@ -149,11 +149,9 @@
                 </div>
             </section>
             <section id="username-section" class="vert gap2 tut-card" v-show="!started && introOff && !tutorialOn && !lost && !isWaiting && (!hasUsername || joiningParty) && !inParty && !(isPartyLeader && countingDown)">
-                <div>
-                    <button class="btn-abs-l light-btn font2" @click.prevent="twoPlayer(); scrollToTop();" v-if="!joiningParty && !changingUsername">back</button>
-                    <button class="btn-abs-l light-btn font2" @click.prevent="hasUsername = true; changingUsername = false; scrollToTop();" v-else-if="!joiningParty && changingUsername">cancel</button>
-                    <button class="btn-abs-l light-btn font2" @click.prevent="joiningParty = false; scrollToTop();" v-else>back</button>
-                </div>
+                <button class="btn-abs-l light-btn font2" @click.prevent="twoPlayer(); scrollToTop(); newBranch();" v-if="!joiningParty && !changingUsername">back</button>
+                <button class="btn-abs-l light-btn font2" @click.prevent="hasUsername = true; changingUsername = false; scrollToTop(); newBranch();" v-else-if="!joiningParty && changingUsername">cancel</button>
+                <button class="btn-abs-l light-btn font2" @click.prevent="joiningParty = false; scrollToTop(); newBranch();" v-else>back</button>
                 <div class="vert gap1">
                     <h1 class="font1 fz2 txt-center" v-if="!joiningParty">Choose Your Username</h1>
                     <h1 class="font1 fz2 txt-center" v-else>Join Party by Username</h1>
@@ -166,12 +164,12 @@
             </section>
             <section id="multiplayer-path" v-show="!started && !tutorialOn && !lost && multiPlayer && !isWaiting && !inParty && !(isPartyLeader && countingDown)">
                 <section id="party-or-random" class="vert gap2 tut-card" v-show="hasUsername && !chosenMatchmakingMode && !joiningParty">
-                    <button class="btn-abs-l light-btn font2" @click.prevent=" twoPlayer(); scrollToTop();">back</button>
+                    <button class="btn-abs-l light-btn font2" @click.prevent=" twoPlayer(); scrollToTop(); newBranch();">back</button>
                     <div class="vert gap-5">
                         <h1 class="font1 fz2 txt-center">Play Online</h1>
                         <div class="vert gap-5">
                             <span class="font2 txt-center">username: {{ mpUsername }}</span>
-                            <button id="change-username" class="btn font2 fz1 light-btn small-btn" @click="hasUsername = false; changingUsername = true">change username</button>
+                            <button id="change-username" class="btn font2 fz1 light-btn small-btn" @click="hasUsername = false; changingUsername = true; newBranch();">change username</button>
                         </div>
                     </div>
                     <div class="vert gap1 full-width">
@@ -186,7 +184,7 @@
                 </section>
                 <section id="choose-game-mode" class="vert gap2 tut-card" v-show="hasUsername && chosenMatchmakingMode && !joiningParty && !mpClassicTut && !mpSpeedTut && !mpBattleTut">
                     <button class="btn-abs-l light-btn font2" @click.prevent="chosenMatchmakingMode = false; deleteParty(); scrollToTop();" v-show="wantsToCreateParty">end party</button>
-                    <button class="btn-abs-l light-btn font2" @click.prevent="chosenMatchmakingMode = false; scrollToTop();" v-show="!wantsToCreateParty">back</button>
+                    <button class="btn-abs-l light-btn font2" @click.prevent="chosenMatchmakingMode = false; newBranch(); scrollToTop();" v-show="!wantsToCreateParty">back</button>
                     <div class="vert gap-5" v-show="wantsToCreateParty">
                         <h1 class="font1 fz2">Party Leader</h1>
                         <span class="font2 txt-center" v-show="partyMemberUsername !== ' '">In party: {{ partyMemberUsername }}</span>
@@ -203,7 +201,7 @@
                     </div>
                 </section>
                 <section id="classic-mode" class="vert gap2 tut-card" v-show="mpClassicTut">
-                    <button class="btn-abs-l light-btn font2" @click.prevent="mpClassicTut=false; mpCTisHidden=true;" v-show="!isWaiting">back</button>
+                    <button class="btn-abs-l light-btn font2" @click.prevent="mpClassicTut=false; mpCTisHidden=true; newBranch();" v-show="!isWaiting">back</button>
                     <button class="btn-abs-r light-btn font2 mp-rules-toggle" @click="mpCTHide" v-if="mpCTisHidden" v-show="!isWaiting">rules</button>
                     <button class="btn-abs-r light-btn font2 mp-rules-toggle" @click.prevent="mpCTHide(); scrollToTop();" v-else>hide rules</button>
                     <div class="vert gap-5">
@@ -282,7 +280,7 @@
                     </div>
                 </section>
                 <section id="speed-mode" class="vert gap2 tut-card" v-show="mpSpeedTut">
-                    <button class="btn-abs-l light-btn font2" @click.prevent="mpSpeedTut=false; mpSTisHidden=true;" v-show="!isWaiting">back</button>
+                    <button class="btn-abs-l light-btn font2" @click.prevent="mpSpeedTut=false; mpSTisHidden=true; newBranch();" v-show="!isWaiting">back</button>
                     <button class="btn-abs-r light-btn font2 mp-rules-toggle" @click="mpSTHide" v-if="mpSTisHidden" v-show="!isWaiting">rules</button>
                     <button class="btn-abs-r light-btn font2 mp-rules-toggle" @click.prevent="mpSTHide(); scrollToTop();" v-else>hide rules</button>
                     <div class="vert gap-5">
@@ -356,7 +354,7 @@
                     </div>
                 </section>
                 <section id="battle-mode" class="vert gap2 tut-card" v-show="mpBattleTut">
-                    <button class="btn-abs-l light-btn font2" @click.prevent="mpBattleTut=false; mpWTisHidden=true;" v-show="!isWaiting">back</button>
+                    <button class="btn-abs-l light-btn font2" @click.prevent="mpBattleTut=false; mpWTisHidden=true; newBranch();" v-show="!isWaiting">back</button>
                     <button class="btn-abs-r light-btn font2 mp-rules-toggle" @click="mpWTHide" v-if="mpWTisHidden" v-show="!isWaiting">rules</button>
                     <button class="btn-abs-r light-btn font2 mp-rules-toggle" @click.prevent="mpWTHide(); scrollToTop();" v-else>hide rules</button>
                     <div class="vert gap-5">
