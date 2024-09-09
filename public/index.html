@@ -179,7 +179,7 @@
                     <div class="vert gap1 full-width">
                         <h2 class="font1 txt-center">Play with Friends</h2>
                         <button class="btn" @click.prevent="chooseMatchmakingMode('member'); scrollToTop();">Join Party</button>
-                        <button class="btn" @click.prevent="chooseMatchmakingMode('leader'); scrollToTop();">Create Party</button>
+                        <button class="btn" @click.prevent="chooseMatchmakingMode('leader');">Create Party</button>
                     </div>
                 </section>
                 <section id="choose-game-mode" class="vert gap2 tut-card" v-show="hasUsername && chosenMatchmakingMode && !joiningParty && !mpClassicTut && !mpSpeedTut && !mpBattleTut">
