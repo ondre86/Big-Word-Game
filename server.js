@@ -5,8 +5,8 @@ const helmet = require('helmet')
 const syl = require('syllabificate')
 const profanity = require('@2toad/profanity')
 const pf = new profanity.Profanity({wholeWord: false})
-const letterArray = "abcdefghijklmnopqrstuvwxyz".split("")
-const port = 8383
+const LETTER_ARRAY = "abcdefghijklmnopqrstuvwxyz".split("")
+const PORT = 8383
 
 // EXPRESS SERVER
 app.use(helmet({
@@ -28,7 +28,6 @@ app.disable('x-powered-by')
 app.use(express.static('public')).use(express.json()).use(express.text())
 
 app.post('/', async (req, res)=>{
-    // FAIL
     if (!req.body){ 
         return res.status(400).send({ status: 'failed' }) 
     }
@@ -36,11 +35,9 @@ app.post('/', async (req, res)=>{
         directPostMessages(req, res)
     }
 })
-
 app.get("/", (req, res) => {
     res.status(200).send()
 })
-
 app.ws('/', function(ws, req) {
     ws.on('message', function (msg) {
         if (lobbies.length == 0){
@@ -54,18 +51,15 @@ app.ws('/', function(ws, req) {
         removeSocket(ws)  
     })
 })
-
 app.use((req, res, next) => {
     res.status(404).sendFile('404.html', {root: 'public'})
 })
-  
 app.use((err, req, res, next) => {
     res.status(500).send('Something broke!')
 })
+app.listen(PORT)
 
-app.listen(port)
-
-// DICTIONARY API
+// DICTIONARY API CALL
 let dictionaryData
 async function dictionaryCall(input){
     try{
@@ -161,22 +155,22 @@ class GameRoom {
         if (this.details.order == "default"){
             if (this.clIndex == 25){
                 this.clIndex = 0
-                this.currentLetter = letterArray[this.clIndex]
+                this.currentLetter = LETTER_ARRAY[this.clIndex]
             }
             else {
                 this.clIndex++
-                this.currentLetter = letterArray[this.clIndex]
+                this.currentLetter = LETTER_ARRAY[this.clIndex]
             }
         }
         else {
             this.clIndex = Math.floor(Math.random() * 26)
-            this.currentLetter = letterArray[this.clIndex]
+            this.currentLetter = LETTER_ARRAY[this.clIndex]
         }
     }
     startGame() {
         if (this.details.order != "default"){
             this.clIndex = Math.floor(Math.random() * 26)
-            this.currentLetter = letterArray[this.clIndex]
+            this.currentLetter = LETTER_ARRAY[this.clIndex]
         }
         if (this.details.mode == "Classic"){
             this.player1Turn = true
@@ -241,8 +235,7 @@ class PlayedWord {
     }
 }
 
-// FUNCTIONS
-// handling messages
+// DIRECT CLIENT MESSAGES - ONLINE WORLD, MATCHMAKING, PARTIES, REMOVALS
 function removeSocket(ws){
     for (s in sockets){
         if (sockets[s].socket == ws){
@@ -290,7 +283,7 @@ function removeLobby(ws) {
 }
 function removePairs(username) {
     for (let pair in parties) {
-        // LEADER ENDS THE PARTY
+        // LEADER ENDS THE PARTY - PARTY IS DISSOLVED FOR ALL
         if (parties[pair] && parties[pair][0] && parties[pair][0] == username){
             for (s in sockets){
                 if (sockets[s].username == parties[pair][1]){
@@ -304,7 +297,7 @@ function removePairs(username) {
             sockets = sockets.filter(socket => socket.username !== username)
             parties.splice(pair, 1)
         }
-        // MEMBER LEAVES THE PARTY
+        // MEMBER LEAVES THE PARTY - LEADER CAN STILL ACCEPT MEMBERS WITHOUT CREATING NEW PARTY
         if (parties[pair] && parties[pair][1] && parties[pair][1] == username){
             for (s in sockets){
                 if (sockets[s].username == parties[pair][0]){
@@ -342,7 +335,6 @@ async function directPostMessages(req, res) {
     directPartyMessages(req, res)
 
     async function directDictionaryMessages(req, res) {
-        // DICTIONARY CALL
         if (req.body.input){
             await dictionaryCall(req.body.input)
             res.status(200).send({ 
@@ -352,7 +344,6 @@ async function directPostMessages(req, res) {
         }
     }
     function directOnlineWorldMessages(req, res) {
-        // JOIN ONLINE WORLD
         if (req.body.request == "join"){
             if (req.body.username == ''){
                 res.status(200).send({ 
@@ -388,8 +379,7 @@ async function directPostMessages(req, res) {
                 })
             }
         }
-        // LEAVING ONLINE
-        if (typeof req.body === "string" ){
+        if (typeof req.body === "string"){
             if (JSON.parse(req.body).request == "leave"){
                 for (player in registeredOnlinePlayers){
                     if ((JSON.parse(req.body).username == registeredOnlinePlayers[player].username)){
@@ -409,7 +399,6 @@ async function directPostMessages(req, res) {
 
     }
     function directPartyMessages(req, res) {
-        // CREATE A PARTY
         if (req.body.partyRequest == "create"){
             if (!partyLeaders.has(req.body.username)){
                 partyLeaders.add(req.body.username)
@@ -423,7 +412,6 @@ async function directPostMessages(req, res) {
                 })
             }
         }
-        // JOIN A PARTY
         if (req.body.partyRequest == "join"){            
             if (!checkIsInactiveParty(req, res) && !checkIsOwnName(req, res) && !checkIsPartyFull(req, res)){
                 parties.push([req.body.partyLeaderUsername, req.body.username])
@@ -573,9 +561,8 @@ function receiveSocketAndPlaceInLobby(ws, msg) {
     }  
     function makeMatch(client, msg){
         let createdGame
-        // MATCHMAKING
         for (x of sockets){
-            // RANDOM - create Game Room and start game instantly once match is made
+            // RANDOM MATCH - create Game Room and start game instantly once match is found
             if ((x.details.mode == client.details.mode && x.details.order == client.details.order) 
                 && (x.uuid != client.uuid && x.socket != client.socket) 
                 && !((x.isPartyLeader && client.inParty) && (x.username === client.partyLeader)))
@@ -584,7 +571,7 @@ function receiveSocketAndPlaceInLobby(ws, msg) {
                 createdGame.startGame()
                 return true
             }
-            // PARTY - create Game Room and start game once member has joined leader
+            // PARTY MATCH - create Game Room and start game once leader initiates
             if ((x.isPartyLeader && client.inParty) && (x.username === client.partyLeader)){
                 x.details = {
                     mode: msg.mode,
@@ -613,11 +600,9 @@ function receiveSocketAndPlaceInLobby(ws, msg) {
             return lobby
         }
     }
-
-    
 }
 
-// game logic
+// GAME LOGIC
 function assignWSMessageToLobbyPlayer(ws, msg) {
     if (ws == lobbies[l].player1.socket && !JSON.parse(msg).mode){
         lobbies[l].turns++
