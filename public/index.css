@@ -1,50 +1,136 @@
 @font-face {
   font-family: "freckle";
-  src: url("/fonts/FreckleFace-Regular.woff2");
+  src: url("./fonts/FreckleFace-Regular.woff2");
   font-weight: 600;
   font-style: normal;
 }
 @font-face {
   font-family: "nanum";
-  src: url("/fonts/NanumPen.woff2");
+  src: url("./fonts/NanumPen.woff2");
   font-weight: 600;
   font-style: normal;
 }
-input, .timer, .btn, .font1 {
+input, .timer, .btn, .btn-abs-l, .btn-abs-r, .font1 {
   font-family: "freckle";
 }
 
-.card, .txt-card, .font2 {
+*, .font2 {
   font-family: "nanum";
 }
 
-input, .timer, .font1 {
+.timer, .letter-wrap, .txt-card, .card, .tut-card, .word-card, .fz25 {
   font-size: 2.5rem;
 }
 
-.card, .letter-wrap, .txt-card, .btn, .font2 {
+.fz225 {
+  font-size: 2.25rem;
+}
+
+#text, #user-text, .fz2 {
+  font-size: 2rem;
+}
+
+.fz175 {
+  font-size: 1.75rem;
+}
+
+#user-text, .fz15 {
   font-size: 1.5rem;
 }
 
-.card, .btn {
-  padding: 0.5rem 1rem;
+*, .fz135 {
+  font-size: 1.35rem;
+}
+
+.def-pop, #word-msg, .btn-abs-r, .btn-abs-l, .fz1 {
+  font-size: 1rem;
+}
+
+input, .active, .btn, .btn-abs-l, .btn-abs-r, .card, .tut-card, .word-card, #app-wrap, #app, body {
+  -webkit-transition: all 0.3s ease-in-out;
+  -moz-transition: all 0.3s ease-in-out;
+  -o-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
+}
+
+.word-card ul, .gap-5 {
+  gap: 0.5rem;
+}
+
+.word-card-info, .wl, .form, .letter-wrap, .gap1 {
+  gap: 1rem;
+}
+
+.tut-card, .gap2 {
+  gap: 2rem;
+}
+
+#app-wrap, #app {
+  height: auto;
+}
+
+.timer-wrap, .btn, .btn-abs-l, .btn-abs-r {
+  height: fit-content;
+}
+
+.word-card, .word-card-scroller, .word-card-wrap, .wl-wrap, input, .game-btn-wrap, .txt-card, .inner-card, .card * :not(.btn-abs-l, .btn-abs-r, #cancel-ws, #change-username, #user-post, #user-text, .order-picker, span, .word-card div h3), .tut-card * :not(.btn-abs-l, .btn-abs-r, #cancel-ws, #change-username, #user-post, #user-text, .order-picker, span, .word-card div h3), .word-card * :not(.btn-abs-l, .btn-abs-r, #cancel-ws, #change-username, #user-post, #user-text, .order-picker, span, .word-card div h3), .full-width {
+  width: 100%;
+}
+
+.form, .fit-width {
+  width: fit-content;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+.wl, .form, .game-btn-wrap, .timer-wrap, .txt-card, .inner-card-item span:has(span.fz-75), .inner-card-item span:not(span.fz175 + span, span.fz-75), header, .flex {
+  display: flex;
+  flex-direction: row;
+}
+
+.word-card-info, .word-card ul, .word-card-scroller, .word-card-wrap, .wl-wrap, .user-form, .letter-meta, .meat, .main, .inner-card-item, .card p.left, .tut-card p.left, .word-card p.left, .card * :not(span, .letter-order, ul, li, p.left), .tut-card * :not(span, .letter-order, ul, li, p.left), .word-card * :not(span, .letter-order, ul, li, p.left), .card, .tut-card, .word-card, #app-wrap, #app, noscript, body, .vert {
+  display: flex;
+  flex-direction: column;
+}
+
+.word-card-info, .word-card, .user-form, .timer-wrap, .letter-wrap, .txt-card, .meat, .main, .inner-card-item span:has(span.fz-75), .inner-card-item span:not(span.fz175 + span, span.fz-75), .tut-card, .card * :not(span, .letter-order, ul, li, p.left), .tut-card * :not(span, .letter-order, ul, li, p.left), .word-card * :not(span, .letter-order, ul, li, p.left), header, #app-wrap, noscript, .center {
+  justify-content: center;
+  align-items: center;
+  align-self: center;
+}
+
+.card p.left, .tut-card p.left, .word-card p.left, .left {
+  justify-content: flex-start;
+  align-items: flex-start;
+  align-self: flex-start;
+  text-align: left;
+}
+
+.word-card-scroller, #app-wrap, #app, .top-center {
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.btn, .btn-abs-l, .btn-abs-r {
   background-color: #fddc02;
 }
 
-.btn:focus, a:focus {
-  outline: 9px solid #B79E01;
-  color: black;
+.light-btn, .card, .tut-card, .word-card {
+  background-color: #FEEB72;
 }
 
-.btn:active {
-  background-color: #8875FF;
-}
-
-.btn:hover {
+.active, #post:focus, #user-post:focus, .btn:focus, .btn-abs-l:focus, .btn-abs-r:focus, #post:hover, #user-post:hover, .active:hover, .btn:hover, .btn-abs-l:hover, .btn-abs-r:hover {
   background-color: #dec20f;
 }
 
-.example, .card, #text-input, .btn {
+#post:active, #user-post:active, .active:active, .btn:active, .btn-abs-l:active, .btn-abs-r:active {
+  background-color: #B79E01;
+}
+
+#post, #user-post, #text, #user-text, .btn, .btn-abs-l, .btn-abs-r, .inner-card, .card, .tut-card, .word-card {
   border: 3px solid black;
   border-top-left-radius: 17px 100px;
   border-top-right-radius: 13px 90px;
@@ -53,29 +139,40 @@ input, .timer, .font1 {
   outline-offset: 0px;
 }
 
-.wl, .letter-wrap, .form, .txt-card, .timer-wrap, .gap2, .gap1, .flex {
-  display: flex;
+.word-card-scroller:focus, #post:focus, #user-post:focus, .btn:focus, .btn-abs-l:focus, .btn-abs-r:focus {
+  outline: 4.5px solid #B79E01;
 }
 
-.word-card-wrap, .tut-card, .card, .wl-wrap, .letter-meta, .main, .vert, .logo-holster, .meat, .app-wrap, #app, noscript, body {
-  display: flex;
-  flex-direction: column;
+#post:active, #user-post:active, .active:active, .btn:active, .btn-abs-l:active, .btn-abs-r:active {
+  outline: 0px solid #B79E01;
 }
 
-.txt-card, .timer-wrap, .main, .vert, .center, .logo-holster, .meat, .app-wrap {
-  justify-content: center;
-  align-items: center;
+#post, #user-post, .active, .btn, .btn-abs-l, .btn-abs-r {
+  cursor: pointer;
+}
+.fz-75 {
+  font-size: 0.75rem;
 }
 
-.lost-card, .letter-wrap, .form, .gap1 {
-  gap: 1rem;
+.underline {
+  text-decoration: underline;
 }
 
-.tut-card, .main, .gap2 {
-  gap: 2rem;
+.txt-center {
+  text-align: center;
+}
+
+.margin-v-1 {
+  margin: 1rem 0;
+}
+
+.margin-v-2 {
+  margin: 2rem 0;
 }
 
 * {
+  color: black;
+  text-decoration: none;
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
@@ -84,208 +181,241 @@ input, .timer, .font1 {
 }
 
 html, body {
-  margin: 0;
-  padding: 0;
-  background-color: #f5f5f5;
-}
-
-html {
-  height: 100%;
-  min-height: 100%;
-  overflow-y: scroll;
-}
-
-body {
   position: relative;
   box-sizing: border-box;
   height: 100%;
-  max-height: 100%;
-  overflow-x: hidden;
+  background-color: #f5f5f5;
   overflow-y: scroll;
-  transition: all 0.5s;
+  overflow-x: hidden;
 }
 
-a {
-  text-decoration: none;
-  color: black;
+html {
+  min-height: 100%;
 }
 
-h1, h2, h3, h4 {
-  margin: 0;
-  padding: 0;
-}
-
-#logo:focus {
-  outline: none;
-}
-#logo:active {
-  outline: 0px;
+body {
+  max-height: 100%;
 }
 
 #app {
-  opacity: 0;
-  justify-content: flex-start;
-  align-items: center;
-  height: auto;
-  transition: all 0.5s;
+  display: none;
 }
 
-.app-wrap {
+#app-wrap {
   max-width: 500px;
   min-width: 300px;
-  height: auto;
-  min-height: 90%;
-  justify-content: flex-start;
+  min-height: 95%;
   padding: 0.5rem 0 2rem;
-  transition: all 0.5s;
 }
 
-.meat {
-  gap: 2rem;
+header {
+  margin: 20px 0 40px;
+}
+header a {
+  display: inline-block;
+  height: fit-content;
 }
 
-.logo-holster {
-  height: 90px;
-  width: 100vw;
-  margin: 0 0 2rem;
+#logo {
+  background-image: url("/img/logo(day).webp");
+  background-position: left top;
+  background-repeat: no-repeat;
+  background-size: 90px 60px;
+  height: 60px;
+  width: 90px;
 }
 
-.logo {
-  width: 120px;
-  height: 80px;
-  padding-top: 10px;
+.card, .tut-card, .word-card {
+  min-width: 270px;
+  max-width: 340px;
+}
+.card br, .tut-card br, .word-card br {
+  display: block;
+}
+.tut-card {
+  padding: 1.5rem 1rem;
+  position: relative;
+}
+
+.rule-card {
+  padding: 1.5rem;
+}
+
+.inner-card {
+  text-align: center;
+}
+
+.inner-card-item {
+  padding: 1rem 0;
   margin: 0;
 }
-
-.btn {
-  color: black;
-  text-decoration: none;
-  -webkit-transition: all 0.3s ease-in-out;
-  -moz-transition: all 0.3s ease-in-out;
-  -o-transition: all 0.3s ease-in-out;
-  transition: all 0.3s ease-in-out;
+.inner-card-item span:not(span.fz175 + span, span.fz-75) {
+  max-width: 85%;
 }
-.btn:hover {
-  cursor: pointer;
-}
-.btn:active {
-  outline: 0px solid #000;
-  background-color: #B79E01;
+.inner-card-item:nth-of-type(2n) {
+  border-top: 3px solid black;
+  border-bottom: 3px solid black;
 }
 
-.pause:hover, .quit:hover {
-  background-color: #dec20f;
-}
-.pause:active, .quit:active {
-  background-color: #B79E01;
+.inner-card-item:last-of-type {
+  border-bottom: 0px solid black;
 }
 
-.quit {
-  height: fit-content;
+p.left {
+  align-items: left;
+}
+
+.btn, .btn-abs-l, .btn-abs-r {
+  padding: 0.5rem 1rem;
+}
+
+.pause {
+  min-width: 120px;
+}
+
+.btn-abs-l, .btn-abs.r, .order-picker, .credit {
+  font-family: "nanum";
+}
+
+.btn-abs-l {
+  position: absolute;
+  top: -1.5rem;
+  left: -0.5rem;
+}
+
+.btn-abs-r {
+  position: absolute;
+  top: -1.5rem;
+  right: -0.5rem;
+}
+
+.small-btn {
+  padding: 0.25rem 0.5rem;
+}
+
+.order-picker {
+  padding: 0.25rem 0.5rem;
+  font-size: 1.15rem;
+}
+
+.credit {
+  margin: 1rem 0 0 0;
 }
 
 .active {
-  background-color: #dec20f;
   outline: 4.5px solid #B79E01;
 }
-.active:hover {
-  background-color: #dec20f;
-}
-.active:active {
-  background-color: #B79E01;
+
+.letter-order {
+  margin: 0 0 1rem 0;
 }
 
-.btn-highlight {
-  outline: 9px solid #B79E01;
-  transition: all 0.3s ease-in-out;
+@media (pointer: coarse) {
+  .btn:hover {
+    background-color: #fddc02;
+  }
+  .btn:focus {
+    outline: 4.5px solid #B79E01;
+  }
+  .active:hover {
+    background-color: #dec20f;
+  }
+  .active:focus {
+    background-color: #dec20f;
+  }
+  .pause:hover:not(.active) {
+    background-color: #fddc02;
+  }
+  .pause:focus:not(.active) {
+    background-color: #fddc02;
+  }
 }
-
-.btn-highlight2 {
-  outline: 0px solid #B79E01;
-  transition: all 0.3s ease-in-out;
-}
-
-.waitingMsg {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-}
-
-#credit {
-  background-color: #fddc02;
-}
-#credit:hover {
-  background-color: #dec20f;
-}
-
-.intro {
-  justify-self: center;
-  margin: 2rem 0;
-}
-.intro .btn {
-  font-size: 3rem;
-}
-
-.timer-wrap {
-  height: fit-content;
-  gap: 0.5rem;
-  min-width: 105px;
-  justify-content: space-between;
+.meat, .main {
+  gap: 0.75rem;
 }
 
 .txt-card {
   justify-content: space-between;
-  width: 100%;
-}
-
-.bottom-txt {
+  align-items: flex-start;
   position: relative;
-  align-items: initial;
 }
 
-.form {
-  width: fit-content;
-}
-
-input {
-  width: 100%;
-  padding: 1rem;
-  transition: all 0.3s;
-}
-input:focus {
-  outline: 9px solid #fddc02;
-  color: black;
-}
-input::placeholder {
-  font-size: 3rem;
-}
-input::-moz-placeholder {
-  font-size: 3rem;
-}
-input:-ms-input-placeholder {
-  font-size: 3rem;
-}
-input:-ms-input-placeholder {
-  font-size: 3rem;
-}
-
-#text-input {
-  padding-right: 1rem;
+.letter-meta {
+  justify-content: flex-start;
 }
 
 .letter-wrap {
   justify-content: flex-end;
 }
+.letter-wrap span {
+  width: fit-content;
+  display: inline-block;
+}
 
-.tvc {
+.timer-wrap {
+  gap: 0.5rem;
+  min-width: 140px;
+  justify-content: space-between;
+}
+
+.game-btn-wrap {
+  justify-content: space-between;
+}
+
+#word-msg {
   align-self: center;
+}
+
+#waiting-text {
+  display: inline-block;
   text-align: center;
+}
+
+.def-pop {
+  align-self: flex-start;
+}
+
+.score-wrap, .strike-wrap {
+  min-width: 115px;
+  justify-content: space-between;
+}
+
+#strikes, #score, #letter, .timer-wrap {
+  overflow: hidden;
+}
+#strikes span, #score span, #letter span, .timer-wrap span {
+  display: inline-block;
+}
+
+.form {
+  position: relative;
+  margin: 0.5rem 0 0 0;
+}
+
+input {
+  padding: 1rem;
+}
+
+#text, #user-text {
+  padding-right: 1rem;
+  letter-spacing: 0.05rem;
+}
+#text:focus, #user-text:focus {
+  outline: 7px solid #B79E01;
+}
+
+#user-text {
+  width: 80%;
+  padding: 0.5rem 1rem;
+}
+
+#post, #user-post {
+  width: fit-content;
+  height: initial;
 }
 
 .wl-wrap {
   margin: 2rem 0 0;
-  width: 100%;
   max-width: 100%;
   position: relative;
 }
@@ -311,67 +441,20 @@ input:-ms-input-placeholder {
   background-color: rgba(0, 0, 0, 0);
   z-index: 100;
 }
+.wl-wrap span {
+  text-align: center;
+}
 
 .wl {
-  padding: 1rem 1.25rem;
-  list-style-type: none;
-  gap: 1rem;
+  padding: 0.5rem 1.25rem 1rem;
   position: relative;
   justify-content: center;
+  list-style-type: none;
   overflow-x: scroll;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.wl::-webkit-scrollbar {
-  display: none;
-}
-
-.middle-example {
-  border-top: 3px solid black;
-  border-bottom: 3px solid black;
-}
-
-.top-example {
-  border-bottom: 3px solid black;
-}
-
-.card {
-  max-width: 320px;
-  background-color: #FEEB72;
-  transition: all 0.3s;
-}
-
-li.tvc.card {
-  padding: 1.5rem;
-}
-
-.back {
-  position: absolute;
-  top: -1.5rem;
-  left: -0.5rem;
-}
-
-.back2 {
-  position: absolute;
-  top: -1.5rem;
-  right: -0.5rem;
-}
-
-.example {
-  width: 100%;
-  padding: 1rem 0;
-}
-
-.tut-card {
-  padding: 2rem;
-  position: relative;
-}
-.tut-card .btn {
-  transition: all 0.3s;
 }
 
 .word-card-wrap {
-  margin: 0.5rem 0 0 0;
+  margin: 1rem 0 0 0;
   position: relative;
   height: 40vh;
   min-width: 300px;
@@ -382,7 +465,7 @@ li.tvc.card {
   top: 0;
   left: 0;
   width: 100%;
-  height: 8%;
+  height: 1.5rem;
   background-image: linear-gradient(0deg, rgba(0, 0, 0, 0), #f5f5f5);
   background-color: rgba(0, 0, 0, 0);
   z-index: 100;
@@ -393,7 +476,7 @@ li.tvc.card {
   bottom: -2px;
   left: 0;
   width: 100%;
-  height: 8%;
+  height: 1.5rem;
   background-image: linear-gradient(0deg, #f5f5f5, rgba(0, 0, 0, 0));
   background-color: rgba(0, 0, 0, 0);
   z-index: 100;
@@ -403,90 +486,78 @@ li.tvc.card {
   padding: 10% 3%;
   overflow-y: scroll;
   overflow-x: hidden;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  min-width: 100%;
 }
-.word-card-scroller::-webkit-scrollbar {
-  display: none;
-}
-
 .word-card {
-  padding: 1rem 1rem 1.5rem 1rem;
-  transition: all 0.5s;
+  padding: 1rem 0;
+  max-width: 340px;
+}
+.word-card ul {
+  max-width: 75%;
+  text-align: left;
+  list-style: disc outside;
+}
+.word-card ul li {
+  display: list-item;
+}
+.word-card div {
+  max-width: 85%;
+}
+.word-card div h3 {
+  text-align: center;
 }
 
-.lost-card {
-  padding: 1rem 1rem 1.5rem 1rem;
+.word-card-info ul {
+  padding-left: 10%;
+}
+.word-card-info span {
+  max-width: 75%;
+  text-align: center;
 }
 
-@media (pointer: coarse) {
-  .btn:hover {
-    background-color: #fddc02;
-  }
-  .btn:focus {
-    outline: 4.5px solid #B79E01;
-  }
-  .active:hover {
-    background-color: #dec20f;
-  }
-  .active:focus {
-    background-color: #dec20f;
-  }
-  .pause:hover:not(.active) {
-    background-color: #fddc02;
-  }
-  .pause:focus:not(.active) {
-    background-color: #fddc02;
-  }
-}
 @media (max-width: 535px) {
-  .app-wrap {
+  #app-wrap {
     max-width: 90%;
+  }
+  .card, .tut-card {
+    min-width: 270px;
+    max-width: 270px;
   }
 }
 @media (prefers-color-scheme: dark) {
-  a:focus, .btn:focus {
-    outline: 9px solid #8875FF;
+  #logo {
+    background-image: url("/img/logo(night).webp");
+  }
+  .btn:focus, .btn-abs-l:focus, .btn-abs-r:focus, #post:focus, #user-post:focus {
+    outline: 4.5px solid #8875FF;
   }
   html, body {
     background-color: #212121;
+  }
+  * {
     color: white;
   }
-  a {
-    color: white;
-  }
-  .btn, .card {
+  .btn, .btn-abs-l, .btn-abs-r, #post, #user-post {
     background-color: #5318a0;
     color: white;
     border-color: white;
   }
-  .btn:focus, .card:focus {
+  .btn:focus, .btn-abs-l:focus, .btn-abs-r:focus, #post:focus, #user-post:focus {
     color: white;
     background-color: #2e0e57;
   }
-  .btn:active, .card:active {
+  .btn:active, .btn-abs-l:active, .btn-abs-r:active, #post:active, #user-post:active {
     color: white;
     background-color: #2e0e57;
   }
-  .btn:hover, .card:hover {
+  .btn:hover, .btn-abs-l:hover, .btn-abs-r:hover, #post:hover, #user-post:hover {
     color: white;
     background-color: #2e0e57;
   }
-  .example {
-    border-color: white;
+  .light-btn {
+    background-color: #321473;
   }
-  .card {
-    background-color: #2e0e57;
-  }
-  .btn-highlight {
-    outline: 9px solid #8875FF;
-    transition: all 0.3s ease-in-out;
-  }
-  .btn-highlight2 {
-    outline: 0px solid #8875FF;
-    transition: all 0.3s ease-in-out;
-  }
-  .pause:hover, .quit:hover {
+  .pause:hover, .quit:hover, #post:hover, #user-post:hover {
     background-color: #2e0e57;
   }
   .active {
@@ -496,14 +567,42 @@ li.tvc.card {
   .active:hover {
     background-color: #2e0e57;
   }
-  #credit {
+}
+@media (prefers-color-scheme: dark) and (pointer: coarse) {
+  .btn:hover, #post:hover, #user-post:hover {
     background-color: #5318a0;
   }
-  #credit:hover {
+  .btn:focus, #post:focus, #user-post:focus {
+    outline: 4.5px solid #8875FF;
+  }
+  .active:hover {
     background-color: #2e0e57;
   }
-  #credit:focus {
+  .active:focus {
     background-color: #2e0e57;
+  }
+  .pause:hover:not(.active) {
+    background-color: #5318a0;
+  }
+  .pause:focus:not(.active) {
+    background-color: #5318a0;
+  }
+}
+@media (prefers-color-scheme: dark) {
+  .card, .tut-card, .word-card {
+    background-color: #2e0e57;
+    color: white;
+    border-color: white;
+  }
+  .inner-card, .inner-card-item, .inner-card-item:nth-of-type(2n) {
+    border-color: white;
+  }
+  .middle-example {
+    border-top: 3px solid white;
+    border-bottom: 3px solid white;
+  }
+  .top-example {
+    border-bottom: 3px solid white;
   }
   input {
     background-color: #2c2c2c;
@@ -512,11 +611,18 @@ li.tvc.card {
     caret-color: white;
   }
   input:focus {
-    outline: 9px solid #8875FF;
+    outline: 4.5px solid #8875FF;
     color: white;
   }
-  #text-input {
+  #text, #user-text, #post, #user-post {
     border-color: white;
+  }
+  #text:focus, #user-text:focus {
+    outline: 7px solid #8875FF;
+    color: white;
+  }
+  #post, #user-post {
+    background-color: #5318a0;
   }
   .wl-wrap::before {
     background-image: linear-gradient(270deg, rgba(0, 0, 0, 0), #212121);
@@ -530,31 +636,7 @@ li.tvc.card {
   .word-card-wrap::after {
     background-image: linear-gradient(0deg, #212121, rgba(0, 0, 0, 0));
   }
-  .middle-example {
-    border-top: 3px solid white;
-    border-bottom: 3px solid white;
-  }
-  .top-example {
-    border-bottom: 3px solid white;
-  }
-}
-@media (prefers-color-scheme: dark) and (pointer: coarse) {
-  .btn:hover {
-    background-color: #5318a0;
-  }
-  .btn:focus {
-    outline: 4.5px solid #8875FF;
-  }
-  .active:hover {
-    background-color: #2e0e57;
-  }
-  .active:focus {
-    background-color: #2e0e57;
-  }
-  .pause:hover:not(.active) {
-    background-color: #5318a0;
-  }
-  .pause:focus:not(.active) {
-    background-color: #5318a0;
+  li::marker {
+    color: white;
   }
 }/*# sourceMappingURL=index.css.map */

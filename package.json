@@ -13,6 +13,7 @@
   "author": "Ondre Johnson",
   "license": "ISC",
   "dependencies": {
+    "@2toad/profanity": "^2.4.2",
     "express": "^4.19.2",
     "express-ws": "^5.0.2",
     "helmet": "^7.1.0",
