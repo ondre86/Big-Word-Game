@@ -4,25 +4,6 @@ The Big Word Game is a single page web application that users can connect to and
 
 It's based on a game that my mother, _an English teacher with over 20 years of experience_, would play with my siblings and I on long road trips. 
 
-**Why did I create and design this app?**
-- To strengthen my coding, design, and user interaction skills
-- It was personal and engaging for me to actualize one of my childhood games
-- I felt a need to provide more engaging ***educational*** experiences catered to all ages
-  
-  - It's a fun way for children to test and expand their vocabulary
-  - It's also a fun way for older people to retain their mental acuity
-
-**Challenges I faced during development**
-- Choosing a JS framework that made the most sense for the project
-- Leaning new skills and incorporating new technologies
-  
-  - Sass, Vue.JS, Node.JS, Express, WebSockets, HTTP Headers + Security, 3rd party JS Libraries, Using REST APIs, Asynchronous JavaScript, Railway, Git + GitHub, NPM
-- Understanding full-stack development (how front-ends & back-ends communicate)
-- Understanding deployments and environment variables
-- Constant user interface revisions during solo and focus group testing
-- Bug finding and fixing (locally & in production)
-- Compression and file-size management
-
 ## Tech Stack
 - HTML
 - [Sass](https://sass-lang.com/) (CSS)
@@ -37,6 +18,24 @@ It's based on a game that my mother, _an English teacher with over 20 years of e
  - [GitHub](https://github.com) (Version Control & Repository)
  - [Railway](https://railway.app) (Deployments from GitHub)
  - [Umami](https://umami.is) (Website Analytics)
+
+**Why did I create and design this app?**
+- To strengthen my coding, design, and user interaction skills
+- It was personal and engaging for me to actualize one of my childhood games
+- I felt compelled to provide an engaging ***educational*** experience catered to all ages
+  
+  - It's a fun way for children to test and expand their vocabulary
+  - And it's a fun way for older people to retain their mental acuity
+
+**What challenges did I face?**
+- Choosing a JS framework that made the most sense for the project
+- Leaning new skills and incorporating new technologies
+  
+  - Sass, Vue.JS, Node.JS, Express.JS, WebSockets, HTTP Headers + Security, 3rd party JS Libraries, Using REST APIs, Asynchronous JavaScript, Railway, Git + GitHub, NPM
+- Understanding full-stack development & how front-ends & back-ends communicate
+- Creating deployments and environment variables
+- Constant user interface revisions during solo and focus group testing
+- Work-life balance :)
 
 - - -
 © 2024 Ondre Johnson. All Rights Reserved.
