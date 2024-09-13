@@ -1303,13 +1303,13 @@ const app = Vue.createApp({
                             this.classicModeOn = true
                         }
                         this.determineMode(rep.mode)
-                        clearInterval(this.waitingDots)
 
                         this.opponentName = rep.opponent
                         this.countingDown = true
                         this.mpCountdownToGameStart = setInterval(() => {
                             this.countdown--
                             if (this.countdown == 0){
+                                this.resetWaiting()
                                 clearInterval(this.mpCountdownToGameStart)
                                 this.countdown = 5
                                 this.countingDown = false
