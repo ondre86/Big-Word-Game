@@ -357,9 +357,10 @@ const app = Vue.createApp({
             if (this.score > this.cookieHighScore){
                 this.newHighScore = true
                 this.cookieScore = this.score
-                localStorage.setItem("highScore", `${this.score}`)
+                localStorage.highScore = this.score
             }
             
+            localStorage.lastScore = this.score
             this.cookieScore = localStorage.lastScore ? localStorage.lastScore : 0
             this.cookieHighScore = localStorage.highScore || this.cookieHighScore !== '' ? localStorage.highScore : 0
         },
@@ -699,10 +700,10 @@ const app = Vue.createApp({
                 this.wordCard.word = null
                 this.wordCard.type = null
                 this.wordCard.defs = null
-                localStorage.setItem("lastScore", `${this.score}`)
+                localStorage.lastScore = this.score
                 if (this.score > this.cookieHighScore){
                     this.newHighScore = true
-                    localStorage.setItem("highScore", `${this.score}`)
+                    localStorage.highScore = this.score
                 }
                 else{
                     this.newHighScore = false
@@ -1001,7 +1002,7 @@ const app = Vue.createApp({
                 }
                 this.score += this.wordCard.syllablesOther
                 this.cookieScore = this.score
-                localStorage.setItem("lastScore", `${this.score}`)
+                localStorage.lastScore = this.score
             }
             else if (this.wordPlayed && this.customScore){
                 if (!this.classicModeOn){
@@ -1009,20 +1010,20 @@ const app = Vue.createApp({
                 }
                 this.score += this.wordCard.syllablesCustom
                 this.cookieScore = this.score
-                localStorage.setItem("lastScore", `${this.score}`)
+                localStorage.lastScore = this.score
                 
             }
             if (this.score > this.cookieHighScore){
                 this.newHighScore = true
                 this.cookieScore = this.score
-                localStorage.setItem("highScore", `${this.score}`)
+                localStorage.highScore = this.score
             }
         },
-        mpScoreFinal(s){
-            localStorage.setItem("lastScore", `${s}`)
-            if (s > this.cookieHighScore){
+        mpScoreFinal(score){
+            localStorage.lastScore = score
+            if (score > this.cookieHighScore){
                 this.newHighScore = true
-                localStorage.setItem("highScore", `${s}`)
+                localStorage.highScore = score
             }
         },
 
@@ -1108,7 +1109,7 @@ const app = Vue.createApp({
                 this.newBranch()
             }
             else{
-                this.mpUsername = this.usernameInput.replace(/[^a-zA-Z0-9]/g, '')
+                this.mpUsername = this.usernameInput.toLowerCase().replace(/[^a-zA-Z0-9]/g, '')
                 this.mpUserTimestamp = Date.now()
                 fetch('/', {
                     method: 'POST',
@@ -1147,8 +1148,8 @@ const app = Vue.createApp({
                     else {
                         this.hasUsername = true
                         this.multiPlayer = true
-                        localStorage.setItem("username", this.mpUsername)
-                        localStorage.setItem("usernameDate", this.mpUserTimestamp)
+                        localStorage.username = this.mpUsername
+                        localStorage.usernameDate = this.mpUserTimestamp
                         this.$refs.userInput.value = ''
                         this.usernameInput = ''
                         this.newBranch()
@@ -1177,7 +1178,7 @@ const app = Vue.createApp({
                 this.usernameErrorMSG("Username cannot be blank.")
             }
             else {
-                this.partyLeaderUsername = this.usernameInput.replace(/[^a-zA-Z0-9]/g, '')
+                this.partyLeaderUsername = this.usernameInput.toLowerCase().replace(/[^a-zA-Z0-9]/g, '')
                 fetch('/', {
                     method: 'POST',
                     headers: {
@@ -1260,14 +1261,12 @@ const app = Vue.createApp({
                             isPartyLeader: this.isPartyLeader,
                         }))
                     }
-                    else {
-                        if (this.mode != ''){
-                            this.webSocket.send(JSON.stringify({
-                                mode: this.mode,
-                                order: this.order,
-                                username: this.mpUsername
-                            }))
-                        }
+                    if (this.mode != ''){
+                        this.webSocket.send(JSON.stringify({
+                            mode: this.mode,
+                            order: this.order,
+                            username: this.mpUsername
+                        }))
                     }
                 })
                 // RECEIVE GAME EVENTS FROM SERVER
@@ -1507,6 +1506,7 @@ const app = Vue.createApp({
             if(this.webSocket){
                 this.webSocket.close()
                 this.webSocket = null
+                this.mode = ''
             }
         },
 
@@ -1522,8 +1522,8 @@ const app = Vue.createApp({
 
         // GRAB SCORES FROM LOCALSTORAGE
         if (!localStorage.lastScore || !localStorage.highScore){
-            localStorage.setItem("lastScore", "0")
-            localStorage.setItem("highScore", "0")
+            localStorage.lastScore = 0
+            localStorage.highScore = 0
         }
         else{
             this.cookieScore = localStorage.lastScore ? localStorage.lastScore : 0
@@ -1543,10 +1543,10 @@ const app = Vue.createApp({
             }
 
             // SET SCORE
-            localStorage.setItem("lastScore", `${this.score}`)
+            localStorage.lastScore = this.score
             if (this.score > this.cookieHighScore){
                 this.newHighScore = true
-                localStorage.setItem("highScore", `${this.score}`)
+                localStorage.highScore = this.score
             }
 
             return undefined
@@ -1602,8 +1602,8 @@ const app = Vue.createApp({
         }
         else{
             this.expandHeader()
-            this.cookieScore = localStorage.lastScore
-            this.cookieHighScore = localStorage.highScore
+            this.cookieScore = localStorage.lastScore ? localStorage.lastScore : 0
+            this.cookieHighScore = localStorage.highScore ? localStorage.highScore : 0
         }
 
         // MULTIPLAYER USERNAME FORM
