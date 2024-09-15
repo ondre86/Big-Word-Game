@@ -16,10 +16,10 @@ Players can play until they get 3 strikes, or the round ends.
 - Teachers playing on their big classroom screen, oscillating between student participation and the teachers introducing new words to the children
 - Parents playing alongside their children at home, either as a leisure or homeschooling activity, doing the same as above
 #### Having Fun
-- Children playing in school, with solo games during quiet time and multiplayer games during fun time
+- Children playing together in school, with solo games during quiet time and multiplayer games during fun time
 - Teens and adults playing against each other online for easy, low-stakes competition, and a change of pace from social media apps
 #### Staying Fresh
-- Adults and seniors playing often as a way to keep their brains active vocabularies sharp
+- Adults and seniors playing often as a way to keep their brains active and their vocabularies sharp
 
 ## Tech Stack
 - HTML
