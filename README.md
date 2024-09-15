@@ -4,6 +4,23 @@ The Big Word Game is a single page web application that users can connect to and
 
 It's based on a game that my mother, _an English teacher with over 20 years of experience_, would play with my siblings and I on long road trips. 
 
+Players have 15 seconds to enter a word that starts with the target letter shown on their screen **and** that word must contain **three** or more syllables.
+There are a few other minor rules that keep the game clean and competitive, as well.
+
+After a successful word is played, the the word is added to your "used" list, and its definition is shown on screen.
+
+Players can play until they get 3 strikes, or the round ends.
+
+## Use Cases
+#### Learning New Words 
+- Teachers playing on their big classroom screen, oscillating between student participation and the teachers introducing new words to the children
+- Parents playing alongside their children at home, either as a leisure or homeschooling activity, doing the same as above
+#### Having Fun
+- Children playing in school, with solo games during quiet time and multiplayer games during fun time
+- Teens and adults playing against each other online for easy, low-stakes competition, and a change of pace from social media apps
+#### Staying Fresh
+- Adults and seniors playing often as a way to keep their brains active vocabularies sharp
+
 ## Tech Stack
 - HTML
 - [Sass](https://sass-lang.com/) (CSS)
@@ -18,24 +35,6 @@ It's based on a game that my mother, _an English teacher with over 20 years of e
  - [GitHub](https://github.com) (Version Control & Repository)
  - [Railway](https://railway.app) (Deployments from GitHub)
  - [Umami](https://umami.is) (Website Analytics)
-
-**Why did I create and design this app?**
-- To strengthen my coding, design, and user interaction skills
-- It was personal and engaging for me to actualize one of my childhood games
-- I felt compelled to provide an engaging ***educational*** experience catered to all ages
-  
-  - It's a fun way for children to test and expand their vocabulary
-  - And it's a fun way for older people to retain their mental acuity
-
-**What challenges did I face?**
-- Choosing a JS framework that made the most sense for the project
-- Leaning new skills and incorporating new technologies
-  
-  - Sass, Vue.JS, Node.JS, Express.JS, WebSockets, HTTP Headers + Security, 3rd party JS Libraries, Using REST APIs, Asynchronous JavaScript, Railway, Git + GitHub, NPM
-- Understanding full-stack development & how front-ends & back-ends communicate
-- Creating deployments and environment variables
-- Constant user interface revisions during solo and focus group testing
-- Work-life balance :)
 
 - - -
 © 2024 Ondre Johnson. All Rights Reserved.
