@@ -23,18 +23,18 @@ Players can play until they get 3 strikes, or the round ends.
 
 ## Tech Stack
 - HTML
-- [Sass](https://sass-lang.com/) (CSS)
+- [Sass](https://sass-lang.com/)
 - JavaScript
-  - [Vue.JS](https://vuejs.org/) (Client-side framework)
-  - [Node.JS](https://nodejs.org/en) (Server-side runtime)
-  - [Express](https://expressjs.com/) (Server-side framework)
-  - [express-ws](https://www.npmjs.com/package/express-ws) (Express Websocket Middleware)
-  - [helmet](https://www.npmjs.com/package/helmet) (Express Security Middleware)
+  - [Vue.JS](https://vuejs.org/)
+  - [Node.JS](https://nodejs.org/en)
+  - [Express](https://expressjs.com/)
+  - [express-ws](https://www.npmjs.com/package/express-ws)
+  - [helmet](https://www.npmjs.com/package/helmet)
   - [Syllabificate](https://github.com/EndaHallahan/syllabificate) (JS library for counting syllables)
-  - [Merriam-Webster Dictionary API](https://dictionaryapi.com/) (API for word validation)
- - [GitHub](https://github.com) (Version Control & Repository)
- - [Railway](https://railway.app) (Deployments from GitHub)
- - [Umami](https://umami.is) (Website Analytics)
+  - [Merriam-Webster Dictionary API](https://dictionaryapi.com/)
+- [GitHub](https://github.com)
+- [Railway](https://railway.app) (CI/CD)
+- [Umami](https://umami.is) (Analytics)
 
 - - -
 © 2024 Ondre Johnson. All Rights Reserved.
